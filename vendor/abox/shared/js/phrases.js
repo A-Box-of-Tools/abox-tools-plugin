@@ -1,0 +1,129 @@
+/**
+ * The words, out of the markup.
+ *
+ * GENERATED INTO EACH TOOL. This file lives at shared/js/phrases.js and the
+ * build copies it to <tool>/src/shared/phrases.js. Unlike the other shared
+ * parts it is not opt-in and is not listed in any tool.toml: every tool page
+ * has sentences that JavaScript puts on it, so every tool page needs this. See
+ * js_parts() in buildlib/site.py.
+ *
+ * WHY THE WORDS ARE NOT IN THE JAVASCRIPT
+ *
+ * Nothing under shared/js/ or tools/<slug>/src/ is translated. The build copies
+ * both byte for byte into every language, so a sentence written in a
+ * module is that sentence in English at all of the page's addresses but one. That is how a German reader whose browser refused the service worker
+ * came to be told about it in English, on a page that was otherwise entirely
+ * in German, in twenty-nine tools at once.
+ *
+ * The answer is not to translate the JavaScript. It is to stop the JavaScript
+ * being where the words live. HTML already goes through the locale machinery -
+ * body.html is translated per language, and so is every string in [ui] - so a
+ * sentence held in the markup is a sentence a translator can already reach,
+ * with no new file format and nothing new for the build to learn.
+ *
+ * WHERE A PHRASE COMES FROM
+ *
+ * Two blocks of hidden <span data-phrase="..."> elements, looked up in this
+ * order:
+ *
+ *   #phrases        the tool's own, in tools/<slug>/body.html, translated in
+ *                   locales/<lang>/tools/<slug>.html
+ *   #frame-phrases  the frame's, in templates/tool.html, filled in from
+ *                   [ui.tool] in config/site.toml and translated in
+ *                   locales/<lang>/locale.toml
+ *
+ * The tool's own wins, which is what lets one tool say something sharper than
+ * the frame's version of the same thing without every other tool having to
+ * care: heic-to-jpg's "offline" line mentions that the decoder is cached too,
+ * because on that tool that is the interesting part.
+ *
+ * This started as a private function in qr-barcode-reader/src/main.js, which
+ * needed it for forty-odd sentences of its own. It is here because the other
+ * twenty-eight tools need it for the frame's seven.
+ */
+
+/**
+ * A technical expression, marked as reading left to right.
+ *
+ * "1280 x 960" says nothing about its own direction. Digits carry none, and
+ * the separator between them is neutral, so the bidi algorithm hands the whole
+ * pair to the paragraph it sits in - which on the Arabic pages runs the other
+ * way. The two numbers come out swapped, and the result is not a mangled
+ * string a reader can spot but a plausible one they cannot: a 1280 x 960 frame
+ * is shown to an Arabic reader as 960 x 1280, beside a thumbnail that is
+ * plainly wider than it is tall.
+ *
+ * The isolate says the part between these two marks is its own left-to-right
+ * run, and settles it wherever the text lands: alone in a cell, inside an
+ * Arabic sentence, or in a title attribute. It is invisible, and in a
+ * left-to-right language it does nothing at all.
+ *
+ * Wrap the expression, not each number in it. Two isolates side by side are
+ * still two neutral objects to the paragraph around them, and swap exactly as
+ * the bare numbers did.
+ *
+ * @param {string} text  a number, or an expression made of numbers
+ * @returns {string}
+ */
+export function ltr(text) {
+  return `\u2066${text}\u2069`;
+}
+
+/**
+ * One phrase, with its blanks filled in.
+ *
+ * The whitespace is collapsed because the source is indented markup: a phrase
+ * written across three lines of body.html is one sentence, not a sentence with
+ * two newlines and six spaces in the middle of it.
+ *
+ * That collapse is why a Japanese or Chinese phrase has to stay on ONE line of
+ * markup. Those languages put no space between words, so a line break in the
+ * middle of one arrives here as a space in the middle of a sentence - and
+ * nothing downstream can tell it from a space somebody meant. The ja and zh
+ * translations of qr-barcode-reader already keep every phrase on one line for
+ * this reason. Korean wraps freely, because Korean has spaces to wrap at.
+ *
+ * A key that resolves to nothing comes back as the key. That is deliberate and
+ * is not a fallback to English - there is no English here to fall back to. A
+ * bare `offline.ready` on screen says "this page is built wrong" plainly
+ * enough, and, unlike a throw, it cannot be the thing that breaks the window's
+ * own error handler, which is one of the callers.
+ *
+ * @param {string} key  the `data-phrase` to find
+ * @param {Record<string, string|number>} [values]  what to put in the blanks
+ * @returns {string}
+ */
+export function phrase(key, values = {}) {
+  const found = document.querySelector(`#phrases [data-phrase="${key}"]`)
+    ?? document.querySelector(`#frame-phrases [data-phrase="${key}"]`);
+  const text = (found?.textContent ?? key).replace(/\s+/g, ' ').trim();
+
+  // Single braces, because the strings in [ui.tool] pass through the build's
+  // own {{ ... }} templating on the way to the page. A placeholder the build
+  // recognised too would be one a translator could fill in correctly and have
+  // silently rendered away before this file ever saw it.
+  //
+  // A blank with no value keeps its braces: a translation naming something the
+  // caller does not pass is a mistake worth seeing rather than one worth
+  // hiding behind a gap in a sentence.
+  return text.replace(/\{(\w+)\}/g, (whole, name) => (
+    name in values ? String(values[name]) : whole));
+}
+
+/**
+ * Values for a phrase, with any that are phrases themselves resolved first.
+ *
+ * A module too deep to reach the DOM returns a key and lets the caller look it
+ * up (see above), and when its answer is a sentence with a blank in it, what
+ * fills the blank is sometimes another key: "could not read it: {reason}",
+ * where the reason is the reader's own. So a value that is a `{key, values}`
+ * pair is looked up here, and everything else - a number, a file name, a
+ * string already in the visitor's language - passes through as it is.
+ *
+ * @param {Record<string, unknown>} [values]
+ * @returns {Record<string, unknown>}
+ */
+export function fill(values = {}) {
+  return Object.fromEntries(Object.entries(values)
+    .map(([name, value]) => [name, value?.key ? phrase(value.key, value.values) : value]));
+}

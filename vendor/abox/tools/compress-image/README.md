@@ -1,0 +1,206 @@
+# Image Compressor
+
+*Name the size. It works out the rest.*  ·  lives at `/compress-image/`  ·  [all tools](../)  ·  [how the site is built](../../README.md)
+
+The third tool. You give it a file size; it gives you the best-looking image
+that fits in it.
+
+---
+
+The file gate uses [`shared/js/image-input.js`](../../shared/js/image-input.js).
+It admits a known image extension even when the operating system reports a
+generic or incorrect MIME type, so an AVIF file is not refused before the
+browser gets to decode it. The decoder still establishes whether it is a
+picture; the filename alone never does.
+
+## Why a target size rather than a quality slider
+
+Every other compressor hands you a quality dial and leaves you to guess. That is
+backwards, because nobody arrives wanting "quality 62". They arrive because an
+upload form said 500 KB, or an email bounced, or a page is loading too slowly,
+and they want the best picture that clears that number.
+
+So the target is the input, and the quality is what gets searched for. There is
+no formula that turns a quality setting into a byte count — it depends entirely
+on the picture — so the search is empirical: encode, look at the size, adjust,
+encode again. Every figure the page shows is a real encoded file rather than an
+estimate, which is only affordable because the encoding is happening on the
+visitor's own machine and costs this project nothing.
+
+---
+
+## One plan per batch
+
+Starting a run captures the files, target, format policy, resizing permission
+and available encoders once. Every image uses that plan after decoding, so a
+batch cannot mix settings while an earlier picture is being processed. The
+settings controls stay disabled until the run ends; Cancel remains available,
+and completed images remain downloadable after a stop or another file fails.
+The results repeat the settings that produced them. The format policy applies
+only to files over the target: an original that already fits still passes
+through byte for byte.
+
+`src/process.js` owns the per-image work without reading the page. Its decoded
+source and measurement bitmaps are released on success, failure and cancellation.
+Canvas backing stores also clear when an encoder or pixel read fails.
+The deferred-decoder regressions in `tests/js/compress.test.js` exercise that
+path while the original settings and encoder set change.
+
+## The search
+
+`src/compress.js`. Four rules, in order, and the order is the whole argument:
+
+1. **A file already under the target is passed through byte for byte.** Not
+   re-saved, not "optimised". The best possible version of a file that already
+   fits is that file, and it is the only result on the page that keeps its
+   metadata.
+2. **Quality is spent first, down to a floor.** Full resolution is kept and the
+   dial is bisected between `QUALITY_FLOOR` (0.62) and `QUALITY_CEILING` (0.94)
+   for the highest setting that fits. Six halvings land within half a percent of
+   the dial, which is finer than the encoder itself distinguishes.
+3. **Resolution is spent second.** Below the floor, quality stops being cheap —
+   blocking and smeared edges are what people mean by "compressed" — so the
+   picture is made smaller and the dial goes back up to 0.8. The opening guess
+   for the scale is `sqrt(target / bytesAtThatQuality)`, because encoded size
+   tracks pixel count closely enough to guess from; that lands within a few
+   percent and the four halvings after it only tidy up. Bisecting blindly would
+   cost about twice as many encodes.
+4. **The leftover budget is then spent.** Once something fits, quality is pushed
+   back up at that size until the budget is used. A result at 60% of the target
+   is not a win, it is detail thrown away for nothing.
+
+A whole search is capped at `MAX_ENCODES` (16) and a typical one takes eight.
+
+Two paths fall outside the four rules:
+
+- **Resizing turned off** and the floor still not enough: the search keeps going
+  down to `QUALITY_HARD_MIN` (0.2), because the visitor asked for a size. If even
+  that misses, the row says so in plain words rather than pretending.
+- **PNG output** has no quality dial at all — it is lossless, which is the whole
+  reason somebody picks it — so only the scale search runs.
+
+---
+
+## What "auto" does about formats
+
+Keeping the format is the default, because a file that arrives as a `.jpg` and
+leaves as a `.jpg` is what people expect, and a surprise `.webp` is a support
+question for whoever they send it to.
+
+So "auto" only reaches for another format when keeping this one actually cost
+something: a resize, a quality at or below the floor, or a target that was
+missed. In that case the same search is run again in WebP, both results are
+**measured**, and the better-looking one wins — with the original format keeping
+any tie. When the extension changes, the row says why.
+
+---
+
+## Measuring what it cost
+
+`src/measure.js`. Tools of this kind all claim "minimal quality loss" and almost
+none of them says how much, because saying how much means decoding the result
+and comparing it against the original — work a server-side compressor would be
+paying for. Here it is nearly free, so both figures are shown:
+
+- **SSIM**, on Rec. 601 luma, over 8×8 non-overlapping windows. Not the sliding
+  11×11 Gaussian of the paper: an eighth of the arithmetic, and the average over
+  a whole picture lands within a couple of thousandths of the same answer.
+- **PSNR**, in decibels. A poor model of the eye, but it is the number people
+  expect, and it stays honest about heavy compression where SSIM is generous.
+
+Two decisions worth keeping:
+
+- **Both pictures are drawn at the same size, in the original's shape**, capped
+  at 1280 on the long side. A result that fitted by becoming half as wide is
+  stretched back up before it is judged, because that is the cost the eye
+  actually pays. Comparing it against a shrunk original would hide exactly what
+  this figure exists to show.
+- **The cap is a trade, and it goes one way.** The smaller it is, the kinder the
+  numbers, because shrinking a picture smooths out the blocking that compression
+  added. 1280 keeps artefacts visible while holding the work to about a
+  megapixel, which stays quick on a phone even when a 40-megapixel photo went in.
+
+---
+
+## Where the words are
+
+Not in `src/`. Every sentence a visitor reads &mdash; the summary under the
+target, the note on a row already small enough, the search's running commentary,
+the measurement in words &mdash; is a `data-phrase` span in the `#phrases` block
+at the foot of `body.html`, read back with `phrase()` from
+`shared/js/phrases.js`. `src/` is copied byte for byte into every language, so a
+sentence written there is English on fourteen of the tool's fifteen addresses.
+
+Three of the modules here do not do that lookup themselves. `files.js`,
+`compress.js` and `codecs.js` are imported by `tests/js/compress.test.js`
+straight off the disk, and `phrase()` reads the words off a page that a test
+does not have. So they hand back the *key* of a phrase and the blanks to fill
+it with, and `main.js`, which can reach the page, resolves it: `bytes()` returns `{ key: 'size.kb', values: … }`,
+`fitToTarget` reports its progress as `'step.quality'`, and a failure is an
+`Error` whose message is a key and whose `values` ride along on the error. That
+last one leans on a documented property of `phrase()`: a key it does not
+recognise comes back unchanged, so a real message from the encoder still
+arrives intact.
+
+What the tests then check is the decision each function makes &mdash; which
+wording, and what number goes in it &mdash; rather than a sentence, which is
+the right thing to test either way.
+
+---
+
+## Limitations
+
+- **Metadata does not survive.** Compressing means decoding to pixels and
+  encoding those pixels again, and a canvas carries no tags, so EXIF, GPS, XMP
+  and the rest are simply not written to the new file. Usually a bonus, and said
+  on the page either way — with a link to `/exif-editor/` for anyone who wants
+  the metadata gone but the picture untouched.
+- **Only what the browser can write.** JPEG, PNG and WebP. WebP is checked at
+  runtime by encoding one pixel and looking at the type that comes back, because
+  `toBlob` handed a type it cannot write returns a PNG rather than failing. If it
+  is missing, the option is disabled with a reason.
+- **AVIF and JPEG XL are read but not written**, for the same reason: no browser
+  ships an encoder for them that `toBlob` will reach. That is on the FFmpeg list
+  in [What can be built here](../../docs/what-can-be-built-here.md#what-needs-a-vendored-engine).
+- **A tight target on a large photo takes a few seconds.** Eight to twenty-two
+  encodes of a 12-megapixel image is real work, and it is happening on the
+  visitor's laptop rather than someone's server. The progress line names the file
+  and the phase so the wait is legible.
+- **Animated GIFs and animated WebP lose the animation**, because a canvas holds
+  one frame. The first frame is what comes out.
+- **Everything is held in memory**, as with the other tools. Decoded bitmaps are
+  released as soon as each image is finished, so only the thumbnails and the
+  results stay alive.
+
+---
+
+## Testing it
+
+CI runs `tests/js/compress.test.js` for size wording, target parsing, format
+choices and the per-image run contract. Build the page and check it in a browser
+while working; the local suites are reserved for CI.
+
+The browser checks use canvas-generated images fed through a `DataTransfer`:
+a two-image run with a delayed second decode, locked settings, completed-run
+context, cancellation and per-file errors. Other useful cases are targets that
+fit at full quality, need a quality search, force a resize or cannot be reached;
+a file already under the target returned as the identical `File`; PNG output
+reaching a target by resizing alone; and the comparison and zip downloads.
+
+## Carrying the result on
+
+The compressed pictures can go straight into `/images-to-pdf/` without
+being saved first: `handoff` in `tool.toml` names it, and
+`shared/handoff.js` puts a row of links under the results. This tool
+finishes a whole batch, and the row carries **all** of it — twelve
+compressed photos arrive as twelve files, which is the point, because
+saving twelve and handing twelve back is the part nobody does twice.
+
+What that costs the policy is one directive: `connect-src` carries `blob:`,
+because the row reads the finished result back out of this page before
+parking it for the next tool. So this page does permit `fetch()` of a
+`blob:` URL, and a result can be read back in the page's own console. That
+is the one place this tool's policy differs from a tool with no carry-on
+row, and it is worth knowing before concluding that a `blob:` fetch failing
+somewhere else on the site is a bug. Nothing else is widened, and `blob:`
+names bytes inside this page — it gains no reach over the network.

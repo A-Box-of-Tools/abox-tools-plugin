@@ -1,0 +1,4 @@
+interface:
+  display_name: "abox.tools local files"
+  short_description: "Compress images, split PDFs, and remove image metadata locally."
+  default_prompt: "Use $abox-local-files to process these local files with abox.tools."

@@ -1,0 +1,228 @@
+{
+  "repository": "https://github.com/A-Box-of-Tools/website",
+  "commit": "0b35dbc391f9c7f457885058afdbf0d0955bc5cd",
+  "entrypoints": [
+    "tools/compress-image/src/process.js",
+    "tools/exif-editor/src/container.js",
+    "tools/exif-editor/src/clean-copy.js",
+    "tools/merge-pdf/src/assemble.js",
+    "tools/merge-pdf/src/plan.js",
+    "shared/js/pdf-reader.js",
+    "shared/js/pdf-writer.js",
+    "shared/js/example-pdf.js"
+  ],
+  "files": [
+    {
+      "path": "LICENSE",
+      "sha256": "346444a37b6657d031bc2deca56702a80f633455ba1907646a2b7cd5e0304d99",
+      "generated": false
+    },
+    {
+      "path": "shared/js/crc32.js",
+      "sha256": "e74400b612a87bb9d0cc93f81b5f45d4150ca5ac3aa1bdb4e88c5b1df3c5286f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/example-pdf.js",
+      "sha256": "a8d1302505de8bc71ac1e525b6cb03699218bccd84caecaa36dc9e3f4a47b34c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/example-statement.js",
+      "sha256": "0bc5ffc8923f1d044749a3374e64cb2662a431d3da9b3e933d2a6c2b5cb28cfb",
+      "generated": false
+    },
+    {
+      "path": "shared/js/format.js",
+      "sha256": "e20650f3295a7e05b5d82746a7ccf4e2e2c828c7aa1506f4d7aded0e9bbfc08c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/heif-metadata.js",
+      "sha256": "6289058ad0fd70c410eec31085d27a98b14c33341e8020271aa321a837c7b2fa",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-filters.js",
+      "sha256": "59b28ff58fa8c87dde8cf9bf30129950abdf3c6b41d73ed64eb9c50d1026d53b",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-objects.js",
+      "sha256": "82f99661354cf31d3cad493eb28185d8b2d503718a278c96f2e9dbf52d41056e",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-page-writer.js",
+      "sha256": "f5c2798d4f71101b350d95968048b6dcef296cdccf7d5ffcbb1471ae52c3f763",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-pages.js",
+      "sha256": "d93624db8a4dc19b305e2d32985b1399ecf111d1584e8f9d60819f8b93214adf",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-reader.js",
+      "sha256": "ef515c195a038329fa7ad8d89ae651cd0b562ddd1706a467c8ceba175f73efc4",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-writer.js",
+      "sha256": "e53e5a7f88400f55a50780e02f66d5e98e130352e4a9f3ba37af63be6768850e",
+      "generated": false
+    },
+    {
+      "path": "shared/js/phrases.js",
+      "sha256": "7b6938c6491f48c206d1baf78d3f8697af68e77dfc899d015365a43cc12deee3",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/README.md",
+      "sha256": "f7d8d2b6990e7b138f03efbeb06f0a799288ca359ffafdc8fc5ff32be73ee5fc",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/codecs.js",
+      "sha256": "11408917d65296c4502869b06c6c1a6c7ddcb840a893bf35722d960e0a3a5744",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/compress.js",
+      "sha256": "b718e738429c130d5fe0238bb4be03833390df2cb6b3271eab2d0bfff51177a1",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/files.js",
+      "sha256": "4f1fed3f8c3353d94300983619d31c2259cdeca42c83444c187f740c8f72f9f2",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/measure.js",
+      "sha256": "2a4940fb98d4c754b1c5b36737ee77a9b6dc4b51f2bf8ba1e8f03f98d8c7e64b",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/process.js",
+      "sha256": "e4d6730c670ea222374bc000047ad2351c9e8e1ea06f53cf968212b7e1fdaf59",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-image/src/shared/phrases.js",
+      "sha256": "d77233a07d95379a1e3092fa81c90c1c376a8b59737a0e178de4630deaaa14a1",
+      "generated": true
+    },
+    {
+      "path": "tools/exif-editor/README.md",
+      "sha256": "1f6c486b554b073613423eca3fafe89e4ef66c7a0f02a9ccaf0a0f4ffb376d96",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/clean-copy.js",
+      "sha256": "96ccab76f279012dbbd2a1b0775c8b90c6d22e0c0ac8cf042dfde41c8c161aff",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/container.js",
+      "sha256": "6ce08683013089137a71f50beae87d4f56116f8a261a30cca9ac3368ea9ac27b",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/jpeg.js",
+      "sha256": "c6852a0265d75608ce563c5b29c5b58fcf9fd1804de90ca2673ed8efcf266e5a",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/png.js",
+      "sha256": "1269c38e4c0dd8f130b97c4a7928246d3badf5307243ed133a30f8a72a602523",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/report.js",
+      "sha256": "75339379b6469c6c7e0cfdf9b7c522c6128620c2f3da052eb48e6b01e8c986dd",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/shared/crc32.js",
+      "sha256": "66b534392eca00db88154bbe8b3f55a0e3a7c1a774ef2523565da8b7a4be1c68",
+      "generated": true
+    },
+    {
+      "path": "tools/exif-editor/src/shared/heif-metadata.js",
+      "sha256": "61a4698e04f801709828e513e454f48def9c364fe91b1383083c32ff1fe7d0d9",
+      "generated": true
+    },
+    {
+      "path": "tools/exif-editor/src/shared/phrases.js",
+      "sha256": "d77233a07d95379a1e3092fa81c90c1c376a8b59737a0e178de4630deaaa14a1",
+      "generated": true
+    },
+    {
+      "path": "tools/exif-editor/src/tags.js",
+      "sha256": "ff2246e44cdb544dfbab3e13fe42261a46021943098c9351f77340c505d275fb",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/tiff.js",
+      "sha256": "a947d74461c874b869ec36c691a84aa5676f196351f5b495f2ccca38e8f96241",
+      "generated": false
+    },
+    {
+      "path": "tools/exif-editor/src/webp.js",
+      "sha256": "47234702f424e81e1de4e0e9fe5af45b4cec1f178e4ae271c1ed2ac4da990fe8",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/README.md",
+      "sha256": "68d68f5296df3a10baa71d215bd6113e4e1819c480fb51746e68c433e07ea447",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/assemble.js",
+      "sha256": "6da649421109ccd246860f254e75010ed033da6df757bf80a82ab5084db9b0f1",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/dests.js",
+      "sha256": "bbb6102c277903e3f47507d61442995d3562046129f5af9167309db26b4f8fef",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/format.js",
+      "sha256": "923a456aa58527c8f1ad938925fbde0d3f2f4594d85d1481d541890807b35330",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/outline.js",
+      "sha256": "40fe69e22a2189189a0cc6620bf35d109819a83c1c8175835acefb5323ce6949",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/plan.js",
+      "sha256": "2867073be2521dd7482969fb4e16adaeddaef06c0a1a50802fe8cd5786e77c0e",
+      "generated": false
+    },
+    {
+      "path": "tools/merge-pdf/src/shared/format.js",
+      "sha256": "ff41f0695cafa1fdca9e50e120ab8eea0d8600bba2272a598b9f16a16464ae92",
+      "generated": true
+    },
+    {
+      "path": "tools/merge-pdf/src/shared/pdf-objects.js",
+      "sha256": "1f2d4a9ea988544c8495b4506b468b3d4e92600a1130f36e30ed9c447f2af25e",
+      "generated": true
+    },
+    {
+      "path": "tools/merge-pdf/src/shared/pdf-pages.js",
+      "sha256": "f9035288281a6a042fdc40b4c09a415ec1aa44c07451dfd697c898ee37d3db03",
+      "generated": true
+    }
+  ],
+  "assets": [
+    {
+      "source": "tools/compress-image/icon.png",
+      "path": "assets/icon.png",
+      "sha256": "17e1991adc7dbd511a4c3e2fead93eb08dd1cf9daff7c1a05aae6cad99426996"
+    }
+  ]
+}
