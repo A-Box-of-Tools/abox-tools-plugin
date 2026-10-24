@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -14,7 +14,7 @@ const cli = path.join(root, 'bin', 'abox.mjs');
 const server = path.join(root, 'bin', 'abox-mcp.mjs');
 
 async function workspace(t) {
-  const dir = await mkdtemp(path.join(tmpdir(), 'abox-protocol-test-'));
+  const dir = await realpath(await mkdtemp(path.join(tmpdir(), 'abox-protocol-test-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
   return dir;
 }
@@ -70,7 +70,7 @@ function privatePng() {
 }
 
 test('MCP initializes, advertises all operations, and returns structured local capabilities from an unrelated cwd', { timeout: 30_000 }, async t => {
-  const cwd = await mkdtemp(path.join(tmpdir(), 'abox-protocol-test-'));
+  const cwd = await realpath(await mkdtemp(path.join(tmpdir(), 'abox-protocol-test-')));
   const transport = new StdioClientTransport({ command: process.execPath, args: [server], cwd, stderr: 'pipe' });
   const client = new Client({ name: 'abox-integration-test', version: '1.0.0' });
   t.after(async () => {

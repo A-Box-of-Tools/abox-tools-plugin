@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, open, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, open, readFile, realpath, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -12,7 +12,7 @@ import { PdfDocument } from '../vendor/abox/shared/js/pdf-reader.js';
 const INPUT_LIMIT = 128 * 1024 * 1024;
 
 async function workspace(t) {
-  const dir = await mkdtemp(path.join(tmpdir(), 'abox-adapter-test-'));
+  const dir = await realpath(await mkdtemp(path.join(tmpdir(), 'abox-adapter-test-')));
   t.after(() => rm(dir, { recursive: true, force: true }));
   return dir;
 }

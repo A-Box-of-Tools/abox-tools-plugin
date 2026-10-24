@@ -16,7 +16,9 @@ export async function findBrowser() {
     process.env.LOCALAPPDATA && path.join(process.env.LOCALAPPDATA, 'Google/Chrome/Application/chrome.exe'),
     '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/usr/bin/chromium', '/usr/bin/chromium-browser', '/usr/bin/google-chrome', '/usr/bin/microsoft-edge',
+    // Stable Chrome has the sandbox helper and Ubuntu AppArmor profile its package installs.
+    '/opt/google/chrome/chrome', '/usr/bin/google-chrome', '/usr/bin/microsoft-edge',
+    '/usr/bin/chromium', '/usr/bin/chromium-browser',
   ].filter(Boolean);
   for (const candidate of candidates) {
     if (!path.isAbsolute(candidate)) continue;
@@ -29,11 +31,16 @@ export async function withBrowser(work, { signal } = {}) {
   const executablePath = await findBrowser();
   if (!executablePath) throw new AdapterError('BROWSER_NOT_FOUND', 'Install Edge, Chrome, or Chromium, or set ABOX_BROWSER_PATH to its absolute executable path.');
   const { chromium } = await import('playwright-core');
-  const browser = await chromium.launch({
-    executablePath, headless: true, chromiumSandbox: true,
-    args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run'],
-    timeout: 30000,
-  });
+  let browser;
+  try {
+    browser = await chromium.launch({
+      executablePath, headless: true, chromiumSandbox: true,
+      args: ['--disable-background-networking', '--disable-component-update', '--disable-sync', '--no-first-run'],
+      timeout: 30000,
+    });
+  } catch {
+    throw new AdapterError('BROWSER_LAUNCH_FAILED', 'The installed browser could not start with its sandbox enabled. Check the browser installation and OS sandbox support, or select a working installation with ABOX_BROWSER_PATH.');
+  }
   const abort = () => { void browser.close().catch(() => {}); };
   let timedOut = false;
   const timer = setTimeout(() => { timedOut = true; abort(); }, 120000);

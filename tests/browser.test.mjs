@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { mkdtemp, readFile, writeFile, rm, stat } from 'node:fs/promises';
+import { mkdtemp, readFile, realpath, writeFile, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { withBrowser } from '../src/browser.mjs';
@@ -9,7 +9,7 @@ import { readBytes, serialize } from '../vendor/abox/tools/exif-editor/src/conta
 import { serializeExif, createEntry } from '../vendor/abox/tools/exif-editor/src/tiff.js';
 
 async function workspace(t) {
-  const root = await mkdtemp(path.join(tmpdir(), 'abox-browser-test-'));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'abox-browser-test-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   return root;
 }

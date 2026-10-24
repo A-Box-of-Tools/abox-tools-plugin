@@ -14,6 +14,8 @@ Install Node.js 22.15 or later. For image compression, install Microsoft Edge,
 Google Chrome, or Chromium. The adapter detects common installations; set
 `ABOX_BROWSER_PATH` to an executable path if detection fails. It uses
 `playwright-core` and does not download a browser.
+The browser's sandbox must work on the host OS. On Linux, detection prefers an
+installed stable Chrome before generic Chromium builds for that reason.
 
 From this repository's root:
 
