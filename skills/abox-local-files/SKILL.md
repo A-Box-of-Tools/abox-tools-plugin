@@ -61,15 +61,17 @@ is limited to supported metadata types and is not a promise of anonymization.
 
 If MCP is unavailable, use the same adapter through the local CLI. Resolve
 `<plugin-root>` to this installed plugin's root, and write the operation's JSON
-request to a local file. Run:
+request to a local file. Release packages include `runtime/node.exe` on Windows
+and `runtime/node` on macOS or Linux; use that executable without installing
+Node or npm. For a source checkout, use its installed `node`. Run:
 
 ```text
-node <plugin-root>/bin/abox.mjs <compress-image|split-pdf|remove-exif> --request-file <absolute-request-path>
+<node-executable> <plugin-root>/bin/abox.mjs <compress-image|split-pdf|remove-exif> --request-file <absolute-request-path>
 ```
 
 Use one operation name, not the bracketed alternatives. Quote paths that contain
-spaces. `node <plugin-root>/bin/abox.mjs capabilities` lists support;
-`node <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
+spaces. `<node-executable> <plugin-root>/bin/abox.mjs capabilities` lists support;
+`<node-executable> <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
 summaries rather than file bytes. Do not install dependencies during an operation
 without an explicit request; follow the repository setup instructions when setup
 is needed.

@@ -12,3 +12,8 @@ The adapter uses the official Model Context Protocol TypeScript SDK, Zod, and
 Playwright Core. Their licenses and exact versions travel with installed npm
 packages and are pinned by `package-lock.json`. Browser binaries are not
 bundled or downloaded by this package.
+
+Release archives also include an official Node.js executable. Its complete
+license and third-party notices are at `runtime/LICENSE` inside each archive.
+The official MCPB validator is used only to build and check releases; it is not
+required when running the packaged adapter.

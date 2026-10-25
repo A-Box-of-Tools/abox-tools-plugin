@@ -1,77 +1,55 @@
-# abox.tools local plugin
+# abox.tools for agents
 
-Give an agent three existing [abox.tools](https://abox.tools/) operations through
-a shared skill and a local MCP adapter: image compression, PDF splitting, and
-image metadata removal. The adapter reuses the website's JavaScript and returns
-output paths and JSON summaries. File bytes stay on your computer.
+Compress images, split PDFs, and remove image metadata with the existing
+[abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
+output paths and short JSON results. File bytes stay on your computer.
 
-This is the first version. It is a separate project from the website; its vendored
-source is pinned so a website change cannot silently change an installed plugin.
+**[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
+Release bundles include Node.js, production dependencies, pinned processing
+code, and the shared skill. You do not need to install Node or npm, or type setup
+commands. Image compression still needs an installed Edge, Chrome, or Chromium;
+PDF splitting and metadata removal do not.
 
-## Set up
+## Install in Codex
 
-Install Node.js 22.15 or later. For image compression, install Microsoft Edge,
-Google Chrome, or Chromium. The adapter detects common installations; set
-`ABOX_BROWSER_PATH` to an executable path if detection fails. It uses
-`playwright-core` and does not download a browser.
-The browser's sandbox must work on the host OS. On Linux, detection prefers an
-installed stable Chrome before generic Chromium builds for that reason.
+Download the matching `.zip` from the release's **Assets**:
 
-From this repository's root:
+| Release label | Computer |
+| --- | --- |
+| `windows-x64` | Windows with an Intel or AMD 64-bit processor |
+| `macos-arm64` | Mac with Apple silicon |
+| `macos-x64` | Mac with an Intel processor |
+| `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-```sh
-npm ci --ignore-scripts
-npm test
-npm run test:browser
-npm run doctor
-```
+1. Extract the entire ZIP to a permanent folder. For example, a 0.2.0 Windows
+   bundle extracts as `abox-tools-0.2.0-windows-x64`. Keep this folder in place
+   because the local marketplace uses it for plugin refresh.
+2. Open `START-HERE.html` inside the extracted folder. This page works offline.
+   Select **Install in Codex**, allow your browser to open the desktop app, then
+   select **Install** on the plugin's detail page.
+3. Start a new local chat and ask for one of the operations below.
 
-Setup downloads npm dependencies. Processing uses local files and requires no
-outbound network access. The adapter has no account, API key, or hosted service.
+You need the desktop app installed with its `codex://` link handler available.
+The button opens the app's supported local-plugin detail link; the app handles
+installation. See the [official OpenAI deep-link documentation](https://learn.chatgpt.com/docs/app/commands).
+If your browser blocks the link, use `Install in Codex.cmd` on Windows or
+`Install in Codex.command` on macOS. Linux includes `Install in Codex.sh` for
+file managers that support executing shell scripts. These launchers open the
+same detail page and may briefly show a terminal; no commands need to be typed.
 
-## Install in an agent
+## Install the tools in Claude Desktop
 
-This repository includes a portable `plugin.json`, `mcp.json`, a shared skill,
-and a repository marketplace at `.agents/plugins/marketplace.json`. Add this
-checkout as a local marketplace in a compatible agent host and install
-`abox-tools`. Follow that host's plugin installation instructions. No public
-repository or plugin directory listing is required for a local checkout.
+Download the `.mcpb` matching your OS and processor from the same release, open
+it with Claude Desktop, and follow its installation prompts. It contains the
+same local runtime and processing dependencies. This installs the MCP tools;
+the shared agent skill is part of the Codex ZIP.
 
-For Codex marketplace discovery, run `codex plugin marketplace add` with the
-absolute path to this checkout. Then install `abox-tools` from that marketplace
-in the desktop app and run its Setup action. For a shared GitHub checkout, use
-`codex plugin marketplace add A-Box-of-Tools/abox-tools-plugin` once you have
-access to that repository. Plugin setup installs dependencies in the installed
-copy, rather than relying on another checkout's node_modules.
-
-The MCP configuration uses `${PLUGIN_ROOT}` to find the installed adapter, so it
-does not depend on the user's current working directory. The host must support
-that expansion and a local executor. Run `npm ci` in the installed plugin root if
-the host copied the source to a new location without installing dependencies.
-
-For a host that accepts standard MCP configuration but does not expand
-`${PLUGIN_ROOT}`, register the server with your own absolute checkout path:
-
-```json
-{
-  "mcpServers": {
-    "abox": {
-      "command": "node",
-      "args": ["/absolute/path/to/abox-tools-plugin/bin/abox-mcp.mjs"],
-      "cwd": "/absolute/path/to/abox-tools-plugin"
-    }
-  }
-}
-```
-
-Use native absolute paths on Windows and escape backslashes in JSON, or use
-forward slashes. If the host cannot find `node`, use its absolute executable
-path. The skill can also be installed separately with this adapter registered.
-
-Public plugin-directory submission is a separate step. Local MCP support in
-ChatGPT desktop plugins currently has an approved-partner eligibility boundary;
-a repository marketplace is the initial distribution route. See the official
-[desktop plugin guidance](https://developers.openai.com/plugins/deploy/desktop-only).
+If opening the file does not show an installer, go to **Settings → Desktop app →
+Manage** beside Extensions, then **Advanced settings → Install Extension…** and
+select the `.mcpb`. See [Claude's desktop extension instructions](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).
+Bundle format and MCP execution are checked in CI; installation through the
+Claude Desktop interface has not yet been verified. Download and install a new
+bundle when updating; custom MCPB files do not update automatically.
 
 ## Ask the agent
 
@@ -93,7 +71,9 @@ whether the target was met.
 
 ## Use the CLI
 
-The CLI provides the same operations without MCP:
+The CLI provides the same operations without MCP. These commands use Node in a
+source checkout. In a release bundle, replace `node` with `./runtime/node`, or
+`.\runtime\node.exe` on Windows:
 
 ```sh
 node bin/abox.mjs capabilities
@@ -166,8 +146,65 @@ prints file contents.
   supported fields too; display orientation or colors may change. It does not
   establish that an image is anonymous.
 
-The local adapter does not send file bytes over the network. The agent and its
-host still see file paths, settings, summaries, and errors passed through MCP.
+Downloading a release or installing a browser uses the network. Processing files
+through this adapter does not send their bytes over the network. The agent and
+its host still receive paths, settings, summaries, and errors. The adapter needs
+no account or API key.
+
+The compressor detects common browser installations. Set `ABOX_BROWSER_PATH`
+to an existing browser executable if needed. The browser's sandbox must work on
+the host OS; Linux detection prefers installed stable Chrome over generic
+Chromium builds. The plugin does not download a browser during processing.
+
+## This plugin and the website's development MCP
+
+This plugin runs file operations locally over MCP stdio. The separate website
+catalogue at [mcp-dev.abox.tools/mcp](https://mcp-dev.abox.tools/mcp) exposes
+`find_browser_tools`: it accepts a public search query, locale, and limit, then
+returns tool links and an interactive catalogue. It accepts no files or filenames
+and does not process files. Its source is the website's
+[development catalogue worker](https://github.com/A-Box-of-Tools/website/tree/dev/workers/catalogue-mcp).
+
+The `mcp-dev` endpoint is for development. This repository's release workflow
+does not deploy the website or publish a production catalogue endpoint.
+For directory submissions and MCP registration, see [Publishing](docs/publishing.md).
+
+## Developer setup and other MCP hosts
+
+Use the release bundle for installation without development tools. To develop
+from a source checkout, install Node.js 22.15 or later, then run:
+
+```sh
+npm ci --ignore-scripts
+npm test
+npm run test:browser
+npm run doctor
+```
+
+Source setup downloads npm dependencies. The source checkout's `mcp.json` uses
+Node from the host; release packaging replaces it with the bundled executable.
+A developer can add this repository marketplace with
+`codex plugin marketplace add A-Box-of-Tools/abox-tools-plugin`, then install it
+in the desktop app and run Setup in the installed copy. See the
+[official OpenAI packaging guide](https://developers.openai.com/plugins/build/plugins).
+
+For another host supporting local MCP stdio, point its configuration at the
+extracted bundle's executable and server script using absolute paths:
+
+```json
+{
+  "mcpServers": {
+    "abox": {
+      "command": "/absolute/path/to/bundle/runtime/node",
+      "args": ["/absolute/path/to/bundle/bin/abox-mcp.mjs"]
+    }
+  }
+}
+```
+
+On Windows, use `runtime/node.exe`. Escape backslashes in JSON or use forward
+slashes. A source checkout can use `node` instead of the bundled executable.
+Follow the host's own configuration format; do not replace unrelated settings.
 
 ## Maintain the reused code
 
@@ -177,7 +214,7 @@ To refresh the pinned website sources from a local website checkout:
 npm run sync-upstream -- --source /absolute/path/to/etoolbox
 ```
 
-Review the vendor diff and upstream provenance, then run `npm test`,
-`npm run test:browser`, and `npm run doctor`. Keep upstream license notices with the copied modules. The
-adapter should call those implementations rather than duplicate their processing
-logic.
+Review the vendor diff and provenance, retain license notices, and run the checks
+above. A `v*` tag starts `.github/workflows/release.yml`: it tests, builds all four
+platform bundles, checks extracted MCP execution, and publishes ZIPs, MCPBs, and
+checksums as a GitHub Release. This does not submit the plugin to any directory.

@@ -1,0 +1,90 @@
+name: Build and release local bundles
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Bundle ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows-x64
+            platform: win32
+            arch: x64
+          - os: ubuntu-latest
+            label: linux-x64
+            platform: linux
+            arch: x64
+          - os: macos-latest
+            label: macos-arm64
+            platform: darwin
+            arch: arm64
+          - os: macos-15-intel
+            label: macos-x64
+            platform: darwin
+            arch: x64
+    env:
+      ABOX_EXPECT_PLATFORM: ${{ matrix.platform }}
+      ABOX_EXPECT_ARCH: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run verify-vendor
+      - run: npm test
+      - run: npm run package:release
+      - run: npm run smoke:release
+      - uses: actions/upload-artifact@v7
+        with:
+          name: abox-tools-${{ matrix.label }}
+          path: release/*
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0
+
+  publish:
+    name: Publish verified tag
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: abox-tools-*
+          path: release
+          merge-multiple: true
+      - name: Publish all four platform bundles
+        run: node scripts/publish-release.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}

@@ -23,3 +23,11 @@ target is an explicit result, not a successful fit. Default EXIF cleaning may
 retain orientation and ICC; never describe it as removing every byte of metadata.
 
 Stage explicit paths. Do not commit node_modules, test outputs, or user files.
+
+Release packages include the current runner's Node binary, its license, and the
+locked production dependencies. `npm run package:release` builds one platform;
+`npm run smoke:release` exercises its extracted copy without system Node or npm.
+Use a fresh ignored `_release/` and `release/` for each build. The builder refuses
+to overwrite previous outputs. GitHub Actions builds each supported platform
+and publishes all verified assets only for a matching version tag. Do not upload
+a local dirty-worktree build as a release.

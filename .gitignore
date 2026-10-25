@@ -4,5 +4,7 @@ coverage/
 *.log
 tmp/
 test-output/
+_release/
+release/
 .DS_Store
 Thumbs.db

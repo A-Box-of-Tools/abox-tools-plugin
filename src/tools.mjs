@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { findBrowser } from './browser.mjs';
 import { compressImage } from './compress.mjs';
 import { removeExif } from './exif.mjs';
@@ -7,7 +8,7 @@ import { splitPdf, MAX_PAGES, MAX_OUTPUTS } from './pdf.mjs';
 import { MAX_INPUT_BYTES } from './files.mjs';
 import { AdapterError } from './errors.mjs';
 
-export const VERSION = '0.1.0';
+export const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const filename = z.string().min(1).describe('Absolute local filesystem path. URLs and network shares are refused.');
 const image = z.object({
   input_path: filename, output_path: filename,
