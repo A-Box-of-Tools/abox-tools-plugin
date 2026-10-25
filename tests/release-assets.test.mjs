@@ -17,7 +17,9 @@ test('the publication gate verifies every platform asset and detects a changed d
     await writeFile(path.join(dir, name), bytes);
     await writeFile(path.join(dir, `${name}.sha256`), `${createHash('sha256').update(bytes).digest('hex')}  ${name}\n`);
   }
-  assert.equal((await verifyReleaseAssets(version, dir)).length, 16);
+  assert.equal((await verifyReleaseAssets(version, dir)).length, 18);
+  assert.ok(names.includes(`abox-tools-${version}-universal.mcpb`));
+  assert.ok(names.includes(`abox-tools-${version}-universal.mcpb.sha256`));
   await writeFile(path.join(dir, names[0]), 'Changed after the checksum was recorded');
   await assert.rejects(verifyReleaseAssets(version, dir), /checksum does not match/);
 });

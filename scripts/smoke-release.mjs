@@ -135,8 +135,7 @@ async function safeCleanup(workspace, tempParent) {
   await rm(canonical, { recursive: true, force: true });
 }
 
-async function main() {
-  const config = await jsonFile(parseArguments());
+export async function smokeRelease(config, { universal = false } = {}) {
   assert.equal(config.version, expectedVersion);
   assert.equal(config.platform, process.platform, 'Run the smoke test on the bundle target platform.');
   assert.equal(config.arch, process.arch, 'Run the smoke test on the bundle target architecture.');
@@ -144,30 +143,56 @@ async function main() {
   const bundle = await realpath(config.smoke_root);
   assert.ok(bundle.includes(' '), 'The extracted bundle path must contain a space to test relocation.');
   assert.notEqual(bundle, await realpath(config.root), 'Smoke testing must use the extracted payload.');
-  const plugin = await jsonFile(path.join(bundle, 'plugin.json'));
   const manifest = await jsonFile(path.join(bundle, 'manifest.json'));
-  const mcp = await jsonFile(path.join(bundle, 'mcp.json'));
   const metadata = await jsonFile(path.join(bundle, 'BUNDLE.json'));
-  assert.equal(plugin.name, 'abox-tools');
-  assert.equal(plugin.version, expectedVersion);
-  assert.equal(manifest.name, plugin.name);
+  assert.equal(manifest.name, 'abox-tools');
   assert.equal(manifest.version, expectedVersion);
   assert.equal(manifest.manifest_version, '0.3');
   assert.equal(metadata.version, expectedVersion);
-  assert.equal(metadata.platform, process.platform);
-  assert.equal(metadata.arch, process.arch);
   const runtimeName = process.platform === 'win32' ? 'node.exe' : 'node';
-  const runtimeRelative = `runtime/${runtimeName}`;
-  const runtime = path.join(bundle, 'runtime', runtimeName);
+  const labels = { win32: 'windows', linux: 'linux', darwin: 'macos' };
+  const runtimeLabel = `${labels[process.platform]}-${process.arch}`;
+  const runtimeRelative = universal ? `runtime/${runtimeLabel}/${runtimeName}` : `runtime/${runtimeName}`;
+  const runtime = path.join(bundle, ...runtimeRelative.split('/'));
   const entry = path.join(bundle, 'bin', 'abox-mcp.mjs');
   assert.equal(manifest.server.type, 'binary');
-  assert.equal(manifest.server.entry_point, runtimeRelative);
-  assert.equal(manifest.server.mcp_config.command, '${__dirname}/' + runtimeRelative);
-  assert.deepEqual(manifest.server.mcp_config.args, ['${__dirname}/bin/abox-mcp.mjs']);
   assert.ok(!Object.hasOwn(manifest.server.mcp_config, 'cwd'), 'MCPB must not rely on a current directory.');
-  assert.equal(mcp.mcpServers.abox.command, '${PLUGIN_ROOT}/' + runtimeRelative);
-  assert.deepEqual(mcp.mcpServers.abox.args, ['${PLUGIN_ROOT}/bin/abox-mcp.mjs']);
-  assert.equal(mcp.mcpServers.abox.cwd, '${PLUGIN_ROOT}');
+  let receipt = metadata;
+  if (universal) {
+    assert.equal(metadata.kind, 'universal-mcpb');
+    assert.equal(manifest.server.entry_point, 'runtime/windows-x64/node.exe');
+    assert.deepEqual(manifest.compatibility.platforms, ['win32', 'linux', 'darwin']);
+    assert.equal(manifest.author.url, 'https://github.com/A-Box-of-Tools');
+    receipt = metadata.runtimes[runtimeLabel];
+    assert.ok(receipt, 'Universal bundle lacks this platform and architecture.');
+    assert.equal(hash(await readFile(runtime)), receipt.runtime_sha256);
+    const override = manifest.server.mcp_config.platform_overrides?.[process.platform];
+    if (process.platform === 'darwin') {
+      assert.equal(override.command, '/bin/sh');
+      assert.deepEqual(override.args, ['${__dirname}/scripts/launch-macos.sh']);
+      assert.ok((await lstat(path.join(bundle, 'scripts', 'launch-macos.sh'))).mode & 0o111);
+    } else {
+      assert.equal((override ?? manifest.server.mcp_config).command, '${__dirname}/' + runtimeRelative);
+    }
+  } else {
+    const plugin = await jsonFile(path.join(bundle, 'plugin.json'));
+    const mcp = await jsonFile(path.join(bundle, 'mcp.json'));
+    assert.equal(plugin.name, 'abox-tools');
+    assert.equal(plugin.version, expectedVersion);
+    assert.equal(manifest.server.entry_point, runtimeRelative);
+    assert.equal(manifest.server.mcp_config.command, '${__dirname}/' + runtimeRelative);
+    assert.deepEqual(manifest.server.mcp_config.args, ['${__dirname}/bin/abox-mcp.mjs']);
+    assert.equal(mcp.mcpServers.abox.command, '${PLUGIN_ROOT}/' + runtimeRelative);
+    assert.deepEqual(mcp.mcpServers.abox.args, ['${PLUGIN_ROOT}/bin/abox-mcp.mjs']);
+    assert.equal(mcp.mcpServers.abox.cwd, '${PLUGIN_ROOT}');
+  }
+  assert.equal(receipt.platform, process.platform);
+  assert.equal(receipt.arch, process.arch);
+  const override = manifest.server.mcp_config.platform_overrides?.[process.platform];
+  const launch = { ...manifest.server.mcp_config, ...override };
+  const expand = value => value.replaceAll('${__dirname}', bundle);
+  const command = expand(launch.command);
+  const args = launch.args.map(expand);
   assert.ok(!(await lstat(runtime)).isSymbolicLink(), 'The bundled runtime must be a regular file.');
   if (process.platform !== 'win32') assert.ok((await lstat(runtime)).mode & 0o111, 'The bundled runtime lost its executable mode.');
 
@@ -181,7 +206,7 @@ async function main() {
     const versionProbe = await runFile(runtime, ['--version'], { cwd: workspace, env, windowsHide: true, timeout: 15_000 });
     const runtimeVersion = versionProbe.stdout.trim();
     assert.match(runtimeVersion, /^v\d+\.\d+\.\d+$/);
-    assert.equal(runtimeVersion.replace(/^v/, ''), metadata.node_version.replace(/^v/, ''));
+    assert.equal(runtimeVersion.replace(/^v/, ''), receipt.node_version.replace(/^v/, ''));
     const probeCode = `import {createRequire} from 'node:module';import {pathToFileURL} from 'node:url';const require=createRequire(pathToFileURL(${JSON.stringify(entry)}));console.log(JSON.stringify({runtime:process.execPath,sdk:require.resolve('@modelcontextprotocol/sdk/server/index.js'),path:process.env.PATH,node_path:process.env.NODE_PATH??null,node_options:process.env.NODE_OPTIONS??null}));`;
     const probe = JSON.parse((await runFile(runtime, ['--input-type=module', '--eval', probeCode], { cwd: workspace, env, windowsHide: true, timeout: 15_000 })).stdout);
     assert.equal(await realpath(probe.runtime), await realpath(runtime));
@@ -190,7 +215,7 @@ async function main() {
     assert.equal(probe.node_path, null);
     assert.equal(probe.node_options, null);
 
-    transport = new StdioClientTransport({ command: runtime, args: [entry], cwd: workspace, env, stderr: 'pipe' });
+    transport = new StdioClientTransport({ command, args, cwd: workspace, env, stderr: 'pipe' });
     client = new Client({ name: 'abox-release-smoke', version: expectedVersion });
     await client.connect(transport);
     const listed = await client.listTools();
@@ -201,18 +226,20 @@ async function main() {
     assert.equal(capabilities.max_input_bytes, 128 * 1024 * 1024);
     assert.equal(capabilities.browser.available, true, 'Real compression requires an installed supported local browser.');
 
-    const { chromium } = await import('playwright-core');
-    const installerBrowser = await chromium.launch({ executablePath: capabilities.browser.path, headless: true, chromiumSandbox: true });
-    try {
-      const page = await installerBrowser.newPage();
-      await page.goto(pathToFileURL(path.join(bundle, 'START-HERE.html')).href);
-      const install = new URL(await page.locator('#install').getAttribute('href'));
-      assert.equal(install.protocol, 'codex:');
-      assert.equal(install.hostname, 'plugins');
-      assert.equal(install.pathname, '/abox-tools');
-      assert.equal(path.normalize(install.searchParams.get('marketplacePath')), path.join(bundle, '.agents', 'plugins', 'marketplace.json'));
-    } finally {
-      await installerBrowser.close();
+    if (!universal) {
+      const { chromium } = await import('playwright-core');
+      const installerBrowser = await chromium.launch({ executablePath: capabilities.browser.path, headless: true, chromiumSandbox: true });
+      try {
+        const page = await installerBrowser.newPage();
+        await page.goto(pathToFileURL(path.join(bundle, 'START-HERE.html')).href);
+        const install = new URL(await page.locator('#install').getAttribute('href'));
+        assert.equal(install.protocol, 'codex:');
+        assert.equal(install.hostname, 'plugins');
+        assert.equal(install.pathname, '/abox-tools');
+        assert.equal(path.normalize(install.searchParams.get('marketplacePath')), path.join(bundle, '.agents', 'plugins', 'marketplace.json'));
+      } finally {
+        await installerBrowser.close();
+      }
     }
 
     const png = noisyPng();
@@ -275,7 +302,7 @@ async function main() {
       assert.equal((await PdfDocument.open(new Uint8Array(bytes))).countPages(), 1);
     }
     assert.equal(hash(await readFile(pdfInput)), hash(pdfBytes));
-    console.log(JSON.stringify({ ok: true, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, pdf_outputs: split.outputs.length, relocated: true, system_node_required: false }));
+    console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, pdf_outputs: split.outputs.length, relocated: true, system_node_required: false }));
   } finally {
     // On Windows the server may still hold browser or output handles until its
     // transport closes. Close it before removing the directory we created.
@@ -288,7 +315,7 @@ async function main() {
   }
 }
 
-main().catch(error => {
-  console.error(`Release smoke failed: ${error.stack || error.message || error}`);
-  process.exitCode = 1;
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try { await smokeRelease(await jsonFile(parseArguments())); }
+  catch (error) { console.error(`Release smoke failed: ${error.stack || error.message || error}`); process.exitCode = 1; }
+}

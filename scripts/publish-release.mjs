@@ -18,10 +18,12 @@ const platforms = [
 ];
 
 export function expectedAssets(version) {
-  return platforms.flatMap(({ suffix }) => ['zip', 'mcpb'].flatMap(extension => {
+  const native = platforms.flatMap(({ suffix }) => ['zip', 'mcpb'].flatMap(extension => {
     const archive = `abox-tools-${version}-${suffix}.${extension}`;
     return [archive, `${archive}.sha256`];
   }));
+  const universal = `abox-tools-${version}-universal.mcpb`;
+  return [...native, universal, `${universal}.sha256`];
 }
 
 async function sha256(filename) {
@@ -34,7 +36,7 @@ export async function verifyReleaseAssets(version, directory = RELEASE) {
   const expected = expectedAssets(version);
   const found = (await readdir(directory)).sort();
   if (JSON.stringify(found) !== JSON.stringify([...expected].sort())) {
-    throw new Error('The release directory must contain exactly four ZIPs, four MCPBs, and their SHA-256 files.');
+    throw new Error('The release directory must contain four native ZIPs, four native MCPBs, one universal MCPB, and their SHA-256 files.');
   }
   const files = [];
   for (const name of expected) {
@@ -98,7 +100,7 @@ function releaseNotes(version, tag, repository) {
   }).join('\n');
   return `abox.tools ${version} runs image compression, PDF splitting, and EXIF removal locally. Each bundle includes its runtime.\n\n`
     + `For Codex, download the ZIP for your computer, extract it, open START-HERE.html, and click Install in Codex. Keep the extracted folder in place.\n\n`
-    + `For Claude Desktop on supported desktop systems, download the matching MCPB and open it in Claude Desktop. The MCPB format and bundled MCP operations are checked automatically; installation through the desktop GUI has not been verified.\n\n`
+    + `For Claude Desktop and compatible MCPB hosts, download the [universal MCPB](${base}/abox-tools-${version}-universal.mcpb). It includes the four bundled runtimes and selects the host platform. The MCPB format and bundled MCP operations are checked automatically on all four targets; installation through the Claude Desktop GUI has not been verified.\n\n`
     + `${downloads}\n\nEach archive has a matching SHA-256 file. Source commit: ${process.env.GITHUB_SHA}.\n`;
 }
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.A-Box-of-Tools/abox-tools",
+  "title": "abox.tools",
+  "description": "Compress images, split PDFs, and remove EXIF metadata locally.",
+  "repository": {
+    "url": "https://github.com/A-Box-of-Tools/abox-tools-plugin",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/A-Box-of-Tools/abox-tools-plugin"
+}

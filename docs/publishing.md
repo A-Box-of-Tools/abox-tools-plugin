@@ -10,8 +10,8 @@ against primary documentation on 25 October 2026.
 | --- | --- | --- |
 | GitHub Release + local marketplace | Full Codex plugin, skill, local adapter, runtime, dependencies | Share the release ZIP; users open `START-HERE.html` and install through the app. |
 | OpenAI public directory | Reviewed desktop plugin in ChatGPT/Codex | Confirm local-MCP submission eligibility, then submit the package. |
-| Claude desktop extensions | Local MCP tools through `.mcpb` | Share release artifacts directly or submit a desktop extension for review. |
-| Official MCP Registry | Discoverable metadata pointing to installable artifacts or remote servers | Publish a namespaced `server.json` after artifacts are available. |
+| Claude desktop extensions | Local MCP tools through `.mcpb` | Submit the universal MCPB using the prepared directory materials. |
+| Official MCP Registry | Discoverable metadata pointing to the universal local MCPB | Tagged releases publish verified metadata automatically through GitHub Actions OIDC. |
 
 ## GitHub and Codex
 
@@ -24,8 +24,9 @@ extracted folder available for later refresh. See the official
 [marketplace packaging guide](https://developers.openai.com/plugins/build/plugins).
 
 For a release, update version metadata consistently and push its `v*` tag. The
-release workflow tests and packages the four OS/architecture targets and uploads
-ZIPs, MCPBs, and checksums. Users of custom packages download and install updates
+release workflow tests and packages the four OS/architecture targets, assembles
+a universal MCPB, and tests its launch configuration on all four targets before
+publishing ZIPs, MCPBs, and checksums. Users of custom packages download and install updates
 manually. Keep the immutable versioned download URLs for registry metadata.
 
 ## OpenAI public directory
@@ -44,16 +45,22 @@ not such a service. See [OpenAI's submission guide](https://developers.openai.co
 
 ## Claude Desktop
 
-The `.mcpb` artifacts are desktop extensions with the local adapter, bundled
-Node, and production dependencies. They expose MCP tools; they do not install
+The universal `.mcpb` includes all four native runtimes and uses MCPB platform
+overrides to launch the local adapter. Its macOS launcher selects the native
+runtime for Apple silicon or Intel. Smaller native `.mcpb` files are also
+available. They expose MCP tools; they do not install
 the portable Codex skill. First verify installation through the Claude Desktop
 interface as well as the protocol-level checks.
 
-For directory discovery, use the **desktop extension submission form** linked
+For directory discovery, use the [desktop extension submission form](https://clau.de/desktop-extention-submission) linked
 from [Claude's local MCP documentation](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).
 That documentation distinguishes desktop extension submissions from plugin and
 remote-connector submissions. Sharing a custom MCPB directly needs no directory
-listing; users install updated custom MCPB files manually.
+listing; users install updated custom MCPB files manually. The form accepts one
+MCPB, publisher contact details, a GitHub link and description, a recorded Google
+identity, and acceptance of Anthropic's Directory Terms. See the prepared
+[listing and reviewer scenarios](directory-submissions.md). Submission does not
+guarantee acceptance or a review timeline.
 
 ## Official MCP Registry
 
@@ -70,18 +77,26 @@ for that route. A local package entry uses:
 }
 ```
 
-This is a template, not a ready submission. Use real immutable URLs and hashes,
-and include only supported packages. The artifact URL must contain `mcp`; the
+The artifact URL must contain `mcp`; the
 `.mcpb` extension satisfies that rule. See
 [supported Registry package types](https://modelcontextprotocol.io/registry/package-types).
 
-Create `server.json` using the current Registry schema, choose an available
-namespace matching your verified GitHub account/organization or domain, and
-authenticate with `mcp-publisher`. Publish only after the referenced artifacts
-exist. GitHub-backed names use `io.github.<account-or-organization>/<server>`;
-domain authentication supports a reverse-domain namespace. See the official
+The canonical name is `io.github.A-Box-of-Tools/abox-tools`. The release workflow
+calls `publish-mcp.yml` after publishing the GitHub Release. It downloads and
+hashes that exact universal MCPB, compares its checksum and GitHub digest,
+generates `server.json` from `registry/server.template.json`, and publishes using
+a short-lived GitHub Actions identity token. No PAT, npm publication, DNS
+change, or local publisher login is needed.
+
+The official publisher is pinned to a reviewed version and SHA-256. A rerun
+skips an identical active Registry version and refuses to replace different
+metadata. The workflow then reads back the exact public record. It can also be
+run from Actions using an already published release tag. See
+[the registration runbook](../registry/README.md) and the official
 [publishing quickstart](https://modelcontextprotocol.io/registry/quickstart) and
 [authentication guide](https://modelcontextprotocol.io/registry/authentication).
+The Registry schema has no standard OS/architecture package selector. The single
+universal artifact avoids asking a client to choose among four native packages.
 The Registry is currently in preview. Listing there does not itself grant an
 OpenAI or Claude directory listing.
 

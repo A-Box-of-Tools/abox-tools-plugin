@@ -21,8 +21,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.2.0 Windows
-   bundle extracts as `abox-tools-0.2.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.2.1 Windows
+   bundle extracts as `abox-tools-0.2.1-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -39,10 +39,11 @@ same detail page and may briefly show a terminal; no commands need to be typed.
 
 ## Install the tools in Claude Desktop
 
-Download the `.mcpb` matching your OS and processor from the same release, open
-it with Claude Desktop, and follow its installation prompts. It contains the
-same local runtime and processing dependencies. This installs the MCP tools;
-the shared agent skill is part of the Codex ZIP.
+Download the `universal.mcpb` from the same release, open it with Claude Desktop,
+and follow its installation prompts. One file supports Windows x64, Linux x64,
+and both Apple silicon and Intel Macs. It includes the runtimes and processing
+dependencies. Smaller platform-specific MCPBs are also available. This installs
+the MCP tools; the shared agent skill is part of the Codex ZIP.
 
 If opening the file does not show an installer, go to **Settings → Desktop app →
 Manage** beside Extensions, then **Advanced settings → Install Extension…** and
@@ -151,6 +152,9 @@ through this adapter does not send their bytes over the network. The agent and
 its host still receive paths, settings, summaries, and errors. The adapter needs
 no account or API key.
 
+See the [plugin privacy notice](PRIVACY.md) for the data handled by the adapter
+and the separate responsibilities of the agent host.
+
 The compressor detects common browser installations. Set `ABOX_BROWSER_PATH`
 to an existing browser executable if needed. The browser's sandbox must work on
 the host OS; Linux detection prefers installed stable Chrome over generic
@@ -216,5 +220,8 @@ npm run sync-upstream -- --source /absolute/path/to/etoolbox
 
 Review the vendor diff and provenance, retain license notices, and run the checks
 above. A `v*` tag starts `.github/workflows/release.yml`: it tests, builds all four
-platform bundles, checks extracted MCP execution, and publishes ZIPs, MCPBs, and
-checksums as a GitHub Release. This does not submit the plugin to any directory.
+platform bundles, builds a universal MCPB, and checks extracted MCP execution on
+all four platforms before publishing the GitHub Release. A successful tagged
+release then publishes its verified metadata to the Official MCP Registry using
+GitHub's short-lived identity token. Claude and OpenAI directory reviews remain
+separate submissions; see [Publishing](docs/publishing.md).

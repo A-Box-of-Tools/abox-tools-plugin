@@ -1,0 +1,60 @@
+name: Publish to the Official MCP Registry
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: The already published release containing the universal MCPB.
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The already published release containing the universal MCPB.
+        required: true
+        default: v0.2.1
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mcp-registry-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'A-Box-of-Tools/abox-tools-plugin' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      REGISTRY_TAG: ${{ inputs.tag }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Check the registry preparation logic
+        run: node --test tests/registry.test.mjs
+      - name: Verify the public universal bundle and generate server.json
+        id: prepare
+        run: node scripts/prepare-registry.mjs --tag "$REGISTRY_TAG" --output "$RUNNER_TEMP/abox-server.json"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Install the pinned official publisher
+        if: steps.prepare.outputs.publish_needed == 'true'
+        run: node scripts/install-registry-publisher.mjs --output "$RUNNER_TEMP/mcp-publisher"
+      - name: Authenticate through GitHub Actions OIDC
+        if: steps.prepare.outputs.publish_needed == 'true'
+        run: '"$RUNNER_TEMP/mcp-publisher" login github-oidc'
+      - name: Publish the verified registry metadata
+        if: steps.prepare.outputs.publish_needed == 'true'
+        run: '"$RUNNER_TEMP/mcp-publisher" publish "$RUNNER_TEMP/abox-server.json"'
+      - name: Verify the exact public registry record
+        run: node scripts/prepare-registry.mjs --tag "$REGISTRY_TAG" --output "$RUNNER_TEMP/abox-server.json" --verify-published

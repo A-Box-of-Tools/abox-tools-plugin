@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Compress images, split PDFs, and remove image metadata with the existing abox.tools code, keeping file processing local.",
   "author": {
     "name": "A Box of Tools",

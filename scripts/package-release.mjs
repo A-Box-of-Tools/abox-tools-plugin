@@ -29,7 +29,7 @@ await mkdir(stage, { recursive: true });
 await mkdir(destination);
 for (const relative of [
   'bin', 'src', 'vendor', 'assets', 'skills', '.agents',
-  'plugin.json', 'mcp.json', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'README.md',
+  'plugin.json', 'mcp.json', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'PRIVACY.md', 'SECURITY.md', 'README.md',
   'scripts/verify-vendor.mjs', 'scripts/open-installer.mjs',
 ]) {
   await mkdir(path.dirname(path.join(destination, relative)), { recursive: true });
@@ -88,7 +88,7 @@ const mcpb = {
   manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version: project.version,
   description: 'Compress images, split PDFs, and remove image metadata locally.',
   long_description: 'Runs the existing abox.tools engines on explicit local file paths. This bundle includes Node and all server dependencies. Image compression uses an installed Edge, Chrome, or Chromium; file bytes are never uploaded for processing.',
-  author: { name: 'A Box of Tools', url: 'https://abox.tools/' },
+  author: { name: 'A Box of Tools', url: 'https://github.com/A-Box-of-Tools' },
   homepage: 'https://abox.tools/',
   documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',
   support: 'https://github.com/A-Box-of-Tools/abox-tools-plugin/issues',
