@@ -7,7 +7,7 @@ image metadata; and calculate file checksums with the existing
 output paths and short JSON results. File bytes stay on your computer.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.3.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.4.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 
@@ -97,6 +97,8 @@ Then ask the agent to set up the abox.tools local adapter. The skill includes
 a Python 3.9+ setup script that downloads the matching packaged release, verifies
 its checksum and installs the bundled runtime. It does not require cloning or
 building this project. See [standalone setup](skills/abox-local-files/references/installation.md).
+The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
+is public. Gemini release installation is verified; its gallery indexing is pending.
 
 ## Ask the agent
 

@@ -1,7 +1,7 @@
 # Use abox.tools in Cursor
 
-The v0.4.0 packaging prepares a native ZIP for Windows x64, Linux x64,
-macOS Apple silicon and macOS Intel. Once that release is published, download
+The v0.4.0 release includes a native ZIP for Windows x64, Linux x64,
+macOS Apple silicon and macOS Intel. Download
 the ZIP matching your computer, extract it to a permanent folder, and open
 `START-HERE.html`. Select **Install tools in Cursor** and review Cursor's
 installation prompt. The link

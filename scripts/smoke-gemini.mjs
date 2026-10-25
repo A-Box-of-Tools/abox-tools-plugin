@@ -5,13 +5,15 @@ import { createHash } from 'node:crypto';
 import { lstat, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { promisify } from 'node:util';
+import { parseArgs, promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { deflateSync } from 'node:zlib';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
+const { values } = parseArgs({ options: { 'from-release': { type: 'boolean', default: false } },
+  strict: true, allowPositionals: false });
 const run = promisify(execFile);
 const json = async filename => JSON.parse(await readFile(filename, 'utf8'));
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
@@ -32,6 +34,10 @@ const config = await json(path.join(ROOT, '_release/build.json'));
 assert.equal(config.platform, process.platform);
 assert.equal(config.arch, process.arch);
 const extracted = await realpath(config.gemini_smoke_root);
+assert.match(config.version, /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/);
+const installationSource = values['from-release']
+  ? 'https://github.com/A-Box-of-Tools/abox-tools-plugin' : extracted;
+const installationRef = values['from-release'] ? `v${config.version}` : null;
 const cliRoot = path.join(ROOT, 'node_modules/@google/gemini-cli');
 const cliPackage = await json(path.join(cliRoot, 'package.json'));
 const cliBin = typeof cliPackage.bin === 'string' ? cliPackage.bin : cliPackage.bin.gemini;
@@ -55,7 +61,9 @@ try {
   Object.assign(env, { HOME: home, USERPROFILE: home, GEMINI_CLI_HOME: home,
     GEMINI_CLI_SYSTEM_SETTINGS_PATH: systemSettings, CI: 'true', NO_COLOR: '1' });
   const invocation = [path.join(cliRoot, cliBin)];
-  await run(process.execPath, [...invocation, 'extensions', 'install', extracted, '--consent', '--skip-settings'], {
+  const installArgs = ['extensions', 'install', installationSource,
+    ...(installationRef ? ['--ref', installationRef] : []), '--consent', '--skip-settings'];
+  await run(process.execPath, [...invocation, ...installArgs], {
     cwd: work, env, windowsHide: true, timeout: 180_000, maxBuffer: 2 * 1024 * 1024,
   });
   const listed = await run(process.execPath, [...invocation, 'extensions', 'list'], {
@@ -79,6 +87,9 @@ try {
   const expand = value => value.replaceAll('${extensionPath}', installed);
   const command = expand(server.command);
   const metadata = await json(path.join(installed, 'BUNDLE.json'));
+  assert.equal(metadata.version, config.version);
+  assert.equal(metadata.platform, config.platform);
+  assert.equal(metadata.arch, config.arch, 'Gemini must select the release archive for this architecture.');
   assert.equal(sha256(await readFile(command)), metadata.runtime_sha256);
   if (process.platform !== 'win32') assert.ok((await lstat(command)).mode & 0o111);
   const mcpEnv = { ...env, PATH: process.platform === 'win32' ? path.join(env.SystemRoot ?? env.SYSTEMROOT ?? 'C:\\Windows', 'System32') : '' };
@@ -110,7 +121,10 @@ try {
   assert.equal(result.structuredContent.ok, true);
   assert.deepEqual((await readFile(output)).subarray(0, 8), bytes.subarray(0, 8));
   assert.equal(sha256(await readFile(source)), sha256(bytes));
-  console.log(JSON.stringify({ ok: true, gemini_cli: cliPackage.version, installed_version: config.version, tools: tools.tools.length, shared_skill: true, bundled_runtime: true, local_file_operation: true }));
+  console.log(JSON.stringify({ ok: true, gemini_cli: cliPackage.version,
+    installation_source: installationSource, installation_ref: installationRef,
+    installed_version: config.version, tools: tools.tools.length, shared_skill: true,
+    bundled_runtime: true, local_file_operation: true }));
 } finally {
   if (client) await client.close().catch(() => {});
   if (transport) await transport.close().catch(() => {});

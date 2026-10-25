@@ -2,12 +2,12 @@
 
 Publisher: **Abox Technologies**. Product: **abox.tools**.
 
-The v0.4.0 source prepares client configurations and release assets for the
-routes below. Use a release command only after the matching GitHub release
-and its assets are public. Prepared packaging does not establish a directory
-listing or an approved submission.
+The [v0.4.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.4.0)
+is public with 26 assets. All eleven operations, Gemini installation and
+standalone skill setup passed CI on all four platforms. Directory status is
+recorded separately below.
 
-| Client | Prepared installation route | Runtime requirements |
+| Client | Installation route | Runtime requirements |
 | --- | --- | --- |
 | Codex desktop | Extract the matching native `abox-tools-0.4.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
 | Claude Desktop / MCPB hosts | Open `abox-tools-0.4.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
@@ -22,13 +22,13 @@ processing engines and refuse existing output paths.
 
 ## Gemini CLI
 
-After the v0.4.0 release is public, install the prepared extension with:
+Install the released extension with:
 
 ```sh
 gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.4.0
 ```
 
-The release prepares these Gemini-specific assets:
+The release includes these Gemini-specific assets:
 
 | Target | Asset |
 | --- | --- |
@@ -42,10 +42,11 @@ included native runtime through `${extensionPath}`. The source repository's
 manifest is for development; a plain clone does not contain the bundled
 runtime or installed server dependencies.
 
-Gallery eligibility is prepared for the public release. A public repository
-with a root manifest and the `gemini-cli-extension` topic is eligible for
-Google's daily crawler and validation. A confirmed gallery entry must be
-checked separately. See the official [release and gallery requirements](https://geminicli.com/docs/extensions/releasing/).
+The public repository has the root manifest and `gemini-cli-extension` topic
+required for Google's daily gallery crawler. Indexing is pending. The exact
+public install command above passed using Gemini CLI 0.65.0 on Windows,
+including bundled runtime selection, shared skill discovery and a local file
+operation. See the official [release and gallery requirements](https://geminicli.com/docs/extensions/releasing/).
 
 ## Shared skill and skills.sh
 
@@ -64,16 +65,20 @@ file operation.
 
 The [skills CLI](https://github.com/vercel-labs/skills#install-a-skill) documents
 its Node.js 22.20+ requirement. Installation telemetry drives the
-[skills.sh directory](https://www.skills.sh/docs/faq); publishing this recipe
-does not by itself confirm a leaderboard entry.
+[skills.sh directory](https://www.skills.sh/docs/faq). The
+[abox-local-files listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
+was verified public on 25 October 2026, displaying Abox Technologies and the
+standalone setup guide. Installation counts and rankings update separately.
 
 ## Publication status and other clients
 
 The Cursor Marketplace application has not been submitted. Its Google sign-in
 flow is waiting for the user's explicit identity-sharing approval. The source
-Cursor manifest and native install link are prepared for validation and review.
+Cursor manifest, offline cache launcher and native installation link passed
+protocol checks. Installation through Cursor's own interface remains unverified.
 
-Gemini gallery eligibility and the skills.sh installation recipe are prepared.
+Gemini is installable from its public release; gallery indexing is pending.
+The skills.sh listing is public.
 See [directory submission materials](directory-submissions.md) and
 [publishing](publishing.md) for the release and submission evidence recorded
 for other destinations.
