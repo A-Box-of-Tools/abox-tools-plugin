@@ -1,6 +1,7 @@
 # abox.tools for agents
 
-Compress images, split PDFs, and remove image metadata with the existing
+Published by **Abox Technologies**. Compress, resize and convert images; merge,
+split and reorder PDF pages; and remove image metadata with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
 
@@ -11,7 +12,7 @@ automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image compression still needs an installed Edge, Chrome, or Chromium;
+commands. Image compression, resizing and conversion need an installed Edge, Chrome, or Chromium;
 PDF splitting and metadata removal do not.
 
 ## Install in Codex
@@ -25,8 +26,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.2.1 Windows
-   bundle extracts as `abox-tools-0.2.1-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.3.0 Windows
+   bundle extracts as `abox-tools-0.3.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -58,11 +59,19 @@ where the app reported its local MCP server Running. The macOS desktop interface
 has not been checked. Download and install a new bundle when updating; custom
 MCPB files do not update automatically.
 
+Version 0.3.0 corrects the publisher to Abox Technologies. If your desktop host
+shows both the earlier publisher entry and the new one, disable the older entry
+to avoid duplicate tools.
+
 ## Ask the agent
 
 - “Compress this photo below 500 KB and save a new copy.”
+- “Resize this photo to fit within 1200 by 800 pixels.”
+- “Convert this PNG to WebP.”
+- “Merge these PDFs in this order.”
 - “Split this PDF into one file per page.”
 - “Extract pages 1–3 and 4–6 as two PDFs.”
+- “Make one PDF containing pages 3, 1–2, and another copy of page 3.”
 - “Remove location and other image metadata, keeping its orientation and colors.”
 
 All input and output paths must be absolute. Existing outputs are never
@@ -73,7 +82,11 @@ whether the target was met.
 | --- | --- | --- |
 | `abox_capabilities` | none | Lists formats, limits, and defaults. |
 | `abox_image_compress` | `input_path`, `output_path`, `target_bytes` | `format`: `keep`, `auto`, `jpeg`, `png`, `webp`; `allow_resize` |
+| `abox_image_resize` | `input_path`, `output_path`, `width` and/or `height` | `fit`: `contain` or `cover`; `allow_upscale`: false; `format`, `quality`, `background` |
+| `abox_image_convert` | `input_path`, `output_path`, `format` | `jpeg`, `png`, or `webp`; `quality` from 0 to 1; JPEG `background` |
 | `abox_pdf_split` | `input_path`, `output_dir` | `mode`: `each`, `every`, `ranges`; `pages_per_file`; `ranges`; `keep_bookmarks` |
+| `abox_pdf_merge` | `input_paths`, `output_path` | 2–32 PDFs in input order; `keep_bookmarks` |
+| `abox_pdf_select` | `input_path`, `output_path`, `pages` | Ordered terms such as `3,1-2,3`; `keep_bookmarks` |
 | `abox_exif_remove` | `input_path`, `output_path` | `keep_orientation`; `keep_icc` |
 
 ## Use the CLI
@@ -86,7 +99,11 @@ source checkout. In a release bundle, replace `node` with `./runtime/node`, or
 node bin/abox.mjs capabilities
 node bin/abox.mjs doctor
 node bin/abox.mjs compress-image --request-file /absolute/path/compress.json
+node bin/abox.mjs resize-image --request-file /absolute/path/resize.json
+node bin/abox.mjs convert-image --request-file /absolute/path/convert.json
 node bin/abox.mjs split-pdf --request-file /absolute/path/split.json
+node bin/abox.mjs merge-pdf --request-file /absolute/path/merge.json
+node bin/abox.mjs select-pdf-pages --request-file /absolute/path/select.json
 node bin/abox.mjs remove-exif --request-file /absolute/path/metadata.json
 ```
 
@@ -131,9 +148,17 @@ prints file contents.
 
 ## Limits and behavior
 
-- Image compression: JPEG, PNG, and static WebP. Animated images are refused.
+- Image compression, resizing and conversion: JPEG, PNG, and static WebP.
+  Animated images are refused. Resizing fits the full image (`contain`) or crops
+  centrally (`cover`); upscaling is disabled by default. Re-encoding can change
+  colors and removes source metadata. A no-op resize preserves original bytes.
 - Metadata removal: JPEG, PNG, and WebP containers, including their animation.
 - PDFs: unencrypted input, up to 5,000 pages and 1,000 output files.
+  Merging accepts 2–32 PDFs, at most 128 MiB combined. Page selection preserves
+  the order and repetition of comma-separated terms. Ranges expand ascending:
+  `3,1-2,3` produces 3,1,2,3; use explicit terms for reverse order.
+  Merging PDFs with colliding interactive form field names is currently
+  unsupported by the source engine and fails before creating an output.
   Tool responses include at most 20 output entries. Larger splits also write a
   local `manifest.json` containing every output path and its source pages.
 - Each input: at most 128 MiB.
@@ -178,6 +203,8 @@ and does not process files. Its source is the website's
 The `mcp-dev` endpoint is for development. This repository's release workflow
 does not deploy the website or publish a production catalogue endpoint.
 For directory submissions and MCP registration, see [Publishing](docs/publishing.md).
+For Gemini CLI, Vercel skills.sh, Cursor and other distribution options, see
+[Platform support and publishing](docs/platforms.md).
 
 ## Developer setup and other MCP hosts
 

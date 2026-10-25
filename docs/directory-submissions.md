@@ -8,28 +8,30 @@ Registration automation is documented in [Publishing](publishing.md).
 
 Display name: **abox.tools**
 
-Publisher: **A Box of Tools**
+Publisher: **Abox Technologies**
+
+Use this registered trade name consistently; abox.tools is the product name.
 
 Short description (29 characters): **Process local images and PDFs**
 
 Category: **Productivity**
 
-Description (43 words, within Claude's 50-word limit):
+Description (within Claude's 50-word limit):
 
-> Compress images to a target size, split PDFs by page or range, and remove image
-> metadata using the existing abox.tools engines. Files are processed locally.
-> Includes its runtime and dependencies. Image compression uses an installed
-> Edge, Chrome, or Chromium browser. No account required.
+> Abox Technologies publishes abox.tools: compress, resize and convert images;
+> merge, split and reorder PDF pages; and remove image metadata. Files are
+> processed locally with bundled runtimes and dependencies. Image operations use
+> an installed Edge, Chrome or Chromium browser. No account required.
 
 Long description:
 
-> Give your agent three reusable file tools: compress JPEG, PNG, and static WebP
-> images to a byte target; split unencrypted PDFs into pages, batches, or ranges;
-> and remove supported metadata from JPEG, PNG, and WebP images without
+> Give your agent seven reusable file tools: compress JPEG, PNG, and static WebP
+> images to a byte target; resize or convert images; merge or split unencrypted
+> PDFs; extract, reorder or duplicate their pages; and remove supported metadata from JPEG, PNG, and WebP images without
 > re-encoding. The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
-> The release includes Node and the server dependencies. Image compression needs
+> The release includes Node and the server dependencies. Image compression, resizing and conversion need
 > an installed Edge, Chrome, or Chromium; the other operations do not. Metadata
 > cleaning keeps orientation and color profiles by default. Input files are
 > limited to 128 MiB. The Codex ZIP also includes a shared workflow skill. The
@@ -63,7 +65,11 @@ and release smoke checks generate synthetic fixtures and verify outputs.
 | Positive case | Request | Expected result |
 | --- | --- | --- |
 | Image size | Compress a large JPEG below 500,000 bytes to a new local path. | `verified: true`; report `fitted` and actual bytes honestly. Original remains unchanged. |
+| Resize | Fit a 256×256 PNG within a 96×64 box without upscaling. | New 64×64 PNG; original unchanged. Cover instead produces a centered 96×64 crop. |
+| Convert | Convert a transparent PNG to lossless WebP, then back to PNG. | Actual format signatures and decoded dimensions match; alpha is preserved. |
 | PDF pages | Split a three-page PDF into individual pages. | Three new PDFs, each reopened and verified as one page. |
+| PDF merge | Combine a three-page PDF and a two-page PDF in order. | Five pages with the expected decoded page contents, preserving both inputs. |
+| Page order | Select `3,1-2,3` from a three-page PDF. | Four output pages with actual content order 3,1,2,3. |
 | PDF ranges | Extract `1-2` and `3` as separate PDFs from a three-page input. | Two new PDFs with two and one pages respectively. |
 | Default metadata | Remove image metadata while preserving appearance. | Verified clean copy; orientation and ICC may remain, and the result describes that. |
 | Strict metadata | Remove supported metadata with `keep_orientation: false` and `keep_icc: false`. | New verified copy; supported orientation and ICC fields removed. |

@@ -11,11 +11,17 @@ import { deflateSync } from 'node:zlib';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import { examplePdfFile } from '../vendor/abox/shared/js/example-pdf.js';
+import { decodeStream } from '../vendor/abox/shared/js/pdf-filters.js';
 import { PdfDocument } from '../vendor/abox/shared/js/pdf-reader.js';
+import { readSource } from '../vendor/abox/tools/merge-pdf/src/assemble.js';
 
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
-const expectedTools = ['abox_capabilities', 'abox_exif_remove', 'abox_image_compress', 'abox_pdf_split'];
+const expectedTools = [
+  'abox_capabilities', 'abox_exif_remove', 'abox_image_compress', 'abox_image_convert',
+  'abox_image_resize', 'abox_pdf_merge', 'abox_pdf_select', 'abox_pdf_split',
+];
+const expectedPublisher = 'Abox Technologies';
 
 function parseArguments() {
   const args = process.argv.slice(2);
@@ -114,6 +120,61 @@ function pngChunks(bytes) {
   return chunks;
 }
 
+function webpDimensions(bytes) {
+  assert.equal(bytes.toString('ascii', 0, 4), 'RIFF');
+  assert.equal(bytes.toString('ascii', 8, 12), 'WEBP');
+  assert.equal(bytes.readUInt32LE(4) + 8, bytes.length);
+  let dimensions;
+  let offset = 12;
+  while (offset + 8 <= bytes.length) {
+    const type = bytes.toString('ascii', offset, offset + 4);
+    const length = bytes.readUInt32LE(offset + 4);
+    assert.ok(offset + 8 + length <= bytes.length, 'WebP chunk must remain in bounds.');
+    const data = bytes.subarray(offset + 8, offset + 8 + length);
+    let found;
+    if (type === 'VP8X') {
+      assert.ok(data.length >= 10);
+      found = { width: data.readUIntLE(4, 3) + 1, height: data.readUIntLE(7, 3) + 1 };
+    } else if (type === 'VP8 ') {
+      assert.ok(data.length >= 10);
+      assert.deepEqual(data.subarray(3, 6), Buffer.from([0x9d, 0x01, 0x2a]));
+      found = { width: data.readUInt16LE(6) & 0x3fff, height: data.readUInt16LE(8) & 0x3fff };
+    } else if (type === 'VP8L') {
+      assert.ok(data.length >= 5);
+      assert.equal(data[0], 0x2f);
+      const bits = data.readUInt32LE(1);
+      found = { width: (bits & 0x3fff) + 1, height: ((bits >>> 14) & 0x3fff) + 1 };
+    }
+    if (found) {
+      if (dimensions) assert.deepEqual(found, dimensions);
+      dimensions = found;
+    }
+    offset += 8 + length + (length & 1);
+  }
+  assert.equal(offset, bytes.length);
+  assert.ok(dimensions, 'WebP output must include dimensions in a supported image chunk.');
+  return dimensions;
+}
+
+async function pdfPageFingerprints(bytes) {
+  const document = await PdfDocument.open(new Uint8Array(bytes));
+  const source = readSource(document, 'Smoke fixture');
+  assert.equal(source.pages.length, document.countPages());
+  return Promise.all(source.pages.map(async page => {
+    const contents = document.resolve(page.dict.get('Contents'));
+    const streams = Array.isArray(contents) ? contents.map(item => document.resolve(item)) : [contents];
+    assert.ok(streams.length > 0, 'Fixture pages must have visible content.');
+    const decoded = [];
+    for (const stream of streams) {
+      assert.ok(stream?.dict instanceof Map && stream.raw instanceof Uint8Array, 'Page content must resolve to a stream.');
+      const result = await decodeStream(stream, item => document.resolve(item));
+      assert.deepEqual(result.remaining, []);
+      decoded.push(Buffer.from(result.bytes));
+    }
+    return hash(Buffer.concat(decoded));
+  }));
+}
+
 async function call(client, name, args) {
   const response = await client.callTool({ name, arguments: args });
   const block = response.content?.find(item => item.type === 'text');
@@ -146,6 +207,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
   const manifest = await jsonFile(path.join(bundle, 'manifest.json'));
   const metadata = await jsonFile(path.join(bundle, 'BUNDLE.json'));
   assert.equal(manifest.name, 'abox-tools');
+  assert.equal(manifest.author.name, expectedPublisher);
   assert.equal(manifest.version, expectedVersion);
   assert.equal(manifest.manifest_version, '0.3');
   assert.equal(metadata.version, expectedVersion);
@@ -179,6 +241,8 @@ export async function smokeRelease(config, { universal = false } = {}) {
     const mcp = await jsonFile(path.join(bundle, 'mcp.json'));
     assert.equal(plugin.name, 'abox-tools');
     assert.equal(plugin.version, expectedVersion);
+    assert.equal(plugin.author.name, expectedPublisher);
+    assert.equal(plugin.extensions['com.openai'].interface.developerName, expectedPublisher);
     assert.equal(manifest.server.entry_point, runtimeRelative);
     assert.equal(manifest.server.mcp_config.command, '${__dirname}/' + runtimeRelative);
     assert.deepEqual(manifest.server.mcp_config.args, ['${__dirname}/bin/abox-mcp.mjs']);
@@ -224,6 +288,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.equal(capabilities.version, expectedVersion);
     assert.equal(capabilities.processing, 'local');
     assert.equal(capabilities.max_input_bytes, 128 * 1024 * 1024);
+    assert.deepEqual(capabilities.operations.map(operation => operation.name).sort(), expectedTools.filter(name => name !== 'abox_capabilities'));
     assert.equal(capabilities.browser.available, true, 'Real compression requires an installed supported local browser.');
 
     if (!universal) {
@@ -275,12 +340,51 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.ok(compressedBytes.length > 0 && compressedBytes.length <= targetBytes);
     assert.deepEqual(compressedBytes.subarray(0, 3), Buffer.from([255, 216, 255]));
     assert.ok(compressed.width > 0 && compressed.height > 0);
+
+    const imageResized = path.join(workspace, 'resized image.png');
+    const resized = await call(client, 'abox_image_resize', {
+      input_path: imageInput, output_path: imageResized, width: 96, height: 64,
+      fit: 'contain', allow_upscale: false, format: 'png',
+    });
+    assert.equal(resized.verified, true);
+    assert.equal(resized.output_path, imageResized);
+    assert.equal(resized.mime, 'image/png');
+    assert.equal(resized.format, 'png');
+    assert.equal(resized.input_width, 256);
+    assert.equal(resized.input_height, 256);
+    assert.equal(resized.width, 64);
+    assert.equal(resized.height, 64);
+    const resizedBytes = await readFile(imageResized);
+    assert.equal(resized.output_bytes, resizedBytes.length);
+    const resizedHeader = pngChunks(resizedBytes).find(chunk => chunk.type === 'IHDR').data;
+    assert.equal(resizedHeader.readUInt32BE(0), 64);
+    assert.equal(resizedHeader.readUInt32BE(4), 64);
+
+    const imageConverted = path.join(workspace, 'converted image.webp');
+    const converted = await call(client, 'abox_image_convert', {
+      input_path: imageResized, output_path: imageConverted, format: 'webp', quality: 0.82,
+    });
+    assert.equal(converted.verified, true);
+    assert.equal(converted.output_path, imageConverted);
+    assert.equal(converted.mime, 'image/webp');
+    assert.equal(converted.format, 'webp');
+    assert.equal(converted.input_width, 64);
+    assert.equal(converted.input_height, 64);
+    assert.equal(converted.width, 64);
+    assert.equal(converted.height, 64);
+    assert.equal(typeof converted.lossless, 'boolean');
+    const convertedBytes = await readFile(imageConverted);
+    assert.equal(converted.output_bytes, convertedBytes.length);
+    assert.deepEqual(webpDimensions(convertedBytes), { width: 64, height: 64 });
+    assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageInput)), hash(png));
 
     const pdfInput = path.join(workspace, 'three pages.pdf');
     const pdfOutput = path.join(workspace, 'split pages');
     const pdfFile = examplePdfFile('three pages.pdf', { pages: 3 });
     const pdfBytes = Buffer.from(await pdfFile.arrayBuffer());
+    const originalPages = await pdfPageFingerprints(pdfBytes);
+    assert.equal(new Set(originalPages).size, 3, 'The PDF fixture must distinguish page order.');
     await writeFile(pdfInput, pdfBytes);
     const split = await call(client, 'abox_pdf_split', { input_path: pdfInput, output_dir: pdfOutput });
     assert.equal(split.verified, true);
@@ -300,9 +404,40 @@ export async function smokeRelease(config, { universal = false } = {}) {
       const bytes = await readFile(output.output_path);
       assert.equal(bytes.length, output.output_bytes);
       assert.equal((await PdfDocument.open(new Uint8Array(bytes))).countPages(), 1);
+      assert.deepEqual(await pdfPageFingerprints(bytes), [originalPages[index]]);
     }
+
+    const secondPdfInput = path.join(workspace, 'two pages.pdf');
+    const secondPdf = examplePdfFile('two pages.pdf', { pages: 2 });
+    const secondPdfBytes = Buffer.from(await secondPdf.arrayBuffer());
+    const secondPages = await pdfPageFingerprints(secondPdfBytes);
+    await writeFile(secondPdfInput, secondPdfBytes);
+    const mergedOutput = path.join(workspace, 'merged statements.pdf');
+    const merged = await call(client, 'abox_pdf_merge', {
+      input_paths: [pdfInput, secondPdfInput], output_path: mergedOutput, keep_bookmarks: true,
+    });
+    assert.equal(merged.verified, true);
+    assert.equal(merged.output_path, mergedOutput);
+    assert.equal(merged.page_count, 5);
+    const mergedBytes = await readFile(mergedOutput);
+    assert.equal(merged.output_bytes, mergedBytes.length);
+    assert.deepEqual(await pdfPageFingerprints(mergedBytes), [...originalPages, ...secondPages]);
+
+    const selectedOutput = path.join(workspace, 'reordered statements.pdf');
+    const selected = await call(client, 'abox_pdf_select', {
+      input_path: pdfInput, output_path: selectedOutput, pages: '3,1-2,3', keep_bookmarks: true,
+    });
+    assert.equal(selected.verified, true);
+    assert.equal(selected.output_path, selectedOutput);
+    assert.equal(selected.page_count, 4);
+    assert.deepEqual(selected.page_order, [3, 1, 2, 3]);
+    assert.equal(selected.page_order_truncated, false);
+    const selectedBytes = await readFile(selectedOutput);
+    assert.equal(selected.output_bytes, selectedBytes.length);
+    assert.deepEqual(await pdfPageFingerprints(selectedBytes), [originalPages[2], originalPages[0], originalPages[1], originalPages[2]]);
     assert.equal(hash(await readFile(pdfInput)), hash(pdfBytes));
-    console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, pdf_outputs: split.outputs.length, relocated: true, system_node_required: false }));
+    assert.equal(hash(await readFile(secondPdfInput)), hash(secondPdfBytes));
+    console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, image_resize: { width: resized.width, height: resized.height }, image_convert: converted.format, pdf_outputs: split.outputs.length, pdf_merge_pages: merged.page_count, pdf_select_pages: selected.page_count, relocated: true, system_node_required: false }));
   } finally {
     // On Windows the server may still hold browser or output handles until its
     // transport closes. Close it before removing the directory we created.

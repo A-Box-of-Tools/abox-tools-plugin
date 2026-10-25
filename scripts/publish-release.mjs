@@ -98,9 +98,9 @@ function releaseNotes(version, tag, repository) {
     const name = `abox-tools-${version}-${suffix}`;
     return `- ${label}: [ZIP](${base}/${name}.zip), [MCPB](${base}/${name}.mcpb).`;
   }).join('\n');
-  return `abox.tools ${version} runs image compression, PDF splitting, and EXIF removal locally. Each bundle includes its runtime.\n\n`
+  return `abox.tools ${version}, published by Abox Technologies, runs seven operations locally: image compression, resizing and conversion; PDF splitting, merging and page selection/reordering; and image metadata removal. Each bundle includes its runtime.\n\n`
     + `For Codex, download the ZIP for your computer, extract it, open START-HERE.html, and click Install in Codex. Keep the extracted folder in place.\n\n`
-    + `For Claude Desktop and compatible MCPB hosts, download the [universal MCPB](${base}/abox-tools-${version}-universal.mcpb). It includes the four bundled runtimes and selects the host platform. The MCPB format and bundled MCP operations are checked automatically on all four targets; installation through the Claude Desktop GUI has not been verified.\n\n`
+    + `For Claude Desktop and compatible MCPB hosts, download the [universal MCPB](${base}/abox-tools-${version}-universal.mcpb). It includes the four bundled runtimes and selects the host platform. MCP execution is checked on all four targets; desktop installation was verified on Windows with version 0.2.1.\n\n`
     + `${downloads}\n\nEach archive has a matching SHA-256 file. Source commit: ${process.env.GITHUB_SHA}.\n`;
 }
 

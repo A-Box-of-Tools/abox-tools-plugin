@@ -1,7 +1,8 @@
 {
   "name": "abox-tools-plugin",
-  "version": "0.2.1",
-  "description": "Local image compression, PDF splitting, and EXIF removal using abox.tools engines.",
+  "version": "0.3.0",
+  "description": "Local image and PDF tools published by Abox Technologies, using existing abox.tools engines.",
+  "author": { "name": "Abox Technologies", "url": "https://abox.tools/" },
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -10,8 +11,8 @@
   "scripts": {
     "start": "node bin/abox-mcp.mjs",
     "doctor": "node bin/abox.mjs doctor",
-    "test": "node --test tests/adapter.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs",
-    "test:browser": "node --test tests/browser.test.mjs",
+    "test": "node --test tests/adapter.test.mjs tests/pdf-extra.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs",
+    "test:browser": "node --test tests/browser.test.mjs tests/image.test.mjs",
     "sync-upstream": "node scripts/sync-upstream.mjs",
     "verify-vendor": "node scripts/verify-vendor.mjs",
     "package:release": "node scripts/package-release.mjs",

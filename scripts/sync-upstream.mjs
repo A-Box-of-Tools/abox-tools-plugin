@@ -12,12 +12,16 @@ const run = promisify(execFile);
 const sha = data => createHash('sha256').update(data).digest('hex');
 const seeds = [
   'tools/compress-image/src/process.js',
+  'tools/resize-image/src/run.js',
+  'shared/js/image-convert.js',
   'tools/exif-editor/src/container.js',
   'tools/exif-editor/src/clean-copy.js',
   'tools/merge-pdf/src/assemble.js',
   'tools/merge-pdf/src/plan.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
-  'tools/compress-image/README.md', 'tools/exif-editor/README.md', 'tools/merge-pdf/README.md',
+  'tools/compress-image/README.md', 'tools/resize-image/README.md',
+  'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
+  'tools/exif-editor/README.md', 'tools/merge-pdf/README.md',
   'LICENSE',
 ];
 

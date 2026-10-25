@@ -21,8 +21,8 @@ The adapter CLI is `<plugin-root>/bin/abox.mjs` and the MCP entry point is
 
    Doctor checks pinned engine hashes and detects a local Edge, Chrome, or
    Chromium. If detection fails, choose an existing browser through
-   `ABOX_BROWSER_PATH`, or explain that image compression needs a browser.
-   PDF splitting and metadata removal do not. Do not silently download a browser
+   `ABOX_BROWSER_PATH`, or explain that image compression, resizing and conversion need a browser.
+   PDF operations and metadata removal do not. Do not silently download a browser
    or disable its sandbox.
 3. If no bundled runtime exists, this is a source installation. Check that the
    host has Node.js 22.15 or later. If dependencies are already present, run

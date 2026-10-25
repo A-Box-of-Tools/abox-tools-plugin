@@ -3,6 +3,8 @@
   "commit": "0b35dbc391f9c7f457885058afdbf0d0955bc5cd",
   "entrypoints": [
     "tools/compress-image/src/process.js",
+    "tools/resize-image/src/run.js",
+    "shared/js/image-convert.js",
     "tools/exif-editor/src/container.js",
     "tools/exif-editor/src/clean-copy.js",
     "tools/merge-pdf/src/assemble.js",
@@ -40,6 +42,11 @@
     {
       "path": "shared/js/heif-metadata.js",
       "sha256": "6289058ad0fd70c410eec31085d27a98b14c33341e8020271aa321a837c7b2fa",
+      "generated": false
+    },
+    {
+      "path": "shared/js/image-convert.js",
+      "sha256": "94023f2420fe7524f398d7f051e43c7ff4148807b13390b8ca7be68ee80a362c",
       "generated": false
     },
     {
@@ -216,6 +223,51 @@
       "path": "tools/merge-pdf/src/shared/pdf-pages.js",
       "sha256": "f9035288281a6a042fdc40b4c09a415ec1aa44c07451dfd697c898ee37d3db03",
       "generated": true
+    },
+    {
+      "path": "tools/png-to-webp/README.md",
+      "sha256": "705a67fcb8b0d5de69909832de89d681eab55562ff02ac0e1bbab3b6a176c05e",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/README.md",
+      "sha256": "cfcb4a03023e110bc77a1c217eed3d0ac181e5700c70f81f431fb2327fffdd26",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/src/codecs.js",
+      "sha256": "a8dc481e97807d973f5b2d23df4bf18b021416b6fdf4fccf87479153a620629c",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/src/files.js",
+      "sha256": "d6f33574d4be43ca9cfcbf41f566508938ef10ef1c1b70d65c9792a308adea12",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/src/geometry.js",
+      "sha256": "8fde950f0ec3522282bdab1e6c94af340fff643553582b92eb08e9fc562cc7df",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/src/run.js",
+      "sha256": "41513213d6763fc7a3e2891e87c3f49c104a23ac46eb69358c196c944d5e6758",
+      "generated": false
+    },
+    {
+      "path": "tools/resize-image/src/shared/format.js",
+      "sha256": "ff41f0695cafa1fdca9e50e120ab8eea0d8600bba2272a598b9f16a16464ae92",
+      "generated": true
+    },
+    {
+      "path": "tools/resize-image/src/shared/phrases.js",
+      "sha256": "d77233a07d95379a1e3092fa81c90c1c376a8b59737a0e178de4630deaaa14a1",
+      "generated": true
+    },
+    {
+      "path": "tools/webp-to-jpg/README.md",
+      "sha256": "d580605b8265d271130bc2d4ce86064a1a8e9126b812bd6a30ed5593bbcfe0c0",
+      "generated": false
     }
   ],
   "assets": [

@@ -13,7 +13,7 @@ try {
   });
   const [command, ...extra] = positionals;
   if (values.help || !command) {
-    console.log('abox capabilities | doctor | compress-image | split-pdf | remove-exif\nOperations accept --request <JSON> or --request-file <absolute path>.');
+    console.log('abox capabilities | doctor | compress-image | resize-image | convert-image | split-pdf | merge-pdf | select-pdf-pages | remove-exif\nOperations accept --request <JSON> or --request-file <absolute path>.');
   } else {
     if (extra.length) throw new AdapterError('INVALID_ARGUMENTS', 'Provide exactly one operation.');
     if (values.request && values['request-file']) throw new AdapterError('INVALID_ARGUMENTS', 'Choose request or request-file, not both.');
@@ -26,7 +26,12 @@ try {
     } else if (command === 'capabilities') {
       result = await capabilities();
     } else {
-      const name = { 'compress-image': 'abox_image_compress', 'split-pdf': 'abox_pdf_split', 'remove-exif': 'abox_exif_remove' }[command];
+      const name = {
+        'compress-image': 'abox_image_compress', 'resize-image': 'abox_image_resize',
+        'convert-image': 'abox_image_convert', 'split-pdf': 'abox_pdf_split',
+        'merge-pdf': 'abox_pdf_merge', 'select-pdf-pages': 'abox_pdf_select',
+        'remove-exif': 'abox_exif_remove',
+      }[command];
       if (!name) throw new AdapterError('UNKNOWN_TOOL', `Unknown command: ${command}`);
       const json = values['request-file'] ? await readFile(localPath(values['request-file']), 'utf8') : values.request;
       if (!json) throw new AdapterError('INVALID_ARGUMENTS', 'Supply operation arguments with --request or --request-file.');

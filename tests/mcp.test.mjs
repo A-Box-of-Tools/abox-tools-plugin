@@ -80,7 +80,8 @@ test('MCP initializes, advertises all operations, and returns structured local c
   await client.connect(transport);
   const listed = await client.listTools();
   assert.deepEqual(listed.tools.map(tool => tool.name).sort(), [
-    'abox_capabilities', 'abox_exif_remove', 'abox_image_compress', 'abox_pdf_split',
+    'abox_capabilities', 'abox_exif_remove', 'abox_image_compress', 'abox_image_convert',
+    'abox_image_resize', 'abox_pdf_merge', 'abox_pdf_select', 'abox_pdf_split',
   ]);
   for (const tool of listed.tools) assert.equal(tool.inputSchema.type, 'object');
   const result = await client.callTool({ name: 'abox_capabilities', arguments: {} });
@@ -93,6 +94,7 @@ test('MCP initializes, advertises all operations, and returns structured local c
   assert.equal(json.ok, true);
   assert.equal(json.processing, 'local');
   assert.equal(json.max_input_bytes, 128 * 1024 * 1024);
+  assert.deepEqual(json.operations.map(operation => operation.name).sort(), listed.tools.map(tool => tool.name).filter(name => name !== 'abox_capabilities').sort());
   const rejected = await client.callTool({
     name: 'abox_exif_remove',
     arguments: { input_path: 'https://example.com/private.png', output_path: path.join(cwd, 'unused.png') },
@@ -110,7 +112,7 @@ test('CLI capabilities works independently of the caller working directory', { t
   const json = JSON.parse(result.stdout);
   assert.equal(json.ok, true);
   assert.equal(json.processing, 'local');
-  assert.equal(json.operations.length, 3);
+  assert.equal(json.operations.length, 7);
 });
 
 test('CLI processes a JSON request file and exposes machine-readable failure without overwriting files', { timeout: 30_000 }, async t => {

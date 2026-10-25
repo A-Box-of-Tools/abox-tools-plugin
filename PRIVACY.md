@@ -19,8 +19,8 @@ sizes, page counts, image dimensions, verification status, and error messages.
 File bytes are not returned in MCP responses. The adapter does not maintain a
 separate upload, user database, or processing history.
 
-Image compression starts an installed browser using an isolated offline context
-and bundled processing modules. PDF splitting and metadata removal run in the
+Image compression, resizing and conversion start an installed browser using an isolated offline context
+and bundled processing modules. PDF operations and metadata removal run in the
 local Node process. Compression does not require visiting the abox.tools site.
 The plugin does not download a browser or processing dependencies during an
 operation.

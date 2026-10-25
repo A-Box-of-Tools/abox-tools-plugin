@@ -1,10 +1,10 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.2.1",
-  "description": "Compress images, split PDFs, and remove image metadata with the existing abox.tools code, keeping file processing local.",
+  "version": "0.3.0",
+  "description": "Resize, convert and compress images; merge, select and split PDF pages; and remove image metadata locally.",
   "author": {
-    "name": "A Box of Tools",
+    "name": "Abox Technologies",
     "url": "https://abox.tools/"
   },
   "homepage": "https://abox.tools/",
@@ -17,7 +17,7 @@
       "interface": {
         "displayName": "abox.tools",
         "shortDescription": "Process local images and PDFs",
-        "developerName": "A Box of Tools",
+        "developerName": "Abox Technologies",
         "category": "Productivity",
         "capabilities": ["Read", "Write"],
         "logo": "./assets/icon.png",
