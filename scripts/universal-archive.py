@@ -91,9 +91,9 @@ def member_hash(archive: zipfile.ZipFile, member: zipfile.ZipInfo) -> str:
         return hashlib.file_digest(incoming, "sha256").hexdigest()
 
 
-def check_checksum(archive: Path) -> str:
+def check_checksum(archive: Path, checksum: Path | None = None) -> str:
     require(archive.is_file() and not archive.is_symlink(), f"Missing regular archive: {archive}")
-    checksum = archive.with_name(archive.name + ".sha256")
+    checksum = checksum or archive.with_name(archive.name + ".sha256")
     require(checksum.is_file() and not checksum.is_symlink() and checksum.stat().st_size <= 512, f"Missing checksum: {checksum}")
     match = re.fullmatch(r"([a-fA-F0-9]{64})[ \t]+\*?([^\r\n]+)\r?\n?", checksum.read_bytes().decode("utf-8"))
     require(match is not None and match[2] == archive.name, f"Invalid checksum record: {checksum}")
@@ -113,7 +113,9 @@ def prepare(inputs: Path, destination: Path, version: str, revision: str) -> Non
     require(inputs.is_dir() and not inputs.is_symlink(), "Native inputs must be a regular directory.")
     require(not destination.exists() and not destination.is_symlink(), "Universal staging directory already exists.")
     expected = {f"abox-tools-{version}-{label}.{extension}{suffix}" for label in TARGETS for extension in ("zip", "mcpb") for suffix in ("", ".sha256")}
-    require({entry.name for entry in inputs.iterdir()} == expected, "Universal assembly requires exactly sixteen native release assets.")
+    gemini = {name for platform, arch, _ in TARGETS.values() for name in (f"{platform}.{arch}.abox-tools.zip", f"checksums.{platform}.{arch}.abox-tools.zip.sha256")}
+    found = {entry.name for entry in inputs.iterdir()}
+    require(found in (expected, expected | gemini), "Universal assembly requires the complete native assets, with either all or none of the Gemini assets.")
     native = {}
     shared = None
     upstream = None
@@ -123,6 +125,11 @@ def prepare(inputs: Path, destination: Path, version: str, revision: str) -> Non
             archive_path = inputs / f"{base}.mcpb"
             digest = check_checksum(archive_path)
             check_checksum(inputs / f"{base}.zip")
+            if found == expected | gemini:
+                # Both root archives are generated from the same native entry
+                # list. Checking identical bytes catches a divergent Gemini
+                # payload before it can share a published release.
+                require(check_checksum(inputs / f"{platform}.{arch}.abox-tools.zip", inputs / f"checksums.{platform}.{arch}.abox-tools.zip.sha256") == digest, f"Gemini payload differs from its native MCPB: {label}")
             archive = stack.enter_context(zipfile.ZipFile(archive_path))
             members = archive_members(archive)
             metadata = json_member(archive, members, "BUNDLE.json")

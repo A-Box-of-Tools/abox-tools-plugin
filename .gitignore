@@ -8,3 +8,5 @@ _release/
 release/
 .DS_Store
 Thumbs.db
+__pycache__/
+*.py[cod]

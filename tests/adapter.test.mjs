@@ -162,10 +162,27 @@ test('capabilities describes local operations and the input bound', async () => 
   assert.equal(result.processing, 'local');
   assert.equal(result.max_input_bytes, INPUT_LIMIT);
   assert.deepEqual(result.operations.map(operation => operation.name).sort(), [
-    'abox_exif_remove', 'abox_image_compress', 'abox_image_convert', 'abox_image_resize',
-    'abox_pdf_merge', 'abox_pdf_select', 'abox_pdf_split',
+    'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_images_to_pdf',
+    'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split',
   ]);
   assert.equal(typeof result.browser.available, 'boolean');
+});
+
+test('metadata inspection returns inventory without private values or source changes', async t => {
+  const dir = await workspace(t);
+  const input = path.join(dir, 'private.png');
+  const original = pngFixture();
+  await writeFile(input, original);
+  const result = await execute('abox_exif_inspect', { input_path: input });
+  assert.equal(result.format, 'png');
+  assert.equal(result.metadata.exif_tags, 2);
+  assert.equal(result.metadata.exif_present, true);
+  assert.equal(result.metadata.icc_present, true);
+  assert.equal(result.metadata.xmp_present, true);
+  assert.ok(result.metadata.text_chunks > 0);
+  assert.ok(!JSON.stringify(result).includes('Private'));
+  assert.deepEqual(await readFile(input), original);
+  await assert.rejects(execute('abox_exif_inspect', { input_path: input }, { signal: AbortSignal.abort() }), { name: 'AbortError' });
 });
 
 test('EXIF removal removes private PNG metadata without changing pixels or source', async t => {

@@ -18,8 +18,9 @@ import { readSource } from '../vendor/abox/tools/merge-pdf/src/assemble.js';
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
-  'abox_capabilities', 'abox_exif_remove', 'abox_image_compress', 'abox_image_convert',
-  'abox_image_resize', 'abox_pdf_merge', 'abox_pdf_select', 'abox_pdf_split',
+  'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
+  'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_images_to_pdf',
+  'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split',
 ];
 const expectedPublisher = 'Abox Technologies';
 
@@ -239,6 +240,8 @@ export async function smokeRelease(config, { universal = false } = {}) {
   } else {
     const plugin = await jsonFile(path.join(bundle, 'plugin.json'));
     const mcp = await jsonFile(path.join(bundle, 'mcp.json'));
+    const cursorPlugin = await jsonFile(path.join(bundle, '.cursor-plugin', 'plugin.json'));
+    const cursorMcp = await jsonFile(path.join(bundle, 'cursor-mcp.json'));
     assert.equal(plugin.name, 'abox-tools');
     assert.equal(plugin.version, expectedVersion);
     assert.equal(plugin.author.name, expectedPublisher);
@@ -249,6 +252,14 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.equal(mcp.mcpServers.abox.command, '${PLUGIN_ROOT}/' + runtimeRelative);
     assert.deepEqual(mcp.mcpServers.abox.args, ['${PLUGIN_ROOT}/bin/abox-mcp.mjs']);
     assert.equal(mcp.mcpServers.abox.cwd, '${PLUGIN_ROOT}');
+    assert.equal(cursorPlugin.name, 'abox-tools');
+    assert.equal(cursorPlugin.version, expectedVersion);
+    assert.equal(cursorPlugin.author.name, expectedPublisher);
+    assert.equal(cursorPlugin.publisher, expectedPublisher);
+    assert.equal(cursorPlugin.mcpServers, './cursor-mcp.json');
+    assert.equal(cursorMcp.mcpServers.abox.command, '${CURSOR_PLUGIN_ROOT}/' + runtimeRelative);
+    assert.deepEqual(cursorMcp.mcpServers.abox.args, ['${CURSOR_PLUGIN_ROOT}/bin/abox-mcp.mjs']);
+    assert.equal(cursorMcp.mcpServers.abox.cwd, '${CURSOR_PLUGIN_ROOT}');
   }
   assert.equal(receipt.platform, process.platform);
   assert.equal(receipt.arch, process.arch);
@@ -294,6 +305,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
     if (!universal) {
       const { chromium } = await import('playwright-core');
       const installerBrowser = await chromium.launch({ executablePath: capabilities.browser.path, headless: true, chromiumSandbox: true });
+      let cursorConfig;
       try {
         const page = await installerBrowser.newPage();
         await page.goto(pathToFileURL(path.join(bundle, 'START-HERE.html')).href);
@@ -302,8 +314,28 @@ export async function smokeRelease(config, { universal = false } = {}) {
         assert.equal(install.hostname, 'plugins');
         assert.equal(install.pathname, '/abox-tools');
         assert.equal(path.normalize(install.searchParams.get('marketplacePath')), path.join(bundle, '.agents', 'plugins', 'marketplace.json'));
+        const cursor = new URL(await page.locator('#install-cursor').getAttribute('href'));
+        assert.equal(cursor.protocol, 'cursor:');
+        assert.equal(cursor.hostname, 'anysphere.cursor-deeplink');
+        assert.equal(cursor.pathname, '/mcp/install');
+        assert.equal(cursor.searchParams.get('name'), 'abox-tools');
+        cursorConfig = JSON.parse(Buffer.from(cursor.searchParams.get('config'), 'base64').toString('utf8'));
+        assert.deepEqual(Object.keys(cursorConfig).sort(), ['args', 'command', 'type']);
+        assert.equal(cursorConfig.type, 'stdio');
+        assert.equal(path.normalize(cursorConfig.command), runtime);
+        assert.deepEqual(cursorConfig.args.map(argument => path.normalize(argument)), [entry]);
       } finally {
         await installerBrowser.close();
+      }
+      const cursorClient = new Client({ name: 'abox-cursor-release-smoke', version: expectedVersion });
+      try {
+        await cursorClient.connect(new StdioClientTransport({ command: cursorConfig.command, args: cursorConfig.args, cwd: workspace, env, stderr: 'pipe' }));
+        const cursorCapabilities = await call(cursorClient, 'abox_capabilities', {});
+        assert.equal(cursorCapabilities.version, expectedVersion);
+        assert.equal(cursorCapabilities.publisher, expectedPublisher);
+        assert.deepEqual(cursorCapabilities.operations.map(operation => operation.name).sort(), expectedTools.filter(name => name !== 'abox_capabilities'));
+      } finally {
+        await cursorClient.close();
       }
     }
 
@@ -312,6 +344,14 @@ export async function smokeRelease(config, { universal = false } = {}) {
     const imageClean = path.join(workspace, 'metadata removed.png');
     const imageCompressed = path.join(workspace, 'compressed image.jpg');
     await writeFile(imageInput, png);
+    const inspected = await call(client, 'abox_exif_inspect', { input_path: imageInput });
+    assert.equal(inspected.format, 'png');
+    assert.ok(inspected.metadata.text_chunks > 0);
+    assert.ok(!JSON.stringify(inspected).includes('Private note'));
+    const checksums = await call(client, 'abox_file_hash', { input_path: imageInput, algorithms: ['sha256', 'sha512'] });
+    assert.equal(checksums.hashes.sha256, hash(png));
+    assert.equal(checksums.hashes.sha512, createHash('sha512').update(png).digest('hex'));
+    assert.equal(checksums.input_bytes, png.length);
     const removed = await call(client, 'abox_exif_remove', {
       input_path: imageInput, output_path: imageClean, keep_orientation: false, keep_icc: false,
     });
@@ -435,6 +475,52 @@ export async function smokeRelease(config, { universal = false } = {}) {
     const selectedBytes = await readFile(selectedOutput);
     assert.equal(selected.output_bytes, selectedBytes.length);
     assert.deepEqual(await pdfPageFingerprints(selectedBytes), [originalPages[2], originalPages[0], originalPages[1], originalPages[2]]);
+
+    const rotatedOutput = path.join(workspace, 'rotated statements.pdf');
+    const rotated = await call(client, 'abox_pdf_rotate', {
+      input_path: pdfInput, output_path: rotatedOutput, degrees: 90, pages: '2', keep_bookmarks: true,
+    });
+    assert.equal(rotated.verified, true);
+    assert.equal(rotated.rotation_verified, true);
+    assert.equal(rotated.page_count, 3);
+    assert.equal(rotated.rotated_page_count, 1);
+    assert.deepEqual(rotated.rotated_pages, [2]);
+    const rotatedBytes = await readFile(rotatedOutput);
+    assert.equal(rotated.output_bytes, rotatedBytes.length);
+    const rotatedDoc = await PdfDocument.open(new Uint8Array(rotatedBytes));
+    assert.deepEqual(readSource(rotatedDoc, 'Rotated smoke fixture').pages.map(page => page.rotate), [0, 90, 0]);
+    assert.deepEqual(await pdfPageFingerprints(rotatedBytes), originalPages);
+
+    const picturesOutput = path.join(workspace, 'local pictures.pdf');
+    const pictures = await call(client, 'abox_images_to_pdf', {
+      input_paths: [imageResized, imageCompressed, imageResized], output_path: picturesOutput,
+      page_size: 'fit', dpi: 72, image_mode: 'keep', margin_mm: 0,
+    });
+    assert.equal(pictures.verified, true);
+    assert.equal(pictures.dimensions_verified, true);
+    assert.equal(pictures.page_count, 3);
+    assert.equal(pictures.copied_jpegs, 1);
+    const picturesBytes = await readFile(picturesOutput);
+    assert.equal(pictures.output_bytes, picturesBytes.length);
+    const picturesDoc = await PdfDocument.open(new Uint8Array(picturesBytes));
+    const picturePages = readSource(picturesDoc, 'Image smoke fixture').pages;
+    assert.equal(picturesDoc.countPages(), 3);
+    const expectedDimensions = [[64, 64], [compressed.width, compressed.height], [64, 64]];
+    for (const [index, page] of picturePages.entries()) {
+      const [width, height] = expectedDimensions[index];
+      assert.ok(Math.abs(page.box[2] - page.box[0] - width) < 0.01);
+      assert.ok(Math.abs(page.box[3] - page.box[1] - height) < 0.01);
+      const resources = picturesDoc.get(page.dict, 'Resources');
+      const objects = picturesDoc.get(resources, 'XObject');
+      const image = picturesDoc.resolve(objects.get('Im0'));
+      assert.equal(picturesDoc.get(image.dict, 'Width'), width);
+      assert.equal(picturesDoc.get(image.dict, 'Height'), height);
+      if (index === 1) assert.deepEqual(Buffer.from(image.raw), compressedBytes);
+    }
+    assert.ok(pictures.warnings.some(warning => warning.includes('embedded metadata')));
+    assert.equal(hash(await readFile(imageInput)), hash(png));
+    assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
+    assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));
     assert.equal(hash(await readFile(pdfInput)), hash(pdfBytes));
     assert.equal(hash(await readFile(secondPdfInput)), hash(secondPdfBytes));
     console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, image_resize: { width: resized.width, height: resized.height }, image_convert: converted.format, pdf_outputs: split.outputs.length, pdf_merge_pages: merged.page_count, pdf_select_pages: selected.page_count, relocated: true, system_node_required: false }));

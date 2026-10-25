@@ -9,6 +9,8 @@
     "tools/exif-editor/src/clean-copy.js",
     "tools/merge-pdf/src/assemble.js",
     "tools/merge-pdf/src/plan.js",
+    "tools/images-to-pdf/src/document.js",
+    "tools/hash-checksum/src/hash.js",
     "shared/js/pdf-reader.js",
     "shared/js/pdf-writer.js",
     "shared/js/example-pdf.js"
@@ -22,6 +24,11 @@
     {
       "path": "shared/js/crc32.js",
       "sha256": "e74400b612a87bb9d0cc93f81b5f45d4150ca5ac3aa1bdb4e88c5b1df3c5286f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/errors.js",
+      "sha256": "1e2edc64dd811eed8d15808de4d0a27a88015e3ff518ae6b9c0297b6493cbfd4",
       "generated": false
     },
     {
@@ -40,6 +47,11 @@
       "generated": false
     },
     {
+      "path": "shared/js/hash-blocks.js",
+      "sha256": "fbf1b1422d6a05000b6304b21637405d90ae43c5605811f764d1f82966f510a1",
+      "generated": false
+    },
+    {
       "path": "shared/js/heif-metadata.js",
       "sha256": "6289058ad0fd70c410eec31085d27a98b14c33341e8020271aa321a837c7b2fa",
       "generated": false
@@ -47,6 +59,11 @@
     {
       "path": "shared/js/image-convert.js",
       "sha256": "94023f2420fe7524f398d7f051e43c7ff4148807b13390b8ca7be68ee80a362c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/md5.js",
+      "sha256": "bdb222fd767e137ec59367792029e107dccfa6bae9760d44a0923b9fb7359fd7",
       "generated": false
     },
     {
@@ -178,6 +195,76 @@
       "path": "tools/exif-editor/src/webp.js",
       "sha256": "47234702f424e81e1de4e0e9fe5af45b4cec1f178e4ae271c1ed2ac4da990fe8",
       "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/README.md",
+      "sha256": "f8ab3081c8daf733f2f452f723daa3e421af6431126b371330ad2a8f0342a0e6",
+      "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/src/hash.js",
+      "sha256": "7c9bfe2f087bff2a86d504e52c9783c463b774e3c8c9daf16b1eda68c0f723aa",
+      "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/src/sha1.js",
+      "sha256": "fa907bb242ea8d910eefe68ddc84eb49f3d02a79f6a80ecbe206ea85bc91309a",
+      "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/src/sha256.js",
+      "sha256": "caafaaa7271ae37edb9b47c2416e0f67b0706e5bbdc126ef3427c509fc214211",
+      "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/src/sha512.js",
+      "sha256": "9eeb50f72e4f6c883ce8b844e711e0d0b1f6adca72d901747cd12be0fd45d333",
+      "generated": false
+    },
+    {
+      "path": "tools/hash-checksum/src/shared/hash-blocks.js",
+      "sha256": "2491218b336da5c680ba9a8edd46fa6cf0a4c61a4cd4fb23ce68534fc004e800",
+      "generated": true
+    },
+    {
+      "path": "tools/hash-checksum/src/shared/md5.js",
+      "sha256": "693144b901bd910d29bcedce17ed9c422bd8f8dced15ab7cac137104aa199e70",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-pdf/README.md",
+      "sha256": "5b8a8ac67545f448a237adc71126ebe27ab7267349a8402a279a647e2eb8bea1",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-pdf/src/document.js",
+      "sha256": "ef01c3ae785bd6be5dc6062fd74e1d1e4f70c2a8f599ad46bf13f21bc787cc29",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-pdf/src/encode.js",
+      "sha256": "9be9790131d014df59e5f25c1b8d089906ea7563857080bf74c614117f617a69",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-pdf/src/jpeg.js",
+      "sha256": "96d409b48c2a86e959bb6e2e1874c52b1706845d39d83085ad8d2b29fbb2804e",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-pdf/src/layout.js",
+      "sha256": "76ac28d3163d5e63c78ced766da67ffbd2f7414a2109e9050b57f3f0a4500672",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-pdf/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-pdf/src/shared/pdf-page-writer.js",
+      "sha256": "fb0003511fa04903d8a0eed29b98a546af026a05575993567415b5f3bfb0b5c5",
+      "generated": true
     },
     {
       "path": "tools/merge-pdf/README.md",

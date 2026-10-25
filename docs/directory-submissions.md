@@ -18,23 +18,25 @@ Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: compress, resize and convert images;
-> merge, split and reorder PDF pages; and remove image metadata. Files are
-> processed locally with bundled runtimes and dependencies. Image operations use
-> an installed Edge, Chrome or Chromium browser. No account required.
+> Abox Technologies publishes abox.tools: process images and PDFs, create PDFs
+> from photos, inspect or remove image metadata, and calculate file checksums.
+> Files stay local. Runtimes and dependencies are included. Image processing uses
+> installed Edge, Chrome or Chromium. No account required.
 
 Long description:
 
-> Give your agent seven reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent eleven reusable file tools: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
-> PDFs; extract, reorder or duplicate their pages; and remove supported metadata from JPEG, PNG, and WebP images without
-> re-encoding. The adapter processes files locally and returns output paths and
+> PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
+> inspect or remove supported image metadata; and calculate file checksums.
+> The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
-> The release includes Node and the server dependencies. Image compression, resizing and conversion need
+> The release includes Node and the server dependencies. Image processing and images to PDF need
 > an installed Edge, Chrome, or Chromium; the other operations do not. Metadata
 > cleaning keeps orientation and color profiles by default. Input files are
-> limited to 128 MiB. The Codex ZIP also includes a shared workflow skill. The
+> limited to 128 MiB, except streaming checksums, which accept up to 8 GiB. Native
+> ZIPs and Gemini extensions also include a shared workflow skill. The
 > MCPB installs the MCP tools in compatible desktop hosts.
 
 ## Public links and assets
@@ -70,6 +72,10 @@ and release smoke checks generate synthetic fixtures and verify outputs.
 | PDF pages | Split a three-page PDF into individual pages. | Three new PDFs, each reopened and verified as one page. |
 | PDF merge | Combine a three-page PDF and a two-page PDF in order. | Five pages with the expected decoded page contents, preserving both inputs. |
 | Page order | Select `3,1-2,3` from a three-page PDF. | Four output pages with actual content order 3,1,2,3. |
+| PDF rotation | Rotate only page 2 clockwise by 90 degrees. | Three pages retained in order; only page 2's rotation changes. |
+| Images to PDF | Put a PNG and JPEG into one PDF. | Two pages in input order; correct page sizes and source bytes unchanged. |
+| Metadata inventory | Inspect an image with private EXIF and text. | Counts and presence reported without private tag values. Original unchanged. |
+| Checksums | Hash an empty file and a multi-chunk file. | Digests match independent MD5/SHA implementations; input unchanged. |
 | PDF ranges | Extract `1-2` and `3` as separate PDFs from a three-page input. | Two new PDFs with two and one pages respectively. |
 | Default metadata | Remove image metadata while preserving appearance. | Verified clean copy; orientation and ICC may remain, and the result describes that. |
 | Strict metadata | Remove supported metadata with `keep_orientation: false` and `keep_icc: false`. | New verified copy; supported orientation and ICC fields removed. |

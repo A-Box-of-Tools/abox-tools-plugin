@@ -1,6 +1,6 @@
 {
   "name": "abox-tools-plugin",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Local image and PDF tools published by Abox Technologies, using existing abox.tools engines.",
   "author": { "name": "Abox Technologies", "url": "https://abox.tools/" },
   "type": "module",
@@ -11,14 +11,16 @@
   "scripts": {
     "start": "node bin/abox-mcp.mjs",
     "doctor": "node bin/abox.mjs doctor",
-    "test": "node --test tests/adapter.test.mjs tests/pdf-extra.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs",
-    "test:browser": "node --test tests/browser.test.mjs tests/image.test.mjs",
+    "test": "node --test tests/adapter.test.mjs tests/pdf-extra.test.mjs tests/pdf-rotate.test.mjs tests/hash.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs tests/cursor.test.mjs",
+    "test:browser": "node --test tests/browser.test.mjs tests/image.test.mjs tests/images-pdf.test.mjs",
     "sync-upstream": "node scripts/sync-upstream.mjs",
     "verify-vendor": "node scripts/verify-vendor.mjs",
     "package:release": "node scripts/package-release.mjs",
     "smoke:release": "node scripts/smoke-release.mjs",
     "package:universal": "node scripts/package-universal.mjs",
-    "smoke:universal": "node scripts/smoke-universal.mjs"
+    "smoke:universal": "node scripts/smoke-universal.mjs",
+    "smoke:gemini": "node scripts/smoke-gemini.mjs",
+    "smoke:skills": "node scripts/smoke-skills.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",
@@ -26,6 +28,8 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@anthropic-ai/mcpb": "2.1.2"
+    "@anthropic-ai/mcpb": "2.1.2",
+    "@google/gemini-cli": "0.65.0",
+    "skills": "1.7.4"
   }
 }

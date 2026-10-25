@@ -1,7 +1,8 @@
 # abox.tools for agents
 
 Published by **Abox Technologies**. Compress, resize and convert images; merge,
-split and reorder PDF pages; and remove image metadata with the existing
+split, reorder and rotate PDF pages; turn images into PDFs; inspect or remove
+image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
 
@@ -12,8 +13,8 @@ automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image compression, resizing and conversion need an installed Edge, Chrome, or Chromium;
-PDF splitting and metadata removal do not.
+commands. Image processing and images to PDF need an installed Edge, Chrome, or Chromium.
+PDF editing, metadata operations and checksums do not.
 
 ## Install in Codex
 
@@ -26,8 +27,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.3.0 Windows
-   bundle extracts as `abox-tools-0.3.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.4.0 Windows
+   bundle extracts as `abox-tools-0.4.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -63,6 +64,40 @@ Version 0.3.0 corrects the publisher to Abox Technologies. If your desktop host
 shows both the earlier publisher entry and the new one, disable the older entry
 to avoid duplicate tools.
 
+## Install in Gemini CLI
+
+With Gemini CLI installed, run:
+
+```sh
+gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin
+```
+
+Gemini selects the matching prebuilt archive from the latest GitHub Release.
+The extension includes its runtime, dependencies and shared skill. Review the
+installation prompt and allow its local MCP server. See the
+[Gemini extension release guide](https://geminicli.com/docs/extensions/releasing/).
+
+## Install tools in Cursor
+
+Extract the matching native ZIP, open `START-HERE.html`, and select **Install
+tools in Cursor**. Cursor shows the local server configuration before adding it.
+Keep the extracted folder in place. This adds the MCP tools; the shared skill
+can be installed separately. The repository's Cursor plugin route needs Node
+and a one-time adapter setup; see [Cursor installation](docs/cursor.md).
+
+## Install the shared skill through skills.sh
+
+For agents supported by the skills CLI (Node 22.20+):
+
+```sh
+npx skills add A-Box-of-Tools/abox-tools-plugin --skill abox-local-files
+```
+
+Then ask the agent to set up the abox.tools local adapter. The skill includes
+a Python 3.9+ setup script that downloads the matching packaged release, verifies
+its checksum and installs the bundled runtime. It does not require cloning or
+building this project. See [standalone setup](skills/abox-local-files/references/installation.md).
+
 ## Ask the agent
 
 - “Compress this photo below 500 KB and save a new copy.”
@@ -72,7 +107,11 @@ to avoid duplicate tools.
 - “Split this PDF into one file per page.”
 - “Extract pages 1–3 and 4–6 as two PDFs.”
 - “Make one PDF containing pages 3, 1–2, and another copy of page 3.”
+- “Rotate pages 2–4 clockwise by 90 degrees.”
+- “Put these photos into one PDF, in this order.”
+- “Check whether this image contains EXIF or XMP metadata.”
 - “Remove location and other image metadata, keeping its orientation and colors.”
+- “Calculate SHA-256 checksums for these files.”
 
 All input and output paths must be absolute. Existing outputs are never
 overwritten. Image compression accepts an exact byte target; a result reports
@@ -87,7 +126,11 @@ whether the target was met.
 | `abox_pdf_split` | `input_path`, `output_dir` | `mode`: `each`, `every`, `ranges`; `pages_per_file`; `ranges`; `keep_bookmarks` |
 | `abox_pdf_merge` | `input_paths`, `output_path` | 2–32 PDFs in input order; `keep_bookmarks` |
 | `abox_pdf_select` | `input_path`, `output_path`, `pages` | Ordered terms such as `3,1-2,3`; `keep_bookmarks` |
+| `abox_pdf_rotate` | `input_path`, `output_path`, `degrees` | Clockwise 90, 180, or 270; `pages` defaults to `all`; retains every page |
+| `abox_images_to_pdf` | `input_paths`, `output_path` | One image per page; `page_size`, `orientation`, `fit`, `margin_mm`, `dpi`, `image_mode`, `quality`, `max_side`, `background` |
+| `abox_exif_inspect` | `input_path` | Read-only metadata inventory; does not return private tag values |
 | `abox_exif_remove` | `input_path`, `output_path` | `keep_orientation`; `keep_icc` |
+| `abox_file_hash` | `input_path` | `algorithms`: MD5, SHA-1, SHA-256 (default), SHA-384, SHA-512 |
 
 ## Use the CLI
 
@@ -104,7 +147,11 @@ node bin/abox.mjs convert-image --request-file /absolute/path/convert.json
 node bin/abox.mjs split-pdf --request-file /absolute/path/split.json
 node bin/abox.mjs merge-pdf --request-file /absolute/path/merge.json
 node bin/abox.mjs select-pdf-pages --request-file /absolute/path/select.json
+node bin/abox.mjs rotate-pdf --request-file /absolute/path/rotate.json
+node bin/abox.mjs images-to-pdf --request-file /absolute/path/photos.json
+node bin/abox.mjs inspect-exif --request-file /absolute/path/inspect.json
 node bin/abox.mjs remove-exif --request-file /absolute/path/metadata.json
+node bin/abox.mjs hash-file --request-file /absolute/path/hash.json
 ```
 
 A compression request file contains:
@@ -161,7 +208,13 @@ prints file contents.
   unsupported by the source engine and fails before creating an output.
   Tool responses include at most 20 output entries. Larger splits also write a
   local `manifest.json` containing every output path and its source pages.
-- Each input: at most 128 MiB.
+- Images to PDF: still JPEG, PNG or WebP, one image per page, up to 128 MiB
+  combined and 80 megapixels per image. Defaults to A4, automatic orientation,
+  contain, no margins. `keep` can embed original JPEG streams with their metadata;
+  remove metadata first when a clean document is required. `lossless` preserves
+  decoded image pixels; `jpeg` re-encodes using the requested quality.
+- Checksums: read-only, streaming, supports empty files and up to 8 GiB.
+- Each other input: at most 128 MiB.
 - Compression: up to 80 megapixels and two minutes per image. `auto` may adjust
   the output extension to match the selected format. Other modes require the
   output extension to match the actual bytes, including an unchanged original.

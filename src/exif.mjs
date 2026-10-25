@@ -20,9 +20,20 @@ export function metadataSummary(item) {
 export async function supportedImage(data) {
   const item = await readBytes(new Uint8Array(data));
   if (!item.ok || !['jpeg', 'png', 'webp'].includes(item.kind)) {
-    throw new AdapterError('UNSUPPORTED_IMAGE', 'Version 0.1 supports JPEG, PNG, and WebP containers.');
+    throw new AdapterError('UNSUPPORTED_IMAGE', 'Supported containers are JPEG, PNG, and WebP.');
   }
   return item;
+}
+
+export async function inspectExif(args, { signal } = {}) {
+  signal?.throwIfAborted();
+  const input = await readInput(args.input_path);
+  const item = await supportedImage(input.data);
+  signal?.throwIfAborted();
+  return {
+    ok: true, operation: 'inspect-exif', input_path: input.path,
+    input_bytes: input.data.length, format: item.kind, metadata: metadataSummary(item),
+  };
 }
 
 export async function removeExif(args, { signal } = {}) {

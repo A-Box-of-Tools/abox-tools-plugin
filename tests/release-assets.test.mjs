@@ -15,11 +15,17 @@ test('the publication gate verifies every platform asset and detects a changed d
   for (const name of names.filter(name => !name.endsWith('.sha256'))) {
     const bytes = Buffer.from(`Fixture for ${name}`);
     await writeFile(path.join(dir, name), bytes);
-    await writeFile(path.join(dir, `${name}.sha256`), `${createHash('sha256').update(bytes).digest('hex')}  ${name}\n`);
+    const checksum = /^(win32|linux|darwin)\./.test(name) ? `checksums.${name}.sha256` : `${name}.sha256`;
+    await writeFile(path.join(dir, checksum), `${createHash('sha256').update(bytes).digest('hex')}  ${name}\n`);
   }
-  assert.equal((await verifyReleaseAssets(version, dir)).length, 18);
+  assert.equal((await verifyReleaseAssets(version, dir)).length, 26);
   assert.ok(names.includes(`abox-tools-${version}-universal.mcpb`));
   assert.ok(names.includes(`abox-tools-${version}-universal.mcpb.sha256`));
+  for (const target of ['win32.x64', 'linux.x64', 'darwin.arm64', 'darwin.x64']) {
+    assert.ok(names.includes(`${target}.abox-tools.zip`));
+    assert.ok(names.includes(`checksums.${target}.abox-tools.zip.sha256`));
+    assert.deepEqual(names.filter(name => name.startsWith(`${target}.`)), [`${target}.abox-tools.zip`], 'Gemini must never select a checksum instead of its platform archive.');
+  }
   await writeFile(path.join(dir, names[0]), 'Changed after the checksum was recorded');
   await assert.rejects(verifyReleaseAssets(version, dir), /checksum does not match/);
 });

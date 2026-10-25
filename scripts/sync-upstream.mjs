@@ -18,10 +18,13 @@ const seeds = [
   'tools/exif-editor/src/clean-copy.js',
   'tools/merge-pdf/src/assemble.js',
   'tools/merge-pdf/src/plan.js',
+  'tools/images-to-pdf/src/document.js',
+  'tools/hash-checksum/src/hash.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
   'tools/compress-image/README.md', 'tools/resize-image/README.md',
   'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
   'tools/exif-editor/README.md', 'tools/merge-pdf/README.md',
+  'tools/images-to-pdf/README.md', 'tools/hash-checksum/README.md',
   'LICENSE',
 ];
 

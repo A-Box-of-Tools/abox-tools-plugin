@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import stat
 import tempfile
 import unittest
@@ -79,6 +80,18 @@ class UniversalPackageTests(unittest.TestCase):
                 archive.writestr(item, data)
         checksum(filename)
 
+    def gemini_fixtures(self):
+        for label, (platform, arch, _) in archive_tool.TARGETS.items():
+            original = self.inputs / f"abox-tools-{VERSION}-{label}.mcpb"
+            target = self.inputs / f"{platform}.{arch}.abox-tools.zip"
+            shutil.copyfile(original, target)
+            self.gemini_checksum(target)
+
+    def gemini_checksum(self, filename):
+        filename.with_name("checksums." + filename.name + ".sha256").write_bytes(
+            f"{hashlib.sha256(filename.read_bytes()).hexdigest()}  {filename.name}\n".encode()
+        )
+
     def test_assembly_preserves_all_runtimes_and_omits_native_installer_files(self):
         self.prepare()
         self.assertFalse((self.output / "START-HERE.html").exists())
@@ -137,6 +150,21 @@ class UniversalPackageTests(unittest.TestCase):
     def test_wrong_source_revision_is_rejected(self):
         with self.assertRaisesRegex(ValueError, "source revision is not clean and pinned"):
             archive_tool.prepare(self.inputs, self.output, VERSION, "c" * 40)
+        self.assertFalse(self.output.exists())
+
+    def test_native_and_gemini_assets_are_verified_together(self):
+        self.gemini_fixtures()
+        self.prepare()
+        self.assertTrue((self.output / "BUNDLE.json").is_file())
+
+    def test_divergent_gemini_archive_is_rejected_even_with_matching_checksum(self):
+        self.gemini_fixtures()
+        target = self.inputs / "linux.x64.abox-tools.zip"
+        with target.open("ab") as outgoing:
+            outgoing.write(b"divergent platform payload")
+        self.gemini_checksum(target)
+        with self.assertRaisesRegex(ValueError, "Gemini payload differs"):
+            self.prepare()
         self.assertFalse(self.output.exists())
 
 

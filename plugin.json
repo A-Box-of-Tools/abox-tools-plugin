@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.3.0",
-  "description": "Resize, convert and compress images; merge, select and split PDF pages; and remove image metadata locally.",
+  "version": "0.4.0",
+  "description": "Process images and PDFs, inspect or remove image metadata, and calculate file checksums locally.",
   "author": {
     "name": "Abox Technologies",
     "url": "https://abox.tools/"

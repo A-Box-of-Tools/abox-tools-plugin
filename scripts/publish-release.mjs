@@ -23,7 +23,9 @@ export function expectedAssets(version) {
     return [archive, `${archive}.sha256`];
   }));
   const universal = `abox-tools-${version}-universal.mcpb`;
-  return [...native, universal, `${universal}.sha256`];
+  const gemini = ['win32.x64', 'linux.x64', 'darwin.arm64', 'darwin.x64']
+    .flatMap(target => [`${target}.abox-tools.zip`, `checksums.${target}.abox-tools.zip.sha256`]);
+  return [...native, universal, `${universal}.sha256`, ...gemini];
 }
 
 async function sha256(filename) {
@@ -36,7 +38,7 @@ export async function verifyReleaseAssets(version, directory = RELEASE) {
   const expected = expectedAssets(version);
   const found = (await readdir(directory)).sort();
   if (JSON.stringify(found) !== JSON.stringify([...expected].sort())) {
-    throw new Error('The release directory must contain four native ZIPs, four native MCPBs, one universal MCPB, and their SHA-256 files.');
+    throw new Error('The release directory must contain four native ZIPs, four native MCPBs, one universal MCPB, four Gemini extension ZIPs, and their SHA-256 files.');
   }
   const files = [];
   for (const name of expected) {
@@ -47,7 +49,9 @@ export async function verifyReleaseAssets(version, directory = RELEASE) {
     files.push({ name, filename, size: info.size });
   }
   for (const archive of files.filter(file => !file.name.endsWith('.sha256'))) {
-    const checksum = await readFile(`${archive.filename}.sha256`, 'utf8');
+    const checksumName = /^(win32|linux|darwin)\./.test(archive.name)
+      ? `checksums.${archive.name}.sha256` : `${archive.name}.sha256`;
+    const checksum = await readFile(path.join(directory, checksumName), 'utf8');
     const parsed = /^([a-f0-9]{64})[ \t]+\*?([^\r\n]+)\r?\n?$/i.exec(checksum);
     if (!parsed || parsed[2] !== archive.name || parsed[1].toLowerCase() !== await sha256(archive.filename)) {
       throw new Error(`The release checksum does not match its archive: ${archive.name}`);
@@ -98,9 +102,10 @@ function releaseNotes(version, tag, repository) {
     const name = `abox-tools-${version}-${suffix}`;
     return `- ${label}: [ZIP](${base}/${name}.zip), [MCPB](${base}/${name}.mcpb).`;
   }).join('\n');
-  return `abox.tools ${version}, published by Abox Technologies, runs seven operations locally: image compression, resizing and conversion; PDF splitting, merging and page selection/reordering; and image metadata removal. Each bundle includes its runtime.\n\n`
+  return `abox.tools ${version}, published by Abox Technologies, runs eleven operations locally: image compression, resizing and conversion; PDF splitting, merging, page selection/reordering and rotation; images to PDF; image metadata inspection and removal; and streaming file checksums. Each bundle includes its runtime.\n\n`
     + `For Codex, download the ZIP for your computer, extract it, open START-HERE.html, and click Install in Codex. Keep the extracted folder in place.\n\n`
     + `For Claude Desktop and compatible MCPB hosts, download the [universal MCPB](${base}/abox-tools-${version}-universal.mcpb). It includes the four bundled runtimes and selects the host platform. MCP execution is checked on all four targets; desktop installation was verified on Windows with version 0.2.1.\n\n`
+    + `For Gemini CLI, run \`gemini extensions install https://github.com/${repository} --ref ${tag}\`. Gemini selects its platform archive, which includes the local adapter runtime and shared skill.\n\n`
     + `${downloads}\n\nEach archive has a matching SHA-256 file. Source commit: ${process.env.GITHUB_SHA}.\n`;
 }
 

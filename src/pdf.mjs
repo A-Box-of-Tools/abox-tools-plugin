@@ -4,6 +4,7 @@ import { PdfDocument, EncryptedPdfError } from '../vendor/abox/shared/js/pdf-rea
 import { readSource, assemble } from '../vendor/abox/tools/merge-pdf/src/assemble.js';
 import { parseRanges, splitInto } from '../vendor/abox/tools/merge-pdf/src/plan.js';
 import { writeDocument } from '../vendor/abox/shared/js/pdf-writer.js';
+import { normalizeRotation } from '../vendor/abox/shared/js/pdf-pages.js';
 import { localPath, MAX_INPUT_BYTES, readInput, newOutput, writeNew } from './files.mjs';
 import { AdapterError } from './errors.mjs';
 
@@ -148,7 +149,7 @@ async function mergeInputPaths(values, signal) {
   return paths;
 }
 
-async function writePdf(entries, output, bookmarks, signal) {
+async function writePdf(entries, output, bookmarks, signal, verify = null) {
   signal?.throwIfAborted();
   let built;
   try { built = assemble(entries, { bookmarks, t: phrase }); }
@@ -168,6 +169,7 @@ async function writePdf(entries, output, bookmarks, signal) {
   if (checked.countPages() !== entries.length) {
     throw new AdapterError('VERIFICATION_FAILED', 'The output PDF had an unexpected page count.');
   }
+  if (verify) await verify(checked);
   signal?.throwIfAborted();
   await writeNew(output, data);
   return {
@@ -252,5 +254,41 @@ export async function selectPdfPages(args, { signal } = {}) {
     ...made, page_order: pages.slice(0, 100), page_order_truncated: pages.length > 100,
     keep_bookmarks: bookmarks, repaired_input: repaired, verified: true,
     warnings: editWarnings('Selecting or rearranging pages', made.engine_note_count),
+  };
+}
+
+export async function rotatePdf(args, { signal } = {}) {
+  signal?.throwIfAborted();
+  if (![90, 180, 270].includes(args.degrees)) {
+    throw new AdapterError('INVALID_ARGUMENTS', 'degrees must be 90, 180, or 270 clockwise.');
+  }
+  const selection = args.pages === undefined ? 'all' : args.pages;
+  if (typeof selection !== 'string' || !selection.trim() || selection.length > MAX_PAGE_SELECTION_LENGTH) {
+    throw new AdapterError('INVALID_PAGE_RANGE', `Provide a page selection containing 1 to ${MAX_PAGE_SELECTION_LENGTH} characters.`);
+  }
+  const bookmarks = bookmarkSetting(args);
+  const output = await pdfOutput(args.output_path);
+  const input = await readInput(args.input_path);
+  const { source, repaired } = await pdfSource(input, path.basename(input.path));
+  const selected = parseRanges(selection, source.pages.length, phrase);
+  if (selected.error || !selected.pages.length) {
+    throw new AdapterError('INVALID_PAGE_RANGE', `Invalid page selection for ${source.pages.length} pages.`);
+  }
+  const wanted = new Set(selected.pages);
+  const entries = source.pages.map((_, index) => ({ source, index, rotate: wanted.has(index + 1) ? args.degrees : 0 }));
+  const made = await writePdf(entries, output, bookmarks, signal, checked => {
+    const pages = readSource(checked, path.basename(output)).pages;
+    if (pages.length !== entries.length || pages.some((page, index) =>
+      page.rotate !== normalizeRotation(source.pages[index].rotate + entries[index].rotate))) {
+      throw new AdapterError('VERIFICATION_FAILED', 'The output PDF did not retain the expected page rotations.');
+    }
+  });
+  return {
+    ok: true, operation: 'rotate-pdf', input_path: input.path,
+    input_bytes: input.data.length, input_pages: source.pages.length, output_path: output,
+    ...made, degrees: args.degrees, rotated_page_count: selected.pages.length,
+    rotated_pages: selected.pages.slice(0, 100), rotated_pages_truncated: selected.pages.length > 100,
+    keep_bookmarks: bookmarks, repaired_input: repaired, rotation_verified: true, verified: true,
+    warnings: editWarnings('Rotating pages', made.engine_note_count),
   };
 }

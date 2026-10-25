@@ -2,7 +2,7 @@
 
 Effective 25 October 2026.
 
-The abox.tools local plugin processes images and PDFs on the computer where its
+The abox.tools local plugin processes images, PDFs and file checksums on the computer where its
 MCP server runs. The adapter has no hosted processing service, analytics,
 telemetry, account system, or API key. It does not upload file contents to
 abox.tools or another processing service.
@@ -15,12 +15,13 @@ new local outputs. It refuses to overwrite existing outputs. A large PDF split
 also creates a local manifest listing the output files and source page numbers.
 
 The MCP response contains paths, operation settings and results such as file
-sizes, page counts, image dimensions, verification status, and error messages.
+sizes, page counts, image dimensions, metadata inventory counts, checksum digests,
+verification status, and error messages. Metadata inspection does not return tag values.
 File bytes are not returned in MCP responses. The adapter does not maintain a
 separate upload, user database, or processing history.
 
-Image compression, resizing and conversion start an installed browser using an isolated offline context
-and bundled processing modules. PDF operations and metadata removal run in the
+Image processing and images to PDF start an installed browser using an isolated offline context
+and bundled processing modules. PDF editing, metadata operations and checksums run in the
 local Node process. Compression does not require visiting the abox.tools site.
 The plugin does not download a browser or processing dependencies during an
 operation.
@@ -37,12 +38,20 @@ service. GitHub hosts this repository and its release downloads. A directory or
 agent application may separately check for updates. These setup activities are
 separate from the adapter's local file processing.
 
+The optional skills CLI is a separate distribution tool. Its default anonymous
+installation telemetry helps skills.sh list skills; see its own privacy notice.
+The included Python adapter installer downloads release archives and checksums
+from GitHub and keeps a local integrity receipt. It uploads no user documents.
+
 ## Metadata removal
 
 Metadata removal removes supported image metadata and checks the resulting
 container. It retains orientation and ICC color profiles by default. Removing
 metadata does not make visible content anonymous or guarantee that every image
 format or application-specific field has been removed.
+
+Images-to-PDF keep mode may embed original JPEG streams, including their metadata.
+Remove image metadata before creating the PDF when a clean document is required.
 
 ## Questions and support
 

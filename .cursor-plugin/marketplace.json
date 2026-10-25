@@ -1,0 +1,8 @@
+{
+  "name": "abox-tools",
+  "owner": { "name": "Abox Technologies" },
+  "metadata": { "description": "Local file tools published by Abox Technologies." },
+  "plugins": [
+    { "name": "abox-tools", "source": "./", "description": "Local image and PDF tools with shared workflow skills." }
+  ]
+}

@@ -1,6 +1,6 @@
 ---
 name: abox-local-files
-description: Compress, resize or convert local images; merge, split, extract or reorder local PDF pages; and remove EXIF or image metadata with the abox.tools local adapter. Use for these operations on existing JPEG, PNG, WebP or PDF files.
+description: Compress, resize or convert images; merge, split, reorder or rotate PDFs; turn images into PDFs; inspect or remove image metadata; and calculate local file checksums with the abox.tools adapter. Use for existing JPEG, PNG, WebP, PDF or checksum input files.
 ---
 
 # abox.tools local files
@@ -8,6 +8,12 @@ description: Compress, resize or convert local images; merge, split, extract or 
 Use the installed abox.tools adapter. Pass absolute local paths; never read file
 bytes into the conversation, encode them as base64, or upload them to a website.
 The publisher is Abox Technologies.
+
+If MCP and the CLI are absent, follow [local adapter installation](references/installation.md).
+The self-contained skill includes a Python 3.9+ installer for a verified release;
+it does not require cloning this repository, Node, or npm. Downloading setup files
+uses the network; processing user files remains local. Do not install during a
+file operation unless setup was requested or already authorized.
 
 ## Workflow
 
@@ -63,13 +69,29 @@ The publisher is Abox Technologies.
   orientation and color profile information to preserve appearance. Set both to
   `false` when the user explicitly requests removal of all supported metadata.
   Explain that removing them can change display orientation or colors.
+- `abox_exif_inspect`: `input_path`. Returns counts and presence of supported
+  metadata, without private tag values. It does not modify the image.
+- `abox_file_hash`: `input_path`, optional `algorithms` (unique choices from
+  `md5`, `sha1`, `sha256`, `sha384`, `sha512`; default `["sha256"]`). Streams up
+  to 8 GiB, including empty files. It returns digests without file contents.
+- `abox_pdf_rotate`: `input_path`, `output_path`, `degrees` (90, 180 or 270
+  clockwise), and optional `pages` (default `"all"`, or a selection such as
+  `"1,3-5"`). Retains every page in its original order. Check `rotation_verified`.
+- `abox_images_to_pdf`: ordered `input_paths` and `output_path`. The default is
+  one image per A4 page, automatic orientation, contained within zero margins.
+  Optional `page_size` (`fit`, `a3`, `a4`, `a5`, `letter`, `legal`, `tabloid`),
+  `orientation`, `fit` (`contain`, `cover`, `stretch`), `margin_mm`, `dpi`,
+  `image_mode` (`keep`, `jpeg`, `lossless`), `quality`, `max_side`, `background`.
+  Keep mode can embed original JPEG bytes and their metadata. Use metadata
+  removal first when the user requests a clean document. Check output page count.
 
 ## Limits and privacy
 
 Compression, resizing and conversion support JPEG, PNG, and static WebP. Metadata removal edits JPEG,
 PNG, and WebP containers without flattening animation. PDFs must be unencrypted.
-Each input is limited to 128 MiB. PDFs are limited to 5,000 pages and 1,000 output
-files. Image operations except metadata removal need a locally installed Edge, Chrome, or Chromium;
+Each input is limited to 128 MiB, except streaming checksums (8 GiB). Images to
+PDF accepts at most 128 MiB of combined inputs. PDFs are limited to 5,000 pages and 1,000 split output
+files. Image processing and images to PDF need a locally installed Edge, Chrome, or Chromium;
 `ABOX_BROWSER_PATH` can select its executable.
 
 The adapter processes file bytes locally without outbound network requests.
@@ -89,7 +111,8 @@ Node or npm. For a source checkout, use its installed `node`. Run:
 ```
 
 Operations are `compress-image`, `resize-image`, `convert-image`, `split-pdf`,
-`merge-pdf`, `select-pdf-pages`, and `remove-exif`. Quote paths that contain
+`merge-pdf`, `select-pdf-pages`, `rotate-pdf`, `images-to-pdf`, `inspect-exif`,
+`remove-exif`, and `hash-file`. Quote paths that contain
 spaces. `<node-executable> <plugin-root>/bin/abox.mjs capabilities` lists support;
 `<node-executable> <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
 summaries rather than file bytes. Do not install dependencies during an operation

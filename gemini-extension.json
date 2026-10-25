@@ -1,0 +1,12 @@
+{
+  "name": "abox-tools",
+  "version": "0.4.0",
+  "description": "Process local images and PDFs with the abox.tools adapter, published by Abox Technologies.",
+  "mcpServers": {
+    "abox": {
+      "command": "node",
+      "args": ["${extensionPath}/bin/abox-mcp.mjs"],
+      "cwd": "${extensionPath}"
+    }
+  }
+}

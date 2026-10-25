@@ -53,8 +53,14 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run verify-vendor
       - run: npm test
+      - name: Verify archive and standalone-skill setup contracts
+        run: ${{ runner.os == 'Windows' && 'python' || 'python3' }} -B tests/distribution.test.py
       - run: npm run package:release
       - run: npm run smoke:release
+      - name: Install archive with Gemini CLI and verify local MCP tools
+        run: node scripts/smoke-gemini.mjs
+      - name: Install copied standalone skill and verify its offline adapter
+        run: node scripts/smoke-skills.mjs --source "${{ github.workspace }}" --prepared-bundle
       - uses: actions/upload-artifact@v7
         with:
           name: abox-tools-${{ matrix.label }}
@@ -77,7 +83,7 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: python3 tests/universal-package.test.py
+      - run: python3 -B tests/universal-package.test.py
       - uses: actions/download-artifact@v8
         with:
           pattern: abox-tools-*
@@ -156,7 +162,7 @@ jobs:
           pattern: abox-tools-*
           path: release
           merge-multiple: true
-      - name: Publish all verified native and universal bundles
+      - name: Publish all verified native, universal and Gemini bundles
         run: node scripts/publish-release.mjs
         env:
           GH_TOKEN: ${{ github.token }}

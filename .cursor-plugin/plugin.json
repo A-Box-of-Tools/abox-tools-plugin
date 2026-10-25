@@ -1,0 +1,16 @@
+{
+  "name": "abox-tools",
+  "displayName": "abox.tools",
+  "version": "0.4.0",
+  "description": "Process local images and PDFs with reusable abox.tools engines. Source installs need Node.js and one-time adapter setup.",
+  "author": { "name": "Abox Technologies" },
+  "publisher": "Abox Technologies",
+  "homepage": "https://abox.tools/",
+  "repository": "https://github.com/A-Box-of-Tools/abox-tools-plugin",
+  "license": "MIT",
+  "logo": "assets/icon.png",
+  "category": "Productivity",
+  "keywords": ["local-files", "images", "pdf", "mcp"],
+  "skills": "./skills/",
+  "mcpServers": "./cursor-mcp.json"
+}

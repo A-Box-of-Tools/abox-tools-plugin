@@ -19,6 +19,8 @@ if ((process.env.ABOX_EXPECT_PLATFORM && process.env.ABOX_EXPECT_PLATFORM !== pl
 const project = JSON.parse(await readFile(path.join(ROOT, 'package.json'), 'utf8'));
 const plugin = JSON.parse(await readFile(path.join(ROOT, 'plugin.json'), 'utf8'));
 if (project.version !== plugin.version) throw new Error('Plugin and package versions must agree before packaging.');
+const gemini = JSON.parse(await readFile(path.join(ROOT, 'gemini-extension.json'), 'utf8'));
+if (gemini.version !== project.version) throw new Error('Gemini and package versions must agree before packaging.');
 const receipt = await verifyVendor();
 if (!receipt.ok) throw new Error('Restore the recorded upstream sources before packaging.');
 const name = `abox-tools-${project.version}-${labels[platform]}-${arch}`;
@@ -28,12 +30,15 @@ await mkdir(stage, { recursive: true });
 // An existing build is evidence worth keeping. Never remove or replace it implicitly.
 await mkdir(destination);
 for (const relative of [
-  'bin', 'src', 'vendor', 'assets', 'skills', '.agents',
-  'plugin.json', 'mcp.json', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'PRIVACY.md', 'SECURITY.md', 'README.md',
-  'scripts/verify-vendor.mjs', 'scripts/open-installer.mjs',
+  'bin', 'src', 'vendor', 'assets', 'skills', '.agents', '.cursor-plugin',
+  'plugin.json', 'mcp.json', 'cursor-mcp.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'LICENSE', 'THIRD_PARTY_NOTICES.md', 'PRIVACY.md', 'SECURITY.md', 'README.md',
+  'scripts/verify-vendor.mjs', 'scripts/open-installer.mjs', 'scripts/cursor-mcp.mjs', 'docs/cursor.md',
 ]) {
   await mkdir(path.dirname(path.join(destination, relative)), { recursive: true });
-  await cp(path.join(ROOT, relative), path.join(destination, relative), { recursive: true, errorOnExist: true, force: false });
+  await cp(path.join(ROOT, relative), path.join(destination, relative), {
+    recursive: true, errorOnExist: true, force: false,
+    filter: filename => path.basename(filename) !== '__pycache__' && !/\.py[co]$/.test(filename),
+  });
 }
 // npm ci in CI installs the lockfile. Copy its production graph so users never
 // need npm, a package download, or a development checkout at operation time.
@@ -82,12 +87,19 @@ await writeFile(path.join(runtime, 'LICENSE'), nodeLicense);
 const mcp = JSON.parse(await readFile(path.join(destination, 'mcp.json'), 'utf8'));
 mcp.mcpServers.abox.command = `\${PLUGIN_ROOT}/runtime/${executable}`;
 await writeFile(path.join(destination, 'mcp.json'), `${JSON.stringify(mcp, null, 2)}\n`);
+gemini.mcpServers.abox.command = `\${extensionPath}/runtime/${executable}`;
+await writeFile(path.join(destination, 'gemini-extension.json'), `${JSON.stringify(gemini, null, 2)}\n`);
+const cursor = JSON.parse(await readFile(path.join(destination, 'cursor-mcp.json'), 'utf8'));
+cursor.mcpServers.abox.command = `\${CURSOR_PLUGIN_ROOT}/runtime/${executable}`;
+cursor.mcpServers.abox.args = ['${CURSOR_PLUGIN_ROOT}/bin/abox-mcp.mjs'];
+cursor.mcpServers.abox.cwd = '${CURSOR_PLUGIN_ROOT}';
+await writeFile(path.join(destination, 'cursor-mcp.json'), `${JSON.stringify(cursor, null, 2)}\n`);
 const bundledPackage = { ...project, scripts: { start: project.scripts.start, doctor: project.scripts.doctor } };
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(bundledPackage, null, 2)}\n`);
 const mcpb = {
   manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version: project.version,
-  description: 'Resize, convert and compress images; merge, select and split PDFs; remove image metadata locally.',
-  long_description: 'Published by Abox Technologies. Runs existing abox.tools engines on explicit local file paths, with Node and dependencies included. Image compression, resizing and conversion use installed Edge, Chrome or Chromium. PDF operations and metadata removal need no browser. File bytes stay local.',
+  description: 'Process images and PDFs, inspect or remove image metadata, and calculate local file checksums.',
+  long_description: 'Published by Abox Technologies. Runs eleven existing abox.tools operations on explicit local file paths, with Node and dependencies included. Image processing and images to PDF use installed Edge, Chrome or Chromium. PDF editing, metadata operations and checksums need no browser. File bytes stay local.',
   author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
   homepage: 'https://abox.tools/',
   documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',
@@ -112,10 +124,10 @@ const bundle = {
 };
 await writeFile(path.join(destination, 'BUNDLE.json'), `${JSON.stringify(bundle, null, 2)}\n`);
 
-const script = `const file=new URL('./.agents/plugins/marketplace.json',location.href);let p=decodeURIComponent(file.pathname);if(/^\\/[a-z]:\\//i.test(p))p=p.slice(1);document.getElementById('install').href='codex://plugins/abox-tools?marketplacePath='+encodeURIComponent(p).replaceAll("'",'%27');`;
+const script = `const localPath=relative=>{let p=decodeURIComponent(new URL(relative,location.href).pathname);if(/^\\/[a-z]:\\//i.test(p))p=p.slice(1);return p};document.getElementById('install').href='codex://plugins/abox-tools?marketplacePath='+encodeURIComponent(localPath('./.agents/plugins/marketplace.json')).replaceAll("'",'%27');const server={type:'stdio',command:localPath('./runtime/${executable}'),args:[localPath('./bin/abox-mcp.mjs')]};const encoded=btoa(Array.from(new TextEncoder().encode(JSON.stringify(server)),byte=>String.fromCharCode(byte)).join(''));document.getElementById('install-cursor').href='cursor://anysphere.cursor-deeplink/mcp/install?name=abox-tools&config='+encodeURIComponent(encoded);`;
 const css = `:root{font-family:system-ui,sans-serif;color:#173a30;background:#f3f7f4}body{max-width:680px;margin:8vh auto;padding:24px}h1{font-size:42px;margin-bottom:8px}p,li{line-height:1.6}main{background:white;border:1px solid #d6e3da;border-radius:20px;padding:32px}a{color:#166647}.button{display:inline-block;background:#166647;color:white;text-decoration:none;border-radius:8px;padding:14px 22px;font-weight:650}small{color:#496557}code{overflow-wrap:anywhere}`;
 const hash = value => createHash('sha256').update(value).digest('base64');
-const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${hash(script)}'; style-src 'sha256-${hash(css)}'; base-uri 'none'; form-action 'none'"><title>Install abox.tools</title><style>${css}</style></head><body><main><small>abox.tools ${project.version} · ${labels[platform]} ${arch} · Abox Technologies</small><h1>Your agent's local toolbox.</h1><p>Resize, convert and compress images; merge, split and reorder PDF pages; and remove image metadata. Your files are processed on this computer.</p><ol><li>Keep this extracted folder somewhere permanent.</li><li>Select the button below, then choose <strong>Install</strong> in Codex desktop.</li><li>Start a new local chat and ask the agent to process a file.</li></ol><p><a id="install" class="button">Install in Codex</a></p><p>The runtime and dependencies are included. You do not need Node.js, npm, Git, or a terminal.</p><p>Image compression, resizing and conversion use installed Edge, Chrome or Chromium. PDF operations and metadata removal do not need a browser.</p><p>For Claude Desktop, open the <strong>universal.mcpb</strong> download instead. It installs the MCP tools; the Codex package also includes the shared skill.</p><small>This page opens Codex's installation screen. It does not change app settings itself. <a href="https://github.com/A-Box-of-Tools/abox-tools-plugin#readme">Help and updates</a></small></main><script>${script}</script></body></html>\n`;
+const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-${hash(script)}'; style-src 'sha256-${hash(css)}'; base-uri 'none'; form-action 'none'"><title>Install abox.tools</title><style>${css}</style></head><body><main><small>abox.tools ${project.version} · ${labels[platform]} ${arch} · Abox Technologies</small><h1>Your agent's local toolbox.</h1><p>Eleven tools for images, PDFs, metadata and file checksums. Your files are processed on this computer.</p><ol><li>Keep this extracted folder somewhere permanent.</li><li>Select your app below, then approve installation in the app.</li><li>Start a new local chat and ask the agent to process a file.</li></ol><p><a id="install" class="button">Install in Codex</a> <a id="install-cursor" class="button">Install tools in Cursor</a></p><p>The runtime and dependencies are included. You do not need Node.js, npm, Git, or a terminal.</p><p>Image processing and images to PDF use installed Edge, Chrome or Chromium. PDF editing, metadata operations and checksums do not need a browser.</p><p>The Cursor button adds MCP tools. Install the repository plugin separately to add its shared skill. For Claude Desktop, open the <strong>universal.mcpb</strong> download instead.</p><small>This page opens the selected app's installation screen. It does not change app settings itself. <a href="https://github.com/A-Box-of-Tools/abox-tools-plugin#readme">Help and updates</a></small></main><script>${script}</script></body></html>\n`;
 await writeFile(path.join(destination, 'START-HERE.html'), html);
 if (platform === 'win32') {
   await writeFile(path.join(destination, 'Install in Codex.cmd'), '@echo off\r\n"%~dp0runtime\\node.exe" "%~dp0scripts\\open-installer.mjs"\r\nif errorlevel 1 pause\r\n');

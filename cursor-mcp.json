@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "abox": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["${CURSOR_PLUGIN_ROOT}/scripts/cursor-mcp.mjs"],
+      "cwd": "${CURSOR_PLUGIN_ROOT}"
+    }
+  }
+}
