@@ -6,12 +6,16 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.2.1 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.2.1).
-The universal MCPB passed native execution checks on all four platforms and was
-installed in Claude Desktop on Windows, where its server reported Running. The
-Claude desktop extension form was submitted on 25 October 2026 and confirmed
-receipt; directory review is pending. OpenAI directory submission remains
-pending the publisher's local-MCP partner approval.
+Version 0.3.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.3.0),
+with **Abox Technologies** as publisher. All seven operations passed native and
+universal package checks on all four platforms. The initial 0.2.1 universal MCPB
+was installed in Claude Desktop on Windows, where its server reported Running.
+The Claude desktop extension form confirmed the publisher correction and current
+0.3.0 review link on 25 October 2026; review remains pending. Google Forms retains
+the original attachment when a response is edited, so the response directs
+reviewers to the current public MCPB download. OpenAI directory submission remains
+pending the publisher's local-MCP partner approval. Other distribution routes
+are documented in [Platform support and publishing](platforms.md).
 
 | Route | What it distributes | Next step |
 | --- | --- | --- |
