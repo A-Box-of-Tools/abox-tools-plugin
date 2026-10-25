@@ -81,6 +81,11 @@ installation or replace that recording.
 
 ## Submission status and access
 
+Checked 25 October 2026: version 0.2.1 is active in the Official MCP Registry;
+Claude's desktop extension form confirmed receipt of the universal MCPB
+submission and is awaiting review. The extension is installed and Running in
+Claude Desktop on Windows. OpenAI remains pending local-MCP partner approval.
+
 The Official MCP Registry workflow publishes metadata only after the release is
 public and its universal MCPB has passed all four native smoke checks. A
 successful workflow and a readable Registry record confirm publication.

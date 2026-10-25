@@ -6,6 +6,13 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
+Version 0.2.1 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.2.1).
+The universal MCPB passed native execution checks on all four platforms and was
+installed in Claude Desktop on Windows, where its server reported Running. The
+Claude desktop extension form was submitted on 25 October 2026 and confirmed
+receipt; directory review is pending. OpenAI directory submission remains
+pending the publisher's local-MCP partner approval.
+
 | Route | What it distributes | Next step |
 | --- | --- | --- |
 | GitHub Release + local marketplace | Full Codex plugin, skill, local adapter, runtime, dependencies | Share the release ZIP; users open `START-HERE.html` and install through the app. |
@@ -49,8 +56,9 @@ The universal `.mcpb` includes all four native runtimes and uses MCPB platform
 overrides to launch the local adapter. Its macOS launcher selects the native
 runtime for Apple silicon or Intel. Smaller native `.mcpb` files are also
 available. They expose MCP tools; they do not install
-the portable Codex skill. First verify installation through the Claude Desktop
-interface as well as the protocol-level checks.
+the portable Codex skill. The 0.2.1 universal bundle has been installed through
+Claude Desktop on Windows and its local server reports Running. Protocol checks
+cover all four platforms; the macOS desktop interface has not been checked.
 
 For directory discovery, use the [desktop extension submission form](https://clau.de/desktop-extention-submission) linked
 from [Claude's local MCP documentation](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).

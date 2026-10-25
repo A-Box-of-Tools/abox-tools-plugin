@@ -5,6 +5,10 @@ Compress images, split PDFs, and remove image metadata with the existing
 output paths and short JSON results. File bytes stay on your computer.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.2.1)
+as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
+automatically after their downloads pass verification.
+
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
 commands. Image compression still needs an installed Edge, Chrome, or Chromium;
@@ -48,9 +52,11 @@ the MCP tools; the shared agent skill is part of the Codex ZIP.
 If opening the file does not show an installer, go to **Settings → Desktop app →
 Manage** beside Extensions, then **Advanced settings → Install Extension…** and
 select the `.mcpb`. See [Claude's desktop extension instructions](https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop).
-Bundle format and MCP execution are checked in CI; installation through the
-Claude Desktop interface has not yet been verified. Download and install a new
-bundle when updating; custom MCPB files do not update automatically.
+Bundle format and MCP execution are checked in CI on all four platforms. The
+0.2.1 universal bundle was installed and enabled in Claude Desktop on Windows,
+where the app reported its local MCP server Running. The macOS desktop interface
+has not been checked. Download and install a new bundle when updating; custom
+MCPB files do not update automatically.
 
 ## Ask the agent
 
