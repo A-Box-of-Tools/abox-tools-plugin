@@ -72,10 +72,10 @@ standalone setup guide. Installation counts and rankings update separately.
 
 ## Publication status and other clients
 
-The Cursor Marketplace application is prepared under the signed-in publisher
-account, using Abox Technologies and the requested `abox-tools` handle.
-Submission awaits acceptance of Cursor's Publisher Terms. The source
-Cursor manifest, offline cache launcher and native installation link passed
+The Cursor Marketplace application was submitted on 26 October 2026 for
+Abox Technologies with the accepted `abox-tools` handle. Cursor acknowledged
+receipt; review is pending and no live Marketplace listing is confirmed. The
+source Cursor manifest, offline cache launcher and native installation link passed
 protocol checks. Installation through Cursor's own interface remains unverified.
 
 Gemini is installable from its public release; gallery indexing is pending.

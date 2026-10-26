@@ -104,10 +104,10 @@ remains pending local-MCP partner approval.
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is public. Gemini's normal public-release installation and all four platform
 archives are verified; gallery indexing is pending after adding its discovery
-topic. Cursor's native installation link and source launcher are tested, but its
-publisher application is prepared under the signed-in account and awaits
-acceptance of Cursor's Publisher Terms. The requested name is `abox-tools`,
-with `abox-local-tools` permitted only if that plugin name is unavailable.
+topic. Cursor's native installation link and source launcher are tested. Its
+Marketplace application was submitted on 26 October 2026 for Abox Technologies
+with the accepted `abox-tools` handle. Cursor acknowledged receipt; review is
+pending and no live Marketplace listing is confirmed.
 
 The Official MCP Registry workflow publishes metadata only after the release is
 public and its universal MCPB has passed all four native smoke checks. A
