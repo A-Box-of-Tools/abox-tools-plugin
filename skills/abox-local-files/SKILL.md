@@ -1,6 +1,6 @@
 ---
 name: abox-local-files
-description: Compress, resize or convert images; merge, split, reorder or rotate PDFs; turn images into PDFs; inspect or remove image metadata; and calculate local file checksums with the abox.tools adapter. Use for existing JPEG, PNG, WebP, PDF or checksum input files.
+description: Compress, resize or convert images; create ICO icons; rasterize static SVGs; compress, watermark, merge, split, reorder or rotate PDFs; turn images into PDFs; inspect or remove image metadata; and calculate local file checksums with the abox.tools adapter.
 ---
 
 # abox.tools local files
@@ -84,6 +84,31 @@ file operation unless setup was requested or already authorized.
   `image_mode` (`keep`, `jpeg`, `lossless`), `quality`, `max_side`, `background`.
   Keep mode can embed original JPEG bytes and their metadata. Use metadata
   removal first when the user requests a clean document. Check output page count.
+- `abox_pdf_compress`: `input_path`, `output_path`; optional `preset` (`smallest`,
+  `screen`, `print`, `gentle`; default `screen`), `dpi` (0 to 1200; 0 keeps the
+  source resolution), `quality` (0.30 to 0.95), and `strip_metadata` (default
+  `true`). Recompresses supported PDF images and rewrites the document. This is
+  lossy for changed images and does not search for a byte target. Check `smaller`,
+  `saved_bytes`, `images_changed` and warnings. The output can be larger. Page
+  operators and geometry are verified; visual equivalence is not established.
+- `abox_pdf_watermark`: `input_path`, `output_path`, one-line `text` (1 to 200
+  characters). Optional `size` (`small`, `medium`, `large`), `color` (`grey`,
+  `red`, `blue`), `opacity` (0.05 to 1), `diagonal` (default `true`), `tiled`
+  (default `false`), and `first_page_only` (default `false`). Uses local fonts to
+  draw a rasterized stamp. Check `stamps_verified` and `stamped_page_count`.
+  A watermark can be removed in editors and does not redact or protect content.
+- `abox_image_to_ico`: `input_path`, `output_path`; optional unique `sizes` from
+  16, 20, 24, 32, 40, 48, 64, 96, 128, 256 (default `[16,32,48,256]`),
+  `fit` (`pad`, `crop`, `stretch`), `storage` (`auto`, `png`, `bmp`) and
+  `background` (six-digit hex color or `null` for transparency). Creates one ICO
+  containing the selected sizes and verifies every entry.
+- `abox_svg_to_image`: `input_path`, `output_path`; optional `format` (`png`,
+  `jpeg`, `webp`; default `png`), `width`, `height`, `fit` (`fit`, `pad`,
+  `stretch`), `quality` (0 to 1), and `background` (hex or `null`). Omitted
+  dimensions use the SVG's intrinsic size; one dimension preserves the ratio.
+  Accepts a static, self-contained subset; active content, external resources,
+  CSS imports/escapes, foreign objects and animations are refused. JPEG uses a
+  white background unless another color is requested. Fonts can affect rendering.
 
 ## Limits and privacy
 
@@ -91,7 +116,7 @@ Compression, resizing and conversion support JPEG, PNG, and static WebP. Metadat
 PNG, and WebP containers without flattening animation. PDFs must be unencrypted.
 Each input is limited to 128 MiB, except streaming checksums (8 GiB). Images to
 PDF accepts at most 128 MiB of combined inputs. PDFs are limited to 5,000 pages and 1,000 split output
-files. Image processing and images to PDF need a locally installed Edge, Chrome, or Chromium;
+files. Image processing, PDF compression and PDF watermark rendering need a locally installed Edge, Chrome, or Chromium;
 `ABOX_BROWSER_PATH` can select its executable.
 
 The adapter processes file bytes locally without outbound network requests.
@@ -112,7 +137,8 @@ Node or npm. For a source checkout, use its installed `node`. Run:
 
 Operations are `compress-image`, `resize-image`, `convert-image`, `split-pdf`,
 `merge-pdf`, `select-pdf-pages`, `rotate-pdf`, `images-to-pdf`, `inspect-exif`,
-`remove-exif`, and `hash-file`. Quote paths that contain
+`remove-exif`, `hash-file`, `compress-pdf`, `watermark-pdf`, `image-to-ico`, and
+`svg-to-image`. Quote paths that contain
 spaces. `<node-executable> <plugin-root>/bin/abox.mjs capabilities` lists support;
 `<node-executable> <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
 summaries rather than file bytes. Do not install dependencies during an operation

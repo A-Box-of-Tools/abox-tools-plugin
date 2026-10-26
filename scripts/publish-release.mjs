@@ -102,7 +102,7 @@ function releaseNotes(version, tag, repository) {
     const name = `abox-tools-${version}-${suffix}`;
     return `- ${label}: [ZIP](${base}/${name}.zip), [MCPB](${base}/${name}.mcpb).`;
   }).join('\n');
-  return `abox.tools ${version}, published by Abox Technologies, runs eleven operations locally: image compression, resizing and conversion; PDF splitting, merging, page selection/reordering and rotation; images to PDF; image metadata inspection and removal; and streaming file checksums. Each bundle includes its runtime.\n\n`
+  return `abox.tools ${version}, published by Abox Technologies, runs fifteen operations locally. This release adds PDF compression, PDF text watermarks, multi-size ICO creation and static SVG rasterization. It also includes image compression, resizing and conversion; PDF splitting, merging, page selection/reordering and rotation; images to PDF; metadata inspection/removal; and streaming file checksums. Each bundle includes its runtime.\n\n`
     + `For Codex, download the ZIP for your computer, extract it, open START-HERE.html, and click Install in Codex. Keep the extracted folder in place.\n\n`
     + `For Claude Desktop and compatible MCPB hosts, download the [universal MCPB](${base}/abox-tools-${version}-universal.mcpb). It includes the four bundled runtimes and selects the host platform. MCP execution is checked on all four targets; desktop installation was verified on Windows with version 0.2.1.\n\n`
     + `For Gemini CLI, run \`gemini extensions install https://github.com/${repository} --ref ${tag}\`. Gemini selects its platform archive, which includes the local adapter runtime and shared skill.\n\n`

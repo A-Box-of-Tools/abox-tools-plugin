@@ -5,6 +5,7 @@ import { promisify } from 'node:util';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
+import { staticImports } from './static-imports.mjs';
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const VENDOR = path.join(ROOT, 'vendor/abox');
@@ -20,11 +21,18 @@ const seeds = [
   'tools/merge-pdf/src/plan.js',
   'tools/images-to-pdf/src/document.js',
   'tools/hash-checksum/src/hash.js',
+  'tools/compress-pdf/src/compress.js',
+  'tools/watermark-pdf/src/apply.js', 'tools/watermark-pdf/src/render.js', 'tools/watermark-pdf/src/stamp.js',
+  'tools/image-to-ico/src/render.js', 'tools/image-to-ico/src/ico.js', 'tools/image-to-ico/src/sizes.js',
+  'tools/svg-to-image/src/svg.js', 'tools/svg-to-image/src/sizing.js',
+  'tools/svg-to-image/src/render.js', 'tools/svg-to-image/src/svg-linked-assets.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
   'tools/compress-image/README.md', 'tools/resize-image/README.md',
   'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
   'tools/exif-editor/README.md', 'tools/merge-pdf/README.md',
   'tools/images-to-pdf/README.md', 'tools/hash-checksum/README.md',
+  'tools/compress-pdf/README.md', 'tools/watermark-pdf/README.md',
+  'tools/image-to-ico/README.md', 'tools/svg-to-image/README.md',
   'LICENSE',
 ];
 
@@ -46,9 +54,7 @@ async function visit(relative) {
   if (!data.equals(committed)) throw new Error(`Refusing uncommitted source changes: ${relative}`);
   files.set(relative, data);
   if (!relative.endsWith('.js')) return;
-  const imports = /^\s*import\s+(?:[^'";]*?\bfrom\s*)?['"]([^'"]+)['"]/gm;
-  for (const match of data.toString('utf8').matchAll(imports)) {
-    const specifier = match[1];
+  for (const specifier of staticImports(data.toString('utf8'))) {
     if (!specifier.startsWith('.')) throw new Error(`Review the new external import in ${relative}: ${specifier}`);
     let child = path.posix.normalize(path.posix.join(path.posix.dirname(relative), specifier));
     try { await access(path.join(sourceRoot, child)); }

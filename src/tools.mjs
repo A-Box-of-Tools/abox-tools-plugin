@@ -6,6 +6,10 @@ import { compressImage } from './compress.mjs';
 import { removeExif, inspectExif } from './exif.mjs';
 import { hashLocalFile, MAX_HASH_BYTES } from './hash.mjs';
 import { imagesToPdf, MAX_IMAGE_PDF_PAGES } from './images-pdf.mjs';
+import { compressPdf } from './pdf-compress.mjs';
+import { watermarkPdf } from './pdf-watermark.mjs';
+import { imageToIco } from './icon.mjs';
+import { svgToImage } from './svg.mjs';
 import { resizeImage, convertImage } from './image.mjs';
 import { splitPdf, mergePdf, selectPdfPages, rotatePdf, MAX_PAGES, MAX_OUTPUTS, MAX_PAGE_SELECTION_LENGTH } from './pdf.mjs';
 import { MAX_INPUT_BYTES } from './files.mjs';
@@ -82,6 +86,41 @@ const hash = z.object({
   algorithms: z.array(z.enum(['md5', 'sha1', 'sha256', 'sha384', 'sha512'])).min(1).max(5).default(['sha256'])
     .refine(items => new Set(items).size === items.length, { message: 'Choose each algorithm once.' }),
 }).strict();
+const pdfCompress = z.object({
+  input_path: filename, output_path: filename,
+  preset: z.enum(['smallest', 'screen', 'print', 'gentle']).default('screen'),
+  dpi: z.number().min(0).max(1200).optional().describe('Optional resolution override. Zero disables image downsampling.'),
+  quality: z.number().min(0.3).max(0.95).optional(),
+  strip_metadata: z.boolean().default(true),
+}).strict();
+const watermark = z.object({
+  input_path: filename, output_path: filename,
+  text: z.string().trim().min(1).max(200).regex(/^[^\u0000-\u001f\u007f-\u009f\u2028\u2029]+$/).describe('One line of watermark text, at most 200 characters.'),
+  size: z.enum(['small', 'medium', 'large']).default('medium'),
+  color: z.enum(['grey', 'red', 'blue']).default('grey'),
+  opacity: z.number().min(0.05).max(1).default(0.2),
+  diagonal: z.boolean().default(true), tiled: z.boolean().default(false),
+  first_page_only: z.boolean().default(false),
+}).strict();
+const clearBackground = z.string().regex(/^#[0-9a-fA-F]{6}$/).nullable().default(null);
+const ico = z.object({
+  input_path: filename, output_path: filename,
+  sizes: z.array(z.union([16, 20, 24, 32, 40, 48, 64, 96, 128, 256].map(size => z.literal(size))))
+    .min(1).max(10).default([16, 32, 48, 256])
+    .refine(items => new Set(items).size === items.length, { message: 'Choose each icon size once.' }),
+  fit: z.enum(['pad', 'crop', 'stretch']).default('pad'),
+  storage: z.enum(['auto', 'png', 'bmp']).default('auto'), background: clearBackground,
+}).strict();
+const svg = z.object({
+  input_path: filename, output_path: filename,
+  format: z.enum(['png', 'jpeg', 'webp']).default('png'),
+  width: z.number().int().min(1).max(16384).optional(),
+  height: z.number().int().min(1).max(16384).optional(),
+  fit: z.enum(['fit', 'pad', 'stretch']).default('fit'),
+  quality: z.number().min(0).max(1).default(0.92), background: clearBackground,
+}).strict().refine(args => !args.width || !args.height || args.width * args.height <= 80000000, {
+  message: 'SVG raster output must contain at most 80 megapixels.',
+});
 
 export const tools = [
   { name: 'abox_capabilities', title: 'abox.tools local capabilities', description: 'List supported local operations, limits, and installed browser availability. Does not read user files.', schema: z.object({}).strict(), run: capabilities, readOnly: true },
@@ -96,6 +135,10 @@ export const tools = [
   { name: 'abox_exif_inspect', title: 'Inspect local image metadata', description: 'Read the metadata inventory of a local JPEG, PNG or WebP without modifying it. Reports presence and counts of supported metadata blocks; private tag values and image bytes are not returned.', schema: inspect, run: inspectExif, readOnly: true },
   { name: 'abox_exif_remove', title: 'Remove local image metadata', description: 'Remove supported metadata from JPEG, PNG, or WebP containers without re-encoding image data. Re-inspects output. Defaults preserve an orientation-only EXIF block and ICC color profile when present. Writes a new local file; does not anonymize visible content.', schema: exif, run: removeExif },
   { name: 'abox_file_hash', title: 'Calculate local file checksums', description: 'Stream a local file through the existing abox.tools checksum engines. Supports empty files and files up to 8 GiB. Returns selected hexadecimal digests without file contents or modifications. SHA-256 is the default.', schema: hash, run: hashLocalFile, readOnly: true },
+  { name: 'abox_pdf_compress', title: 'Compress a local PDF', description: 'Recompress supported PDF images and rewrite structure using the existing abox.tools engine. Presets trade image resolution and quality for size. Keeps page content streams and verifies page order and geometry; image pixels can change. Reports actual savings and may produce a larger file. No byte-target search. Writes a new unencrypted PDF; signatures become invalid.', schema: pdfCompress, run: compressPdf },
+  { name: 'abox_pdf_watermark', title: 'Watermark a local PDF', description: 'Overlay one line of rasterized text on all pages or the first page of a local unencrypted PDF. Supports centered diagonal or horizontal stamps and tiled repeats. Uses installed browser fonts. Writes a new PDF and verifies stamp placement and page geometry. A watermark does not redact content or prevent editing; signatures become invalid.', schema: watermark, run: watermarkPdf },
+  { name: 'abox_image_to_ico', title: 'Create a local ICO icon', description: 'Convert a still JPEG, PNG or WebP into one ICO containing requested icon sizes. Uses the existing abox.tools image rendering and ICO encoder, with padding, crop or stretch and transparent or solid background. Writes a new ICO and verifies its directory and image entries.', schema: ico, run: imageToIco },
+  { name: 'abox_svg_to_image', title: 'Rasterize a local SVG', description: 'Render a local static self-contained SVG into PNG, JPEG or WebP using the existing abox.tools sizing and codecs. Refuses active content, animation and external resources. Supports intrinsic dimensions or a requested box, transparency and JPEG background. Writes and verifies a new raster image. Installed fonts can affect appearance.', schema: svg, run: svgToImage },
 ];
 
 export async function capabilities() {
@@ -116,6 +159,10 @@ export async function capabilities() {
       { name: 'abox_exif_inspect', formats: ['jpeg', 'png', 'webp'], read_only: true, returns_tag_values: false },
       { name: 'abox_exif_remove', formats: ['jpeg', 'png', 'webp'], defaults: { keep_orientation: true, keep_icc: true } },
       { name: 'abox_file_hash', algorithms: ['md5', 'sha1', 'sha256', 'sha384', 'sha512'], default_algorithm: 'sha256', max_input_bytes: MAX_HASH_BYTES, streaming: true, read_only: true },
+      { name: 'abox_pdf_compress', encrypted: false, presets: ['smallest', 'screen', 'print', 'gentle'], max_pages: MAX_PAGES, max_megapixels_per_image: 80, requires_browser: true, defaults: { preset: 'screen', strip_metadata: true }, byte_target_search: false, jpeg_filters: ['DCTDecode', 'FlateDecode+DCTDecode'], jpeg_exif_orientation: 1 },
+      { name: 'abox_pdf_watermark', encrypted: false, max_pages: MAX_PAGES, max_text_length: 200, max_stamp_count: 100000, requires_browser: true, rasterized: true, colors: ['grey', 'red', 'blue'] },
+      { name: 'abox_image_to_ico', input_formats: ['jpeg', 'png', 'webp'], output_format: 'ico', sizes: [16, 20, 24, 32, 40, 48, 64, 96, 128, 256], max_megapixels: 80, requires_browser: true },
+      { name: 'abox_svg_to_image', input_format: 'svg', output_formats: ['png', 'jpeg', 'webp'], animated: false, external_resources: false, max_side: 16384, max_megapixels: 80, requires_browser: true },
     ],
   };
 }

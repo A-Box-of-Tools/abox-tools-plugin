@@ -18,21 +18,23 @@ Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: process images and PDFs, create PDFs
-> from photos, inspect or remove image metadata, and calculate file checksums.
+> Abox Technologies publishes abox.tools: process images, PDFs, SVGs and icons;
+> create PDFs from photos; inspect or remove image metadata; and calculate checksums.
 > Files stay local. Runtimes and dependencies are included. Image processing uses
 > installed Edge, Chrome or Chromium. No account required.
 
 Long description:
 
-> Give your agent eleven reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent fifteen reusable file tools: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
+> Additional operations compress PDFs, overlay PDF text watermarks, create
+> multi-size ICO icons and rasterize self-contained static SVGs.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
-> The release includes Node and the server dependencies. Image processing and images to PDF need
+> The release includes Node and the server dependencies. Image processing, PDF compression and watermark rendering need
 > an installed Edge, Chrome, or Chromium; the other operations do not. Metadata
 > cleaning keeps orientation and color profiles by default. Input files are
 > limited to 128 MiB, except streaming checksums, which accept up to 8 GiB. Native

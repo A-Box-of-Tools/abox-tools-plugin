@@ -19,8 +19,8 @@ const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
   'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
-  'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_images_to_pdf',
-  'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split',
+  'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf',
+  'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_watermark', 'abox_svg_to_image',
 ];
 const expectedPublisher = 'Abox Technologies';
 
@@ -518,6 +518,82 @@ export async function smokeRelease(config, { universal = false } = {}) {
       if (index === 1) assert.deepEqual(Buffer.from(image.raw), compressedBytes);
     }
     assert.ok(pictures.warnings.some(warning => warning.includes('embedded metadata')));
+
+    const compressedPdfPath = path.join(workspace, 'screen optimized pictures.pdf');
+    const compressedPdf = await call(client, 'abox_pdf_compress', {
+      input_path: picturesOutput, output_path: compressedPdfPath, preset: 'smallest', dpi: 18,
+    });
+    assert.equal(compressedPdf.verified, true);
+    assert.equal(compressedPdf.content_verified, true);
+    assert.equal(compressedPdf.page_count, 3);
+    assert.ok(compressedPdf.images_changed > 0, 'PDF compression must exercise image recompression.');
+    assert.equal(compressedPdf.smaller, true);
+    const compressedPdfBytes = await readFile(compressedPdfPath);
+    assert.equal(compressedPdf.output_bytes, compressedPdfBytes.length);
+    assert.deepEqual(await pdfPageFingerprints(compressedPdfBytes), await pdfPageFingerprints(picturesBytes));
+    assert.equal(hash(await readFile(picturesOutput)), hash(picturesBytes));
+
+    const watermarkedPath = path.join(workspace, 'draft statements.pdf');
+    const watermarked = await call(client, 'abox_pdf_watermark', {
+      input_path: pdfInput, output_path: watermarkedPath, text: 'DRAFT', color: 'red', opacity: 0.3,
+      first_page_only: true, diagonal: false,
+    });
+    assert.equal(watermarked.verified, true);
+    assert.equal(watermarked.stamps_verified, true);
+    assert.equal(watermarked.page_count, 3);
+    assert.equal(watermarked.stamped_page_count, 1);
+    assert.equal(watermarked.stamp_count, 1);
+    const stampedDoc = await PdfDocument.open(new Uint8Array(await readFile(watermarkedPath)));
+    const stampedPages = readSource(stampedDoc, 'Watermarked smoke fixture').pages;
+    for (const [index, page] of stampedPages.entries()) {
+      const content = stampedDoc.resolve(page.dict.get('Contents'));
+      const streams = (Array.isArray(content) ? content : [content]).map(value => stampedDoc.resolve(value));
+      assert.ok(streams.length >= (index === 0 ? 3 : 1));
+      const expectedOriginal = streams[index === 0 ? 1 : 0];
+      const decoded = await decodeStream(expectedOriginal, value => stampedDoc.resolve(value));
+      assert.equal(hash(decoded.bytes), originalPages[index]);
+    }
+
+    const iconPath = path.join(workspace, 'multi size app icon.ico');
+    const icon = await call(client, 'abox_image_to_ico', { input_path: imageResized, output_path: iconPath });
+    assert.equal(icon.verified, true);
+    assert.deepEqual(icon.entries.map(entry => [entry.width, entry.kind]), [[16, 'bmp'], [32, 'bmp'], [48, 'bmp'], [256, 'png']]);
+    const iconBytes = await readFile(iconPath);
+    assert.equal(iconBytes.readUInt16LE(0), 0);
+    assert.equal(iconBytes.readUInt16LE(2), 1);
+    assert.equal(iconBytes.readUInt16LE(4), 4);
+    let iconEnd = 70;
+    for (const [index, entry] of icon.entries.entries()) {
+      const offset = iconBytes.readUInt32LE(6 + index * 16 + 12);
+      const length = iconBytes.readUInt32LE(6 + index * 16 + 8);
+      assert.equal(offset, iconEnd);
+      assert.equal(length, entry.bytes);
+      const frame = iconBytes.subarray(offset, offset + length);
+      if (entry.kind === 'png') {
+        const header = pngChunks(frame).find(chunk => chunk.type === 'IHDR').data;
+        assert.equal(header.readUInt32BE(0), entry.width);
+        assert.equal(header.readUInt32BE(4), entry.height);
+      } else {
+        assert.equal(frame.readUInt32LE(0), 40);
+        assert.equal(frame.readInt32LE(4), entry.width);
+        assert.equal(frame.readInt32LE(8), entry.height * 2);
+      }
+      iconEnd += length;
+    }
+    assert.equal(iconEnd, iconBytes.length);
+
+    const svgPath = path.join(workspace, 'local vector.svg');
+    const svgBytes = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="8" height="4"><rect width="4" height="4" fill="#f00"/></svg>');
+    await writeFile(svgPath, svgBytes);
+    const vectorPath = path.join(workspace, 'rasterized vector.png');
+    const vector = await call(client, 'abox_svg_to_image', { input_path: svgPath, output_path: vectorPath, width: 80 });
+    assert.equal(vector.verified, true);
+    assert.equal(vector.width, 80);
+    assert.equal(vector.height, 40);
+    const vectorHeader = pngChunks(await readFile(vectorPath)).find(chunk => chunk.type === 'IHDR').data;
+    assert.equal(vectorHeader.readUInt32BE(0), 80);
+    assert.equal(vectorHeader.readUInt32BE(4), 40);
+    assert.equal(hash(await readFile(svgPath)), hash(svgBytes));
     assert.equal(hash(await readFile(imageInput)), hash(png));
     assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));

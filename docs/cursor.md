@@ -7,7 +7,7 @@ the ZIP matching your computer, extract it to a permanent folder, and open
 installation prompt. The link
 configures the Node runtime and MCP server inside that extracted folder. Keep
 the folder in place. Node.js, npm, Python and a source build are not required
-for this route. Image operations still need an installed Edge, Chrome or
+for this route. Image processing, PDF compression and watermark rendering need an installed Edge, Chrome or
 Chromium browser.
 
 The Git repository also contains a Cursor plugin manifest at

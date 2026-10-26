@@ -1,7 +1,8 @@
 # abox.tools for agents
 
-Published by **Abox Technologies**. Compress, resize and convert images; merge,
-split, reorder and rotate PDF pages; turn images into PDFs; inspect or remove
+Published by **Abox Technologies**. Compress, resize and convert images; create
+ICO icons and rasterize SVGs; compress, watermark, merge, split, reorder and
+rotate PDF pages; turn images into PDFs; inspect or remove
 image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
@@ -13,8 +14,9 @@ automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image processing and images to PDF need an installed Edge, Chrome, or Chromium.
-PDF editing, metadata operations and checksums do not.
+commands. Image processing, PDF compression and PDF watermark rendering need an
+installed Edge, Chrome, or Chromium. PDF page operations, metadata operations and
+checksums do not.
 
 ## Install in Codex
 
@@ -27,8 +29,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.4.0 Windows
-   bundle extracts as `abox-tools-0.4.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.5.0 Windows
+   bundle extracts as `abox-tools-0.5.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -114,6 +116,10 @@ is public. Gemini release installation is verified; its gallery indexing is pend
 - “Check whether this image contains EXIF or XMP metadata.”
 - “Remove location and other image metadata, keeping its orientation and colors.”
 - “Calculate SHA-256 checksums for these files.”
+- “Compress this scanned PDF for screen reading.”
+- “Add a diagonal DRAFT watermark to every PDF page.”
+- “Make an ICO with 16, 32, 48 and 256 pixel versions of this logo.”
+- “Export this SVG as a transparent PNG, 1200 pixels wide.”
 
 All input and output paths must be absolute. Existing outputs are never
 overwritten. Image compression accepts an exact byte target; a result reports
@@ -133,6 +139,10 @@ whether the target was met.
 | `abox_exif_inspect` | `input_path` | Read-only metadata inventory; does not return private tag values |
 | `abox_exif_remove` | `input_path`, `output_path` | `keep_orientation`; `keep_icc` |
 | `abox_file_hash` | `input_path` | `algorithms`: MD5, SHA-1, SHA-256 (default), SHA-384, SHA-512 |
+| `abox_pdf_compress` | `input_path`, `output_path` | `preset`: `smallest`, `screen`, `print`, `gentle`; optional `dpi`, `quality`, `strip_metadata` |
+| `abox_pdf_watermark` | `input_path`, `output_path`, `text` | `size`, `color`, `opacity`, `diagonal`, `tiled`, `first_page_only` |
+| `abox_image_to_ico` | `input_path`, `output_path` | `sizes`, `fit`: `pad`, `crop`, `stretch`; `storage`: `auto`, `png`, `bmp`; optional `background` |
+| `abox_svg_to_image` | `input_path`, `output_path` | `format`: `png`, `jpeg`, `webp`; `width`, `height`, `fit`, `quality`, `background` |
 
 ## Use the CLI
 
@@ -154,6 +164,10 @@ node bin/abox.mjs images-to-pdf --request-file /absolute/path/photos.json
 node bin/abox.mjs inspect-exif --request-file /absolute/path/inspect.json
 node bin/abox.mjs remove-exif --request-file /absolute/path/metadata.json
 node bin/abox.mjs hash-file --request-file /absolute/path/hash.json
+node bin/abox.mjs compress-pdf --request-file /absolute/path/compress-pdf.json
+node bin/abox.mjs watermark-pdf --request-file /absolute/path/watermark.json
+node bin/abox.mjs image-to-ico --request-file /absolute/path/icon.json
+node bin/abox.mjs svg-to-image --request-file /absolute/path/svg.json
 ```
 
 A compression request file contains:
@@ -216,6 +230,27 @@ prints file contents.
   remove metadata first when a clean document is required. `lossless` preserves
   decoded image pixels; `jpeg` re-encodes using the requested quality.
 - Checksums: read-only, streaming, supports empty files and up to 8 GiB.
+- PDF compression: presets recompress supported images and rewrite structure.
+  `smallest` uses 96 DPI / 0.55 quality, `screen` 130 / 0.68, `print` 220 / 0.82,
+  and `gentle` keeps resolution with 0.90 quality. `dpi` and `quality` can override
+  those settings. It does not search for a byte target; check `smaller` and actual
+  savings. The output can be larger. Changed images can lose detail. CMYK and
+  unsupported image encodings are retained where safely readable. Unusual
+  filter-wrapped JPEG encodings and nonidentity EXIF orientation in JPEG streams
+  are refused before processing to prevent unintended image rotation. Standard PDF
+  metadata is removed by default; embedded images, attachments and visible
+  content can still contain personal information.
+- PDF watermarks: one rasterized line, up to 200 characters, centered or tiled,
+  on all pages or only the first. Local fonts affect appearance. Up to 100,000
+  stamps. Watermarks can be removed by editors and do not redact or protect data.
+- ICO: still JPEG, PNG or WebP to one file with up to ten sizes from 16 to 256
+  pixels. `auto` stores sizes up to 64 as DIB and larger sizes as PNG. Padding
+  preserves aspect ratio and transparency; crop fills the square; stretch can
+  distort. The directory, frame dimensions and rendered pixels are verified.
+- SVG: uncompressed, self-contained static SVG to PNG, JPEG or WebP; up to
+  16,384 pixels per side and 80 megapixels. Active content, foreign objects,
+  external references, CSS imports/escapes and animations are refused. JPEG
+  fills transparency with white by default. Fonts and colors can vary by browser.
 - Each other input: at most 128 MiB.
 - Compression: up to 80 megapixels and two minutes per image. `auto` may adjust
   the output extension to match the selected format. Other modes require the

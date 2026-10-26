@@ -15,7 +15,7 @@ recorded separately below.
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
 | Agents supported by skills.sh | Install `abox-local-files` from this repository, then run its one-time adapter setup. | The current skills CLI needs Node.js 22.20+. Adapter setup uses Python 3 and downloads a verified native ZIP; later file processing uses the cached bundled runtime. |
 
-Image compression, resizing, conversion and images-to-PDF workflows need an
+Image processing, PDF compression and PDF watermark rendering need an
 installed Edge, Chrome or Chromium browser. PDF page operations, hashes and
 metadata removal use the local adapter directly. All routes use the same
 processing engines and refuse existing output paths.

@@ -20,8 +20,9 @@ verification status, and error messages. Metadata inspection does not return tag
 File bytes are not returned in MCP responses. The adapter does not maintain a
 separate upload, user database, or processing history.
 
-Image processing and images to PDF start an installed browser using an isolated offline context
-and bundled processing modules. PDF editing, metadata operations and checksums run in the
+Image processing, images to PDF, PDF compression and watermark text rendering
+use an installed browser with an isolated offline context and bundled modules.
+PDF page operations, metadata operations and checksums run in the
 local Node process. Compression does not require visiting the abox.tools site.
 The plugin does not download a browser or processing dependencies during an
 operation.
@@ -52,6 +53,10 @@ format or application-specific field has been removed.
 
 Images-to-PDF keep mode may embed original JPEG streams, including their metadata.
 Remove image metadata before creating the PDF when a clean document is required.
+
+PDF compression can remove standard PDF metadata, while embedded image metadata,
+attachments, annotations and visible content may remain. PDF watermarking adds
+an image overlay and does not remove or protect the original content.
 
 ## Questions and support
 

@@ -162,8 +162,8 @@ test('capabilities describes local operations and the input bound', async () => 
   assert.equal(result.processing, 'local');
   assert.equal(result.max_input_bytes, INPUT_LIMIT);
   assert.deepEqual(result.operations.map(operation => operation.name).sort(), [
-    'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_images_to_pdf',
-    'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split',
+    'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf',
+    'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_watermark', 'abox_svg_to_image',
   ]);
   assert.equal(typeof result.browser.available, 'boolean');
 });

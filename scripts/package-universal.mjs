@@ -24,7 +24,7 @@ export function universalManifest(version) {
   return {
     manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version,
     description: 'Resize, convert and compress images; merge, select and split PDFs; remove image metadata locally.',
-    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. File bytes stay local. Image compression, resizing and conversion need installed Edge, Chrome or Chromium; PDF operations and metadata removal need no browser.',
+    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. File bytes stay local. Image processing, PDF compression and PDF watermark rendering need installed Edge, Chrome or Chromium; PDF page operations, metadata operations and checksums need no browser.',
     author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
     homepage: 'https://abox.tools/',
     documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',
