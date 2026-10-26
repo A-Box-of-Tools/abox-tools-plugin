@@ -95,7 +95,7 @@ installation or replace that recording.
 
 ## Submission status and access
 
-Checked 25 October 2026: version 0.4.0 is active in the Official MCP Registry,
+Checked 26 October 2026: version 0.5.0 is active in the Official MCP Registry,
 identifying Abox Technologies as publisher. Claude's form confirmed the
 publisher correction and the 0.3.0 review download link; directory review remains
 pending. Its original 0.2.1 attachment cannot be replaced through response
@@ -105,7 +105,7 @@ remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is public. Gemini's normal public-release installation and all four platform
-archives are verified; gallery indexing is pending after adding its discovery
+archives are verified; a gallery listing is unconfirmed after adding its discovery
 topic. Cursor's native installation link and source launcher are tested. Its
 Marketplace application was submitted on 26 October 2026 for Abox Technologies
 with the accepted `abox-tools` handle. Cursor acknowledged receipt; review is

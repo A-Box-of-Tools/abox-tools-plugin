@@ -6,13 +6,13 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.4.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.4.0),
-with **Abox Technologies** as publisher. All eleven operations passed native and
+Version 0.5.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.5.0),
+with **Abox Technologies** as publisher. All fifteen operations passed native and
 universal package checks on all four platforms. Gemini CLI installation, skill
 discovery and offline standalone adapter setup also passed on all four platforms.
 The public Gemini release install command and the skill's actual GitHub download
 were verified on Windows after publication. The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is live; Gemini's gallery crawler is enabled, with indexing pending. The initial 0.2.1 universal MCPB
+is live; Gemini's gallery crawler is enabled, with gallery listing unconfirmed. The initial 0.2.1 universal MCPB
 was installed in Claude Desktop on Windows, where its server reported Running.
 The Claude desktop extension form confirmed the publisher correction and current
 0.3.0 review link on 25 October 2026; review remains pending. Google Forms retains

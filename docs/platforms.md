@@ -2,15 +2,15 @@
 
 Publisher: **Abox Technologies**. Product: **abox.tools**.
 
-The [v0.4.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.4.0)
-is public with 26 assets. All eleven operations, Gemini installation and
+The [v0.5.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.5.0)
+is public with 26 assets. All fifteen operations, Gemini installation and
 standalone skill setup passed CI on all four platforms. Directory status is
 recorded separately below.
 
 | Client | Installation route | Runtime requirements |
 | --- | --- | --- |
-| Codex desktop | Extract the matching native `abox-tools-0.4.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
-| Claude Desktop / MCPB hosts | Open `abox-tools-0.4.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
+| Codex desktop | Extract the matching native `abox-tools-0.5.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
+| Claude Desktop / MCPB hosts | Open `abox-tools-0.5.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
 | Cursor | Use the native ZIP's **Install tools in Cursor** button for the local MCP tools. The repository also carries a Cursor plugin and shared skill. | The native link uses the included runtime. A source plugin needs Node.js 22.15+ on PATH and one-time adapter setup. See [Cursor setup](cursor.md). |
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
 | Agents supported by skills.sh | Install `abox-local-files` from this repository, then run its one-time adapter setup. | The current skills CLI needs Node.js 22.20+. Adapter setup uses Python 3 and downloads a verified native ZIP; later file processing uses the cached bundled runtime. |
@@ -25,7 +25,7 @@ processing engines and refuse existing output paths.
 Install the released extension with:
 
 ```sh
-gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.4.0
+gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.5.0
 ```
 
 The release includes these Gemini-specific assets:
@@ -43,7 +43,7 @@ manifest is for development; a plain clone does not contain the bundled
 runtime or installed server dependencies.
 
 The public repository has the root manifest and `gemini-cli-extension` topic
-required for Google's daily gallery crawler. Indexing is pending. The exact
+required for Google's daily gallery crawler. A gallery listing is unconfirmed. The exact
 public install command above passed using Gemini CLI 0.65.0 on Windows,
 including bundled runtime selection, shared skill discovery and a local file
 operation. See the official [release and gallery requirements](https://geminicli.com/docs/extensions/releasing/).
@@ -78,7 +78,7 @@ receipt; review is pending and no live Marketplace listing is confirmed. The
 source Cursor manifest, offline cache launcher and native installation link passed
 protocol checks. Installation through Cursor's own interface remains unverified.
 
-Gemini is installable from its public release; gallery indexing is pending.
+Gemini is installable from its public release; a gallery listing is unconfirmed.
 The skills.sh listing is public.
 See [directory submission materials](directory-submissions.md) and
 [publishing](publishing.md) for the release and submission evidence recorded
