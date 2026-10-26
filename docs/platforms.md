@@ -72,8 +72,9 @@ standalone setup guide. Installation counts and rankings update separately.
 
 ## Publication status and other clients
 
-The Cursor Marketplace application has not been submitted. Its Google sign-in
-flow is waiting for the user's explicit identity-sharing approval. The source
+The Cursor Marketplace application is prepared under the signed-in publisher
+account, using Abox Technologies and the requested `abox-tools` handle.
+Submission awaits acceptance of Cursor's Publisher Terms. The source
 Cursor manifest, offline cache launcher and native installation link passed
 protocol checks. Installation through Cursor's own interface remains unverified.
 

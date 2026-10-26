@@ -40,10 +40,12 @@ provides the shared workflow skills. Marketplace review and installation in
 Cursor are separate from protocol tests; follow the status in
 `directory-submissions.md` for publication details.
 
-The Cursor Marketplace application has not been submitted. Sign-in is awaiting
-the user's explicit approval of Google's identity-sharing prompt. Prepared
-manifests, a working MCP transport and an install link do not establish a
-Marketplace listing.
+The Cursor Marketplace application is prepared under the signed-in publisher
+account, with **Abox Technologies** as the organization and **abox-tools** as
+the requested handle. Both plugin manifests already use `abox-tools`; use
+`abox-local-tools` only if the preferred plugin name is unavailable.
+Submission is awaiting acceptance of Cursor's Publisher Terms. There is no
+confirmed Marketplace listing yet.
 
 Cursor documents [plugin components and root variables](https://cursor.com/docs/reference/plugins),
 [local MCP commands](https://cursor.com/docs/mcp), and
