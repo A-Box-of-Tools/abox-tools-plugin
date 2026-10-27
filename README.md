@@ -9,7 +9,10 @@ or remove image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
 
-This source version provides 25 local file operations and one capabilities tool.
+It also inspects and extracts GIF frames, traces bitmap shapes into SVG,
+stacks aligned images, redacts image regions and generates passwords into local files.
+
+This source version provides 31 local file operations and one capabilities tool.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
 Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0)
@@ -145,6 +148,12 @@ is public. Gemini release installation is verified; a gallery listing is unconfi
 - “Generate a QR code from the exact text in this local payload file.”
 - “Make a Code 128 barcode from this local payload file.”
 - “Embed this image as a CSS custom property without changing its bytes.”
+- “Inspect the frame timings of this GIF without decoding its pictures.”
+- “Extract GIF frames 1, 5 and 10 as composited PNGs.”
+- “Trace this black-and-white logo into a single-color SVG.”
+- “Average these aligned, opaque images into a new PNG.”
+- “Black out the exact regions in my local JSON file and save a new PNG.”
+- “Generate two six-word passphrases into a new local file without showing them.”
 
 All input and output paths must be absolute. Existing outputs are never
 overwritten. Image compression accepts an exact byte target; a result reports
@@ -178,6 +187,15 @@ whether the target was met.
 | `abox_qr_generate` | UTF-8 payload `input_path`, `output_path` | `format`: `svg` (default) or `png`; `level`: `L`, `M`, `Q`, `H`; `quiet`, `scale`, `foreground`, `background` |
 | `abox_barcode_generate` | UTF-8 payload `input_path`, `output_path` | `symbology`: `code128`, `ean13`, `upca`, `ean8`, `itf14`, `itf`, `code39`; `format`, `scale`, `height`, `text`, `code39_check`, colors |
 | `abox_text_diff` | `left_path`, `right_path`, `output_path` | `context_lines` (0–100, default 3); `ignore_whitespace`, `ignore_case`, `ignore_blank_lines` affect comparison summaries only |
+| `abox_gif_inspect` | `input_path` | Header-only timing, rectangles and budgets; optional zero-based `frame_offset` and `frame_limit` (default 20) |
+| `abox_gif_split` | `input_path`, new `output_dir` | `mode`: `composited` (default) or `stored`; optional unique 1-based `frames`; PNGs and local timing manifest |
+| `abox_image_trace` | `input_path`, `.svg` `output_path` | Single-color shape trace; `threshold`, `invert`, `detail`, `corner_angle`, `min_area`, `fill` |
+| `abox_image_stack` | ordered `input_paths`, `output_path` | `average`, `median`, `sigma`, `lighten`, `darken`, `add`; equal-size opaque frames; PNG/JPEG |
+| `abox_image_redact` | `input_path`, `.png` `output_path`, `regions_path` | Local JSON with expected decoded dimensions and integer rectangles; permanent opaque black fill |
+| `abox_password_generate` | `.txt` `output_path` | Optional local JSON `config_path`; passwords or EFF passphrases; secrets excluded from responses |
+
+The six new tools' settings and JSON configuration examples are documented in
+[the shared skill reference](skills/abox-local-files/references/additional-tools.md).
 
 ## Use the CLI
 
@@ -213,6 +231,12 @@ node bin/abox.mjs format-xml --request-file /absolute/path/xml.json
 node bin/abox.mjs generate-qr --request-file /absolute/path/qr.json
 node bin/abox.mjs generate-barcode --request-file /absolute/path/barcode.json
 node bin/abox.mjs diff-text --request-file /absolute/path/diff.json
+node bin/abox.mjs inspect-gif --request-file /absolute/path/gif-info.json
+node bin/abox.mjs split-gif --request-file /absolute/path/gif-frames.json
+node bin/abox.mjs trace-image --request-file /absolute/path/trace.json
+node bin/abox.mjs stack-images --request-file /absolute/path/stack.json
+node bin/abox.mjs redact-image --request-file /absolute/path/redaction.json
+node bin/abox.mjs generate-passwords --request-file /absolute/path/passwords.json
 ```
 
 A compression request file contains:
@@ -364,6 +388,35 @@ prints file contents.
   are fixed `a` and `b`. Large differences can produce coarse rewrite hunks;
   minimality is not guaranteed. Neither source is modified or patched.
 - Each other input: at most 128 MiB.
+- GIF inspection: 32 MiB, 1000 source frames, 8192 per side and 32 megapixels per
+  screen or patch. Reads headers without verifying LZW or pixels. Frame results
+  are paginated; comments, application text and palette colors are excluded.
+- GIF extraction: at most 200 selected PNGs, 128 Mi decoded patch pixels and
+  300 million walked screen pixels. Each PNG is at most 32 MiB and the total
+  PNG output at most 256 MiB; the upstream working-buffer admission also applies.
+  Strict decoding refuses partial frames. Composited mode applies preceding
+  disposal; stored mode returns patches. Output pixels are checked after PNG
+  encoding, and a local timing manifest lists every frame. Needs a local browser.
+- Image tracing: still JPEG/PNG/WebP, at most 4096 per side and 4 megapixels.
+  Single-color, lossy SVG shape approximation for logos or line art; not photo
+  reconstruction. At most 100000 boundary edges, 1000 contours and 400000 SVG
+  bytes. Passive path structure and rendered path pixels are checked.
+- Stacking: 2–8 opaque, equal-size still JPEG/PNG/WebP frames, up to 128 MiB
+  combined, 4096 per side and 4 megapixels. No alignment, resizing, focus stacking
+  or RAW development. Uses encoded 8-bit SDR RGB; PNG pixels are lossless after
+  stacking, JPEG is lossy. Both stacking and tracing require the local browser.
+- Redaction: explicit 0-based integer rectangles in the decoded display image.
+  Expected dimensions must match exactly; rectangles cannot be clipped. Up to
+  100 regions, 16384 per side, 32 megapixels and 128 million rectangle pixels
+  including overlaps. Solid black fill only, flattened PNG, with all decoded
+  pixels checked. Covered pixels are exactly opaque black; outside alpha is
+  retained and visible colors are within one 8-bit step of the decoded source.
+  The new raster is 8-bit SDR and excludes source metadata. Does not locate sensitive content;
+  review coverage before sharing. Requires the local browser.
+- Passwords: cryptographic generation into a new plaintext `.txt`, one secret per
+  line, at most 100 results and 64 KiB. Defaults to 24 characters; passphrase mode
+  defaults to six EFF words. Settings come from local JSON up to 16 KiB. Secrets,
+  secret hashes and samples never appear in tool results. No browser or vault.
 - Compression: up to 80 megapixels and two minutes per image. `auto` may adjust
   the output extension to match the selected format. Other modes require the
   output extension to match the actual bytes, including an unchanged original.

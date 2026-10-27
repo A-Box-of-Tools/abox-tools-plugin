@@ -1,7 +1,7 @@
 {
   "name": "abox-tools",
-  "version": "0.7.0",
-  "description": "Local images, PDFs, QR/barcodes, structured text, comparisons and file encodings by Abox Technologies.",
+  "version": "0.8.0",
+  "description": "Local images, GIFs, PDFs, codes, text, passwords and file encodings by Abox Technologies.",
   "mcpServers": {
     "abox": {
       "command": "node",

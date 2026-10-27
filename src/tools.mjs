@@ -17,6 +17,9 @@ import { imageToDataUri, MAX_DATA_URI_INPUT_BYTES, MAX_DATA_URI_OUTPUT_BYTES } f
 import { convertYamlJson, formatXml, MAX_STRUCTURED_INPUT_BYTES, MAX_STRUCTURED_OUTPUT_BYTES, MAX_STRUCTURED_DEPTH, MAX_STRUCTURED_NODES } from './structured-text.mjs';
 import { generateQr, generateBarcode, MAX_CODE_SIDE, MAX_CODE_PIXELS, MAX_QR_INPUT_BYTES, MAX_BARCODE_INPUT_BYTES } from './codes.mjs';
 import { diffText, MAX_DIFF_INPUT_BYTES, MAX_DIFF_LINES, MAX_DIFF_OUTPUT_BYTES } from './text-diff.mjs';
+import { inspectGif, extractGifFrames, MAX_GIF_INPUT_BYTES, MAX_GIF_FRAMES, MAX_GIF_OUTPUTS, MAX_GIF_SIDE, MAX_GIF_PIXELS, MAX_GIF_DECODED_PIXELS, MAX_GIF_WALK_PIXELS, MAX_GIF_OUTPUT_BYTES, MAX_GIF_TOTAL_OUTPUT_BYTES } from './gif.mjs';
+import { traceImageToSvg, stackImages, MAX_TRACE_PIXELS, MAX_TRACE_SIDE, MAX_TRACE_EDGES, MAX_TRACE_CONTOURS, MAX_TRACE_OUTPUT_BYTES, MAX_STACK_IMAGES, MAX_STACK_PIXELS, MAX_STACK_SIDE } from './image-vector-stack.mjs';
+import { generatePasswords, redactImage, MAX_PASSWORD_CONFIG_BYTES, MAX_PASSWORD_OUTPUT_BYTES, MAX_PASSWORD_COUNT, MAX_REDACTION_CONFIG_BYTES, MAX_REDACTION_REGIONS, MAX_REDACTION_PIXELS, MAX_REDACTION_SIDE, MAX_REDACTION_WORK_PIXELS } from './password-redact.mjs';
 import { resizeImage, convertImage } from './image.mjs';
 import { splitPdf, mergePdf, selectPdfPages, rotatePdf, MAX_PAGES, MAX_OUTPUTS, MAX_PAGE_SELECTION_LENGTH } from './pdf.mjs';
 import { MAX_INPUT_BYTES } from './files.mjs';
@@ -199,6 +202,35 @@ const diff = z.object({
   ignore_whitespace: z.boolean().default(false), ignore_case: z.boolean().default(false),
   ignore_blank_lines: z.boolean().default(false), context_lines: z.number().int().min(0).max(100).default(3),
 }).strict();
+const gifSplit = z.object({
+  input_path: filename, output_dir: filename,
+  mode: z.enum(['composited', 'stored']).default('composited'),
+  frames: z.array(z.number().int().min(1).max(MAX_GIF_FRAMES)).min(1).max(MAX_GIF_OUTPUTS).optional()
+    .refine(items => items === undefined || new Set(items).size === items.length, { message: 'Choose each GIF frame once.' }),
+}).strict();
+const gifInspect = z.object({
+  input_path: filename, frame_offset: z.number().int().min(0).max(MAX_GIF_FRAMES - 1).default(0),
+  frame_limit: z.number().int().min(1).max(100).default(20),
+}).strict();
+const trace = z.object({
+  input_path: filename, output_path: filename,
+  threshold: z.union([z.literal('otsu'), z.number().int().min(0).max(255)]).default('otsu'),
+  invert: z.boolean().default(false),
+  detail: z.union([z.literal('auto'), z.number().min(0.1).max(10)]).default('auto'),
+  corner_angle: z.number().min(0).max(180).default(65), min_area: z.number().int().min(0).max(10000).default(2),
+  fill: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#000000'),
+}).strict();
+const stack = z.object({
+  input_paths: z.array(filename).min(2).max(MAX_STACK_IMAGES), output_path: filename,
+  method: z.enum(['average', 'median', 'sigma', 'lighten', 'darken', 'add']).default('average'),
+  format: z.enum(['png', 'jpeg']).default('png'), quality: z.number().min(0).max(1).default(0.92),
+  kappa: z.number().min(0.1).max(10).optional(), gain: z.number().min(0.1).max(16).optional(),
+}).strict().refine(args => args.kappa === undefined || args.method === 'sigma', { message: 'kappa applies only to sigma stacking.' })
+  .refine(args => args.gain === undefined || args.method === 'add', { message: 'gain applies only to additive stacking.' });
+const passwords = z.object({ output_path: filename, config_path: filename.optional().describe('Optional local UTF-8 JSON object. Common fields: mode=password or passphrase, count, password length, or passphrase words. Call capabilities for all supported configuration fields. Never place generated secrets in arguments.') }).strict();
+const redact = z.object({ input_path: filename, output_path: filename,
+  regions_path: filename.describe('Local UTF-8 JSON: {image_width, image_height, regions:[{x,y,width,height}]}. Dimensions must match decoded display pixels; whole 0-based rectangles must fit fully. Fixed black fill.'),
+}).strict();
 
 export const tools = [
   { name: 'abox_capabilities', title: 'abox.tools local capabilities', description: 'List supported local operations, limits, and installed browser availability. Does not read user files.', schema: z.object({}).strict(), run: capabilities, readOnly: true },
@@ -227,6 +259,12 @@ export const tools = [
   { name: 'abox_qr_generate', title: 'Create a local QR code', description: 'Read exact UTF-8 payload text from a local file and generate a new SVG or PNG QR code using the website encoder. No redirect or hosted QR service. Verify by decoding the generated modules; PNG also verifies rendered pixels. SVG requires no browser; PNG uses the installed local browser. Payload contents never enter the tool result. Includes a minimum four-module quiet zone.', schema: qr, run: generateQr },
   { name: 'abox_barcode_generate', title: 'Create a local barcode', description: 'Read exact payload text from a local file and create a verified SVG or PNG Code 128, EAN-13, UPC-A, EAN-8, ITF-14, ITF or Code 39 barcode. Retail check digits are computed or validated; invalid supplied digits are refused. Source-defined quiet zones and optional human-readable labels. Verification capacity can limit long inputs. PNG requires a local browser. Payload and completed digits are not returned.', schema: barcode, run: generateBarcode },
   { name: 'abox_text_diff', title: 'Compare local text files', description: 'Compare two UTF-8 files and write a new unified .diff/.patch using the website bounded Myers engine. Verify that applying the patch to the left file exactly reconstructs the right, including line endings and final newlines. Ignore options affect comparison summaries only; the exported patch always describes the original files. Large rewrites can use coarse hunks. Returns counts and paths without source lines.', schema: diff, run: diffText },
+  { name: 'abox_gif_inspect', title: 'Inspect a local GIF', description: 'Inspect bounded GIF headers, frame rectangles, timing, disposal and palette counts using the website analyzer. Does not decode or verify LZW pixels. Reports structural damage without modifying the input. Private comments, application text and palette values are excluded. Frame summaries are paginated using a zero-based offset.', schema: gifInspect, run: inspectGif, readOnly: true },
+  { name: 'abox_gif_split', title: 'Extract local GIF frames', description: 'Extract selected or all GIF frames into a new local directory of lossless PNGs with a timing manifest. Default composited mode applies preceding frames and disposal; stored mode exports individual patches. Strict decoding refuses damaged or partial frames. Verifies each PNG pixel buffer. Requires the local browser for PNG encoding; does not scale frames.', schema: gifSplit, run: extractGifFrames },
+  { name: 'abox_image_trace', title: 'Trace a local image into SVG', description: 'Trace a still JPEG, PNG or WebP into a single-color SVG path using the website mask, contour and curve engines. Best suited to logos and line art; this is a lossy shape interpretation. Supports automatic or explicit threshold, inversion and detail. Refuses overly complex traces. Writes and verifies a static path-only SVG; requires a local browser.', schema: trace, run: traceImageToSvg },
+  { name: 'abox_image_stack', title: 'Stack local images', description: 'Combine 2 to 8 equal-size opaque still JPEG, PNG or WebP images using average, median, sigma-clipped, brightest, darkest or additive stacking from the website engine. No alignment, rescaling, RAW decoding or focus stacking in this version. Writes and verifies a new PNG/JPEG. Images must already line up; requires a local browser.', schema: stack, run: stackImages },
+  { name: 'abox_password_generate', title: 'Generate passwords into a local file', description: 'Generate cryptographically random passwords or EFF-wordlist passphrases with the existing website engine. Writes secrets only to a new local .txt file; never returns secrets, secret hashes or samples. Defaults to one 24-character password. Optional bounded local JSON configuration selects supported settings. The output is plaintext; this is not a password vault.', schema: passwords, run: generatePasswords },
+  { name: 'abox_image_redact', title: 'Redact regions in a local image', description: 'Permanently replace explicitly selected image rectangles with opaque black pixels using the website redaction engine. Read expected decoded image dimensions and rectangle coordinates from a local JSON file. Accepts still JPEG, PNG or WebP and writes a flattened PNG without copying source metadata. Verifies every decoded output pixel. Does not detect sensitive content or prove the chosen regions cover it. Requires the local browser.', schema: redact, run: redactImage },
 ];
 
 export async function capabilities() {
@@ -261,6 +299,15 @@ export async function capabilities() {
       { name: 'abox_qr_generate', max_input_bytes: MAX_QR_INPUT_BYTES, formats: ['svg', 'png'], levels: ['L', 'M', 'Q', 'H'], minimum_quiet_modules: 4, max_side: MAX_CODE_SIDE, max_pixels: MAX_CODE_PIXELS, requires_browser_for: ['png'] },
       { name: 'abox_barcode_generate', max_input_bytes: MAX_BARCODE_INPUT_BYTES, formats: ['svg', 'png'], symbologies: ['code128', 'ean13', 'upca', 'ean8', 'itf14', 'itf', 'code39'], max_side: MAX_CODE_SIDE, max_pixels: MAX_CODE_PIXELS, verification_capacity_limits: true, requires_browser_for: ['png'] },
       { name: 'abox_text_diff', max_total_input_bytes: MAX_DIFF_INPUT_BYTES, max_total_lines: MAX_DIFF_LINES, max_output_bytes: MAX_DIFF_OUTPUT_BYTES, formats: ['diff', 'patch'], ignore_settings_affect_patch: false, minimality_guaranteed: false, requires_browser: false },
+      { name: 'abox_gif_inspect', max_input_bytes: MAX_GIF_INPUT_BYTES, max_frames: MAX_GIF_FRAMES, header_only: true, lzw_verified: false, returns_metadata_text: false, requires_browser: false },
+      { name: 'abox_gif_split', max_input_bytes: MAX_GIF_INPUT_BYTES, max_frames: MAX_GIF_FRAMES, max_outputs: MAX_GIF_OUTPUTS, max_side: MAX_GIF_SIDE, max_pixels: MAX_GIF_PIXELS, max_decoded_patch_pixels: MAX_GIF_DECODED_PIXELS, max_walk_pixels: MAX_GIF_WALK_PIXELS, max_output_bytes: MAX_GIF_OUTPUT_BYTES, max_total_output_bytes: MAX_GIF_TOTAL_OUTPUT_BYTES, modes: ['composited', 'stored'], output_format: 'png', requires_browser: true },
+      { name: 'abox_image_trace', input_formats: ['jpeg', 'png', 'webp'], output_format: 'svg', max_side: MAX_TRACE_SIDE, max_pixels: MAX_TRACE_PIXELS, max_edges: MAX_TRACE_EDGES, max_contours: MAX_TRACE_CONTOURS, max_output_bytes: MAX_TRACE_OUTPUT_BYTES, single_color: true, requires_browser: true },
+      { name: 'abox_image_stack', input_formats: ['jpeg', 'png', 'webp'], output_formats: ['png', 'jpeg'], max_inputs: MAX_STACK_IMAGES, max_side: MAX_STACK_SIDE, max_pixels: MAX_STACK_PIXELS, methods: ['average', 'median', 'sigma', 'lighten', 'darken', 'add'], equal_dimensions: true, opaque_inputs: true, alignment: false, raw_decode: false, requires_browser: true },
+      { name: 'abox_password_generate', modes: ['password', 'passphrase'], max_config_bytes: MAX_PASSWORD_CONFIG_BYTES, max_output_bytes: MAX_PASSWORD_OUTPUT_BYTES, default_password_length: 24, default_passphrase_words: 6, max_count: MAX_PASSWORD_COUNT, returns_secrets: false, output_format: 'plaintext', requires_browser: false,
+        configuration: { common: { mode: ['password', 'passphrase'], count: [1, MAX_PASSWORD_COUNT] },
+          password: { length: [8, 128], lowercase: true, uppercase: true, digits: true, symbols: true, symbol_set: ['full', 'safe'], avoid_lookalikes: false, require_each: true },
+          passphrase: { words: [4, 12], wordlist: ['long', 'short'], separator: ['hyphen', 'space', 'dot', 'underscore', 'none', 'digit'], capitalization: ['lower', 'title', 'upper'], add_digit: false, add_symbol: false } } },
+      { name: 'abox_image_redact', input_formats: ['jpeg', 'png', 'webp'], output_format: 'png', max_config_bytes: MAX_REDACTION_CONFIG_BYTES, max_side: MAX_REDACTION_SIDE, max_pixels: MAX_REDACTION_PIXELS, max_regions: MAX_REDACTION_REGIONS, max_rectangle_work_pixels: MAX_REDACTION_WORK_PIXELS, solid_fill_only: true, sensitive_content_detection: false, requires_browser: true },
     ],
   };
 }

@@ -1,6 +1,6 @@
 ---
 name: abox-local-files
-description: Process images and PDFs; extract PDF tables; format JSON or XML; convert YAML and JSON; compare text files; encode Base64 or image data URIs; generate QR codes and barcodes; inspect or remove image metadata; and calculate checksums locally with abox.tools.
+description: Use abox.tools to process local images, GIFs, PDFs and text files, generate codes or passwords, remove image metadata and calculate checksums while keeping file contents outside the conversation.
 ---
 
 # abox.tools local files
@@ -13,6 +13,8 @@ The publisher is Abox Technologies.
 QR and barcode payloads come from local UTF-8 files. Pass those paths directly;
 do not read secrets into the conversation, echo completed digits, or add or trim
 a final newline. Data URIs and unified patches also stay in local output files.
+Generated passwords and passphrases stay in a new local plaintext file; never
+read, quote, hash or preview those secrets in the conversation.
 
 If MCP and the CLI are absent, follow [local adapter installation](references/installation.md).
 The self-contained skill includes a Python 3.9+ installer for a verified release;
@@ -25,7 +27,7 @@ file operation unless setup was requested or already authorized.
 1. Resolve input paths and the user's requested result. Call `abox_capabilities`
    only when support or settings are unclear.
 2. Choose new output paths. Sources are preserved, and existing outputs cause an
-   error. For PDF splitting, choose a new output directory.
+   error. For PDF or GIF splitting, choose a new output directory.
 3. Call the appropriate operation below. Use defaults unless the user requested
    different settings. Ask only when a required input or page selection cannot be
    determined from the request.
@@ -197,6 +199,34 @@ file operation unless setup was requested or already authorized.
   `coarse_rewrite_detected`. The bounded engine does not guarantee a minimal
   edit script. The patch uses fixed `a`/`b` headers and is not applied to inputs.
 
+For these operations, read [GIF, tracing, stacking, redaction and password settings](references/additional-tools.md)
+only when needed:
+
+- `abox_gif_inspect`: `input_path`; optional zero-based `frame_offset` and
+  `frame_limit` (1–100, default 20). Reports headers and timings without decoding
+  LZW pixels. Check `container_complete`, `verification` and pagination.
+- `abox_gif_split`: `input_path`, new `output_dir`; optional `mode`
+  (`composited` default or `stored`) and unique 1-based `frames`. Selected frames
+  are exported in ascending source order. Link the returned `manifest_path`
+  for the complete timing and output list.
+- `abox_image_trace`: `input_path`, new `.svg` `output_path`; optional
+  threshold, detail, inversion, minimum area and fill. Produces a single-color
+  approximation for logos and line art; inspect the SVG before relying on it.
+- `abox_image_stack`: ordered `input_paths` (2–8), `output_path`; optional
+  `method` and `format`. Inputs must already align, have equal dimensions and
+  be opaque. This version performs no alignment or RAW decoding.
+- `abox_image_redact`: `input_path`, new PNG `output_path`, `regions_path`
+  pointing to local JSON with expected decoded dimensions and integer rectangles.
+  Use user-provided coordinates and dimensions or an existing local regions file.
+  Ask when these are missing; do not guess from a scaled preview or read private
+  image pixels into the conversation. The tool does not detect sensitive content.
+  Tell the user to review the saved image before sharing it.
+- `abox_password_generate`: new `.txt` `output_path`; optional `config_path`
+  to local JSON. Defaults to one random 24-character password. Passphrase mode
+  defaults to six words. Put passphrase settings in that separate configuration
+  file, rather than adding them to the MCP request. Return the output link and
+  count without viewing secrets.
+
 ## Limits and privacy
 
 Compression, resizing and conversion support JPEG, PNG, and static WebP. Metadata removal edits JPEG,
@@ -237,7 +267,8 @@ Operations are `compress-image`, `resize-image`, `convert-image`, `split-pdf`,
 `remove-exif`, `hash-file`, `compress-pdf`, `watermark-pdf`, `image-to-ico`, and
 `svg-to-image`, `image-layout`, `pdf-to-csv`, `format-json`, `base64`,
 `image-to-data-uri`, `convert-yaml-json`, `format-xml`, `generate-qr`,
-`generate-barcode`, and `diff-text`. Quote paths that contain
+`generate-barcode`, `diff-text`, `inspect-gif`, `split-gif`, `trace-image`,
+`stack-images`, `redact-image`, and `generate-passwords`. Quote paths that contain
 spaces. `<node-executable> <plugin-root>/bin/abox.mjs capabilities` lists support;
 `<node-executable> <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
 summaries rather than file bytes. Do not install dependencies during an operation

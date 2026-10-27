@@ -37,6 +37,12 @@ const seeds = [
   'tools/qr-barcode-reader/src/qr-decode.js', 'tools/qr-barcode-reader/src/linear.js',
   'tools/image-to-data-uri/src/sniff.js', 'tools/image-to-data-uri/src/encode.js',
   'tools/image-to-data-uri/src/shapes.js', 'tools/image-to-data-uri/src/metadata.js',
+  'tools/gif-analyzer/src/gif.js', 'tools/gif-analyzer/src/budget.js', 'tools/gif-analyzer/src/lzw.js',
+  'shared/js/gif-decode.js', 'shared/js/gif-compose.js',
+  'tools/split-gif/src/frames.js', 'tools/split-gif/src/working.js',
+  'tools/password-generator/src/generate.js', 'tools/password-generator/src/strength.js',
+  'tools/redact-image/src/redact.js',
+  'tools/image-to-svg/src/trace.js', 'tools/stack-images/src/stack.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
   'tools/compress-image/README.md', 'tools/resize-image/README.md',
   'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
@@ -48,6 +54,9 @@ const seeds = [
   'tools/json-formatter/README.md', 'tools/base64/README.md',
   'tools/yaml-to-json/README.md', 'tools/xml-formatter/README.md', 'tools/text-diff/README.md',
   'tools/qr-barcode/README.md', 'tools/qr-barcode-reader/README.md', 'tools/image-to-data-uri/README.md',
+  'tools/gif-analyzer/README.md', 'tools/split-gif/README.md',
+  'tools/password-generator/README.md', 'tools/redact-image/README.md',
+  'tools/image-to-svg/README.md', 'tools/stack-images/README.md',
   'LICENSE',
 ];
 

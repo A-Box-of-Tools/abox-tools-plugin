@@ -1,0 +1,944 @@
+# Image Stacker
+
+Combines a set of photographs into one. Averages them, takes their median,
+sigma-clips them, keeps the brightest or the darkest, adds them, or takes each
+part of the picture from whichever frame had it in focus. Reads camera RAW
+files without a RAW converter.
+
+This file is for somebody reading the code. What the tool is for, and what it
+claims, is on [the page itself](https://abox.tools/stack-images/).
+
+Ordinary frames use the browser decoder, including AVIF when it is supported.
+The chooser names `image/avif` and `.avif` explicitly so a missing operating
+system association does not hide those frames. AVIF does not enter the RAW
+preview reader; it is decoded as an ordinary image, and the stack is still
+written as PNG or JPEG. TIFF is not promised: there is no TIFF decoder here,
+and an operating-system association does not make a format decodable by
+`createImageBitmap`.
+
+## The two decisions that shaped everything else
+
+### 1. A RAW file is opened from its embedded JPEG preview
+
+Camera RAW sensor decoding is on the ruled-out list in
+[docs/what-can-be-built-here.md](../../docs/what-can-be-built-here.md), and it
+still is. It means an engine such as LibRaw or dcraw, with its per-vendor
+compression schemes, for one family of formats.
+
+Many camera RAW files already contain a JPEG that the camera rendered when it
+took the shot. `src/raw.js` walks directory entries, ranks the usable previews,
+and asks for one slice. It does not know the sensor image's size, so it cannot
+promise that the largest preview is full resolution. A preview below 640×480
+is refused; a missing preview is an unreadable frame.
+
+**Finding the preview and decoding it are separate reads.** The inspection
+figure counts the directory and header reads, commonly a small fraction of the
+file. The JPEG slice is then handed to the browser decoder, which reads its
+bytes too. Calling the inspection figure the total read cost would omit the
+picture being stacked, and a banded run decodes it again for each band.
+
+The pixels are the camera's white balance and picture style at eight bits a
+channel. The sensor data is never decoded. The row gives the preview's actual
+dimensions, because those are the dimensions that can reach the result.
+
+Three container shapes, one rule:
+
+| Shape | Files | Where the preview is |
+|---|---|---|
+| TIFF | CR2, NEF, ARW, DNG, ORF, PEF, SRW, RW2, NRW, 3FR, IIQ, DCR | a directory whose compression says JPEG, or the thumbnail tag pair, or Panasonic's single `JpgFromRaw` field |
+| RAF | Fujifilm | offset at byte 84, length at byte 88, both big-endian |
+| ISO-BMFF | CR3 | a track's first sample, found through `stco` and `stsz` exactly as a video frame would be |
+
+**The rule that decides, in all three cases, is the bytes and not the tag.** A
+candidate is only a candidate once it starts `FF D8 FF`. Cameras write
+directories that point at packed sensor data with a compression tag saying
+JPEG, and the alternative to checking is handing that to a decoder and
+believing whatever it reports. `tests/js/stack-images-raw.test.js` has that
+case as a fixture.
+
+### 2. The work runs in a Worker
+
+This is the first tool in this repository with one, so it is worth saying why
+it is not a precedent for the others. Every other tool here does something that
+takes a second or two. Stacking twenty large frames is minutes of solid
+arithmetic over hundreds of megabytes, and on the main thread that is a frozen
+page: no progress bar moving, a Cancel button that does not answer, and
+eventually a browser offering to kill the tab.
+
+`src/worker.js` is a shim. All of the work is in `src/pipeline.js`, which
+touches no DOM and therefore also runs on the main thread unchanged — the
+fallback for a browser without module workers, which Firefox only gained in
+114.
+
+Two things this costs, both small and both stated on the page:
+
+- `worker-src 'self'` in the tool's own `[csp]`. It is not inherited silently
+  and there is no `blob:` on it, because nothing here ever builds a script at
+  runtime.
+- Cancelling is noticed within one frame rather than instantly, because it
+  arrives as a message and the worker only returns to its event loop between
+  frames. A `SharedArrayBuffer` would be immediate and needs cross-origin
+  isolation, which breaks the advertising that pays for the site.
+
+**`OffscreenCanvas` is a hard requirement** and has no fallback, because every
+surface in the pipeline is one. A document canvas cannot go to a worker.
+
+## The files
+
+| File | What it is |
+|---|---|
+| `src/main.js` | the page: file readiness, settings, cost estimate, progress and result comparison |
+| `src/run-context.js` | phrase keys and values describing the request that made the saved image |
+| `src/worker.js` | a shim around the pipeline, and the cancel flag |
+| `src/pipeline.js` | the run — open, survey, measure, stack, encode |
+| `src/raw.js` | finding the preview inside a RAW file. Reads offsets; never a pixel |
+| `src/orient.js` | the EXIF orientation: reading it off a JPEG head, and the turn that applies it |
+| `src/plan.js` | how much memory and how many decodes, before anything runs |
+| `src/stack.js` | the seven methods, as accumulators over plain RGBA |
+| `src/align.js` | phase correlation, and log-polar for rotation and scale |
+| `src/similarity.js` | the consensus correction from nine measured windows |
+| `src/projective.js` | a validated homography when perspective explains the windows better |
+| `src/mesh.js` | bounded native affine draws for a projective warp, without a full RGBA source copy |
+| `src/fft.js` | the transform the alignment is built on |
+
+`plan.js`, `stack.js`, `align.js`, `fft.js`, `raw.js` and `orient.js` hold no
+DOM and no canvas, which is what lets them be tested without either.
+
+## Which way up a frame is
+
+A phone held upright stores its JPEG sideways and writes an EXIF orientation
+saying which way to turn it. The browser's decoder honours that tag:
+`createImageBitmap` hands back the upright picture, 3000 tall, from a file
+whose frame header says 3000 wide. So **every size the pipeline holds is the
+size the decode will actually have**, not the size the header declares.
+`declaredSize` swaps the header's numbers for the four quarter-turn values
+before anything plans from them, because everything downstream — the survey
+resize, the output box, the placement, the full-size decode — is asking what
+the bitmap will be. Before it did, three portrait frames came back as one
+landscape stack the shape of the reference forced sideways.
+
+A RAW file's embedded preview is the awkward case, because the orientation
+lives in the RAW's own IFD0, where the decoder never looks, and the preview
+JPEG usually carries no EXIF of its own. That frame arrives sideways and the
+pipeline has to turn it: `openFrame` gives it a `turn` (the IFD0 value) and a
+`decoded` size (the stored one). For the ordinary alignment path, `drawFrame`
+applies `orientationMatrix` about the box's centre with the sides swapped, as
+the innermost step of whatever alignment transform is already on the context.
+The projective mesh inverts the same orientation and placement when mapping
+each upright triangle back into the decoded bitmap. The turn is synthesised **only
+when the preview has no EXIF of its own**: when it does, the browser will
+apply that, and applying the RAW's tag as well would turn the frame twice.
+
+That decision needs the reader to distinguish three answers, which is why
+`jpegOrientation` is tri-state. It walks the head of a JPEG over the same
+segment walker `jpegSize` uses — one walker, so the two cannot disagree about
+where a preamble ends — and returns the value when an Exif APP1 says so,
+`null` when the frame header or the scan is reached without one, and
+`undefined` when the bytes ran out first. It reads IFD0 from whatever of the
+Exif block the head holds, because the tag sits in the block's first few
+dozen bytes and the maker-note behind it can run to sixty kilobytes: a 4 KB
+head that ends inside the block has almost always already passed the answer.
+`undefined` is left for the head ending inside the directory itself, or before
+a segment that might still hold the tag. It is not a failure, and a reader
+that said "none" there would turn every such preview sideways. On `undefined`
+the pipeline reads a 64 KB head of the preview — enough to reach an Exif block
+written at the front, which is where every camera puts it — once, and only on
+that path; a preview whose Exif sits behind more than that of other segments
+is treated as having none.
+
+A CR3 is the one RAW whose preview never carries Exif and whose directory is
+not at the front of the file: its IFD0 sits whole in a `CMT1` box, and
+`walkBmff` reads the orientation out of it for the same rule to apply. A RAF
+needs nothing of the kind, because the JPEG it embeds carries its own.
+
+`tests/js/stack-images-orient.test.js` pins each of the eight matrices by
+where it sends the corners, against the specification's own wording of each
+value, because a rotation the wrong way round does not throw or look wrong in
+review: it puts one frame into the stack a half turn from the rest.
+
+## Frame count, passes and working memory
+
+A running maximum, minimum, sum and mean do not need to remember earlier
+frames, and neither does focus stacking's best-so-far. Their accumulator sizes
+depend on the picture, not the frame count. Sigma clipping also uses a
+constant-sized accumulator, but it takes two passes: one to learn the mean and
+spread and a second to average the values inside the threshold.
+
+Median must hold each frame's values for the band being combined. Twenty
+24-megapixel frames at three bytes a pixel would be about 1.4 GB just for those
+values. Bands trade that storage for repeat decodes, and every method uses the
+same band machinery when its working buffers would exceed the budget. A
+one-band run is the fast path rather than a separate engine.
+
+Per pixel of a band, with the RGBA readback included but before the other
+working buffers are counted:
+
+| Method | Bytes | Stacking passes per band |
+|---|---|---|
+| Lighten / Darken | 7 | 1 |
+| Average / Add | 16 | 1 |
+| Focus | 19 | 1 |
+| Sigma clipping | 34 | 2 |
+| Median | 4 + 3 per frame | 1 |
+
+The estimate in `plan.js` follows the largest working set across inspection
+and survey, coarse alignment, stacking, readback, packing and encoding. It
+counts the current bitmap, scratch and output canvases, refinement buffers,
+focus overlap and median scratch where they are live. Auto perspective also
+reserves each retained mesh's maximum coordinate buffer plus fixed metadata;
+the mesh itself holds at most 266,256 bytes of coordinates per moving frame. Browser codec and GPU
+internals, and the timing of garbage collection, are outside that model. The
+512 MB budget therefore sizes bands; it is not a hard cap on the browser
+process's total memory.
+
+The output canvas remains full size even when the stack is banded, at four
+bytes a pixel. It comes out of the budget before choosing band height, so
+banding cannot make an arbitrarily large output cheap. A smaller working
+resolution cuts the area, and most working memory, by four for each step.
+
+The decode figure means **planned stacking decodes**: frame count multiplied by
+passes and bands. Inspection and the run's survey decode frames too. Alignment
+may crop the working box enough to need fewer bands than the preflight plan,
+so the figure is a useful plan rather than a claim about every decoder call.
+
+## The arithmetic and the result
+
+All seven methods combine decoded eight-bit RGB values. Average and sigma
+clipping use wider accumulators and round at the end, but the exported PNG or
+JPEG still has eight bits per channel. Add is additive blending of those
+values; it is not a simulation of accumulating linear sensor exposure.
+Normalizing its brightness applies a gain of `1 / frameCount` before rounding,
+which is why the page provides an exact numeric exposure rather than a slider
+whose lowest stop cannot express a long stack's reciprocal.
+
+Sigma clipping is one mean-and-spread estimate followed by one rejection pass.
+At the default two-sigma threshold, a lone outlier among four identical values
+can still be accepted. The fallback for a channel that rejected every value is
+its original mean. It does not have the median's immunity to a moving object;
+the page explains that distinction instead of promising the two methods give
+the same result.
+
+The page waits for imported batches before a run, retains an explicit record
+of skipped files, and keeps a running request's settings fixed. Alignment
+details name the frames that could not be measured, because a soft stack
+cannot tell the visitor which frame caused it.
+
+The finished result also describes the captured request: method, requested
+alignment, working resolution, exposure and encoding quality, with the sigma
+threshold or focus radius only for the method that uses it. `run-context.js`
+returns phrase keys and values, so the UI's next settings cannot describe the
+previous image and every language has its own labels.
+
+Stacking combines RGB values and always writes opaque alpha. It discards input
+transparency rather than blending the result onto a chosen background, and even
+PNG output is opaque. The page says so before a run; this photograph stacker's
+established pixel arithmetic is unchanged.
+
+The finished result prepares its reference comparison automatically. Both
+pictures are rendered in the same crop and resolution, with the reference on
+the left and the saved stack on the right. A divider reveals either image at
+the same coordinates, because switching whole pictures makes a subtle change
+in noise or sharpness hard to locate. It can be dragged by mouse or touch, or
+moved with the native range control's arrow keys. Either endpoint shows one
+whole image. The divider is available only in Fit to window. Choosing actual
+pixels removes Compare from the source menu and shows the whole stacked
+result; the reference remains available as a separate image. Returning to Fit
+restores Compare without changing the chosen image. A new stack opens its
+comparison in Fit again. At actual size, dragging with a mouse pans both axes
+and captures the pointer until release, so leaving the preview does not abandon
+the gesture. Touch and pen use native panning; touch also retains browser pinch
+gestures. The focused preview also pans with arrow keys; wheel and scrollbar
+input remain
+available. Switching views, discarding a result, losing capture or leaving the
+window ends a drag, so the next result cannot inherit a held pointer.
+
+## The alignment, and the sign
+
+**The reference is the first file in the request, and only that.** The measure
+loop takes the first frame's square as the one everything else is correlated
+against, and the stack loop takes its windows the first time it is decoded, so
+both want it before any other frame — which is what "first" buys and why the
+pipeline has no reference index to be told. Which frame that is belongs to the
+page: the list has a badge that can be moved to any row, and `main.js` puts
+that frame at the head of the request without disturbing the order on screen.
+Nothing else about the order reaches the result, because every method in
+`stack.js` combines the frames as a set.
+
+Phase correlation. Shifting a picture does not change the magnitude of its
+spectrum, only the phase, so multiplying one frame's spectrum by the conjugate
+of another's and transforming back gives a surface with a single spike at the
+offset between them. One transform each finds a two-hundred-pixel shift as
+cheaply as a two-pixel one; searching offsets is quadratic in the range and
+would be the slowest thing in the tool.
+
+It measures twice. The first pass runs on a 256-pixel square, which finds a
+two-hundred-pixel shift as cheaply as a two-pixel one — but only the *integer*
+part of the answer survives the trip back up. The sub-pixel part is estimated,
+and multiplying a 256-square answer up to 6000 across multiplies its estimation
+error by twenty-three: a twentieth of a pixel of fitting error comes back as
+more than a pixel of blur, per frame, which is exactly the softness the
+alignment exists to prevent. Measured on synthetic bursts with known shifts,
+the coarse answer alone was off by one to two output pixels per frame and the
+stack came out *worse* than a single input frame.
+
+So the answer is finished during the stack itself: when each frame's full-size
+decode is first in hand — a decode the stack was going to pay for anyway — the
+frame is correlated against the reference at output resolution and the residual
+corrects the coarse answer in place. At output resolution there is nothing to
+multiply up, so a twentieth of a pixel of error stays a twentieth of a pixel.
+The same synthetic bursts land within a quarter of a pixel per frame.
+
+**Auto perspective is the default, with similarity as its fallback.** A wide
+night sky can line up near the centre while its outer stars still streak:
+rotation of the sky through a wide field is generally projective, rather than
+one shift, angle and scale. `projective.js` uses the same nine local window
+measurements to propose an eight-parameter homography. At least six windows
+must agree and span the measured field. The fit must improve on a similarity,
+predict each inlier when that window is held out, and pass bounds on its
+corner movement, orientation and homogeneous denominator. A failed fit keeps
+the existing similarity correction and is reported as a fallback, rather than
+using the model's extra freedom to warp a noisy or moving subject.
+
+The fitted residual maps `(x-dx, y-dy)` to the reference's `(x,y)` and is
+composed on the left of the coarse similarity. That sign and order matter:
+the windows were measured after the coarse move, so applying the residual
+before it would correct a different coordinate system. Placement and EXIF
+orientation remain the innermost transform; the crop and band origin are
+subtracted only when drawing.
+
+`mesh.js` draws the resulting projective image through small native affine
+triangles. A uniform grid is doubled until a bound on every triangle's entire
+interior is at most 0.15 output pixels. The global grid is cached and reused
+for all bands and passes. Expanded destination clips and copy compositing
+keep antialiasing from opening dark cracks or adding opacity to a translucent
+PNG. Only triangles intersecting the current band are drawn, each from a
+bounded rectangle of the decoded bitmap. No full-frame RGBA source array is
+allocated. The maximum grid is 128 by 128, and a transform requiring more is
+refused before it changes the crop. Canvas sampling can still differ in the
+last bits when the same geometry is rasterized with a different band origin;
+constant opaque and translucent fields remain uniform across those edges.
+
+**Similarity refinement is a grid of nine windows, a gate on each of them, one
+consensus fit, and a ladder to fall down.** It was one window in the middle
+for a week, and one window measures a shift. Nine measure a *field*, and a
+field is what a rotation is: a frame turned a third of a degree moves the
+middle of a 6000×4000 picture by nothing at all and each of its corners by
+nineteen pixels, so the middle window reports honestly that the frame did not
+move while the corners stay as soft as no alignment would have left them.
+Measured in the browser on a synthetic burst rotated by 0.3°, shift-only
+refinement left the corners at a sharpness ratio of 0.47 against 0.48 for no
+alignment at all, where the middle reached 0.64.
+
+The grid is three windows by three over the region the frames covered under
+their coarse moves, inset from its edge. Each covers 512 output pixels and is
+drawn at half scale into a 256 square — `plan.js`'s `refineWindow` decides
+both, halving the cover on a crop too small for three of them and giving up
+below a grid of 64s, where the coarse answer simply stands. Half scale costs
+nothing in accuracy, because the residual being looked for is a pixel or two
+of output and a correlation resolves a fraction of a pixel of its own square
+either way, and it costs a quarter of the readback. Each window is drawn with
+one `drawImage` carrying a **source rectangle**, worked out by inverting the
+transform already on the context: in the browser, on a real 6000×4000 bitmap,
+the whole grid cost 12 ms a frame that way (16 ms with a sub-pixel transform)
+against 21 ms drawing the bitmap nine times over and 100 ms reading nine
+squares out of one full-size draw. The single 512 window it replaces cost 6 ms.
+The whole grid is cheaper than one decode.
+
+Every window goes through `isMeasured`, the same gate as everything else here,
+and one that reports a shift larger than a quarter of what it covers is
+dropped as well — a correlation surface wraps, and no residual of a coarse
+move is that large. In similarity mode, or as Auto's fallback, what survives
+goes to `similarity.js`: every pair of
+surviving windows is taken as a proposal, scored by how many of the others it
+explains within two output pixels, and the largest agreeing set is refitted by
+least squares. Exhaustive rather than sampled, because nine points have
+thirty-six pairs and a test can then pin the answer exactly. The browser's
+table, on 3000×2000 frames with the transform known:
+
+| scene | fitted angle | fitted scale | fit RMS | per-window `next` |
+|---|---|---|---|---|
+| texture, 0.3° | 0.2972 | 1.00005 | 0.14 px | 0.06–0.09 |
+| texture, −0.25°, scale 1.01 | −0.2504 | 1.00994 | 0.22 px | 0.06–0.09 |
+| stars 6%, 0.15° | 0.1457 | 0.99981 | 0.34 px | 0.26–0.63 |
+| low texture 15%, 0° | −0.0211 | 0.99749 | 17.6 px | 0.27–0.98 |
+| featureless gradient | 0.47–0.73 | 0.99–1.01 | 35–42 px | 0.85–0.96 |
+| two unrelated pictures | — | — | — | 0.78–0.99 |
+
+The first three are right to about five thousandths of a degree. The last three
+are not right at all, and the per-window gate is what separates them: on the
+low-texture scene exactly one window read 0.27 and the other eight 0.83–0.98,
+and on the two junk families every window failed. That is the whole design —
+gate every window, fit from the survivors, and fall back rather than guess.
+
+**The ladder, in order.** Four or more windows agreeing on one similarity is
+the answer, composed onto the coarse move about the uncropped output centre —
+the angles add, the scales multiply, and the coarse shift is turned and scaled
+by the refinement before the refinement's own shift is added. Below that, two
+windows agreeing on one shift within the same tolerance give their mean
+translation and nothing about rotation, and the move is marked `partial` —
+but only where fewer than four windows survived the gate at all, because with
+four or more in hand a consensus that came back empty has already said they
+disagree, and the two that happen to coincide are the two that sat on the same
+moving subject. Nothing is applied from either rung that would move the frame
+further than the coarse pass could plausibly have been wrong, which is a
+bound quoted in the coarse square's own pixels: nine windows unanimously
+reporting a hundred pixels is a periodic texture whose every window found the
+same wrong lattice period, not a residual. Below that the coarse move stands.
+Below *that* — a frame the coarse pass
+could not measure — the identity stands and the frame is not refined at all,
+because a residual measured from the identity is not a residual but the whole
+shift, which was just refused. Which rung a frame came off is recorded on its
+move as `refine`, so a test and the page can both see it.
+
+In **translate** mode the same consensus runs and only its translation is
+applied. Not a median of the nine windows, which is the obvious
+generalisation: a rotated burst makes the windows disagree *by design*, and
+the median of nine disagreeing shifts describes no part of the frame.
+
+What this cannot do is the honest half of it. A moving subject or a parallax
+makes the windows disagree because they are each right about a different
+thing, no single transform describes that, and the frame drops to a
+translation or to its coarse answer rather than being dragged by whichever
+window shouted loudest. The size at which that holds is the tolerance: a
+depth split that moves one column of windows two pixels or more relative to
+another drops that column, and a smaller one is absorbed into the fit as a
+fraction of a pixel of invented scale — which is inside the error the
+refinement is there to remove, so it is a limit to state rather than a
+failure to catch. And where two disjoint sets of windows are the same size —
+a subject on four of them and the background on the other four — there is no
+majority to find and the frame drops to its coarse answer rather than to a
+coin toss. The reference frame supplies the reference windows and is never
+itself refined.
+
+**Whether a peak is a peak is decided by two of four statistics — `plateau`
+and `next`, with `live` as the guard under them and `coherence` reported for
+the record — and one gate, `isMeasured`.** Every correlation returns the four
+beside the shift. `plateau` asks whether the peak has a position at all;
+`next` asks whether it is the answer or merely the tallest of several; the
+two paragraphs after this one take each in turn. `live` is the mean weight
+the whitening gave the bins, the share of the spectrum that stood above the
+noise floor at all, and is there only to catch a square whose spectrum is
+numerically empty. The gate is `plateau` at most 0.7, `next` at most 0.8 and
+`live` at least 0.004, at every window size — both floors are ratios of the
+surface to its own peak, and neither scales with the side — and the same
+function decides the log-polar peak, the translation peak and the
+refinement's residual, so there is one place to calibrate. The measurements
+it was calibrated on — identical frames, a noisy textured shift, a noisy
+low-texture shift, a noisy gradient and the same rounded to 8 bits, two
+unrelated pictures, a dense star field and a sparse one, a wall at output
+resolution, two JPEGs sharing a lattice, and a low-texture scene turned a few
+degrees for the log-polar surface — are the fixtures in
+`tests/js/stack-images-align.test.js`, with what each measured written beside
+its assertion, and the comments on `P_MAX` and `N_MAX` in `align.js` carry
+the ranges over ten seeds at every window size, with what each floor refuses
+knowingly and why.
+
+`coherence` — the peak divided by the height every weighted bin agreeing on
+one offset would have produced, 1 for a perfect match — was the gate for a
+week, at 0.15 on the 256 square scaled by the side, and it is reported now
+and not read. It did the job on every fixture family but the tool's own
+subject. A star field is sparse in the spectrum as well as in the picture: a
+few hundred points put their energy into a few hundred bins, and under the
+whitening floor every one of the thousands of noise bins still carries a
+small weight, so the denominator belongs to the noise and a perfect match of
+a sparse field reads as a poor one. In the browser, on the built refinement
+path, a field of four hundred stars at fifteen per cent noise read 0.042
+against a floor of 0.075 and was refused, its frames left 1–2.7 pixels off
+where the code without the floor refined them to under 0.3 — while two
+unrelated smooth pictures locked on their shared JPEG lattice read 0.088 and
+passed. No floor separates those two, and the z-score does not either; the
+comment on `L_MIN` in `align.js` has the browser's whole table.
+
+**`plateau` is the shape of the peak: junk that correlates perfectly well and
+still has no position.**
+A smooth gradient — a clear sky — is refused although it correlates with
+itself, and it does correlate: what the survey square holds of it is the
+slope's 8-bit banding, which matches itself at any offset along the slope.
+That is a ridge, not a peak. Its height was real — coherence 0.47–0.51 in the
+browser, three times what was then the floor, the letterbox's own edge
+pinning the other axis and lifting it — but
+its position
+is wherever the noise tipped the argmax along the ridge, and the sub-pixel fit
+is a parabola through the top of a plateau. Before this test, four frames of
+one gradient with twelve per cent noise came back measured and were moved by
+−12.9, +35.6 and −0.4 output pixels from an identity that was the truth: one
+to three alignment pixels, multiplied up, and a heavier crop for a set that
+had not moved at all. So `phaseCorrelate` also reports the highest point of
+the surface eight pixels from the peak, at every window size, in the eight
+compass directions — eight along the axes, eight times root two on the
+diagonals; a true ring at eight reads 0.05–0.15 higher on real peaks and
+would need its own floor — as a fraction of the peak, and the gate refuses
+anything over 0.7. Eight because that is where a peak has stopped placing
+anything: the refinement is looking for a residual of a pixel or two, so a
+peak still standing eight pixels out cannot say which of nine pixels the
+frame belongs at whatever its argmax says, and on the coarse square eight
+alignment pixels is already tens of output pixels. The gradients measured
+0.93–0.99 in the browser and 0.95–1.00 on the letterboxed fixture at every
+noise level tried, when the whole square was still what got tapered;
+the weakest real match, a low-texture scene at thirty per cent noise, 0.60 in
+the browser and 0.65–0.68 over ten seeds depending on the seeds; a star field
+0.03–0.10, a textured scene 0.1–0.5. The same reading refused the letterboxed
+gradient's log-polar peak (0.78, at a `next` of 0.39–0.56 that passed and a
+coherence of 0.22 that is no longer asked), which
+similarity mode had been applying as a scale of 0.95–1.01 — and that is the
+one reading the picture's box improves: on the box the pipeline builds, the
+same peak reads a plateau of 0.07–0.85 at a `next` of 0.74–1.00 and is
+refused on eighteen seeds in twenty rather than admitted on all of them — and
+the
+refinement's own version of the sky: a low-texture 512 window whose features
+are sixty pixels across measures 0.77–0.96 with its peak one to seven pixels
+off — close enough to pass for a residual — and is refused on every seed at
+both noise levels tried — nothing else would have refused it, and a radius
+that followed the
+side, sixteen at 512, read it at 0.59–0.71 and let nine seeds in ten
+through. The comment on `P_MAX` in `align.js` has the browser table and the
+fixture table side by side, and the log-polar and other-window readings. The
+fixture table is of the square as it was built before `lumaSquare` handed
+`window2d` the picture's box, and over a letterbox anchored at the top of the
+square where the pipeline centres it — a stronger edge than the real one, and
+the reason a gradient fixture over a full square measured a tenth of the
+coherence and did not reproduce the browser at all.
+
+Over the box the pipeline really builds, every one of those plateau readings
+falls, junk with real: the 8-bit gradients and skies read 0.56–0.93 where the
+whole-square taper read 0.96–1.00, the two unrelated textured pictures
+0.23–0.87 and the two unrelated low-texture ones 0.37–0.81. So this floor
+alone would now admit a sky on some seeds and `next` is what refuses it — at
+exactly the numbers the same sky reads as a *square* output, which has never
+had a letterbox and which this floor has always read that way. In the browser,
+where the sky is a photograph of one rather than a fixture, both readings fall
+under their floors at once, and that is what the coarse square's own
+uniqueness floor is for — the paragraph after next. What this floor still
+catches is what it was calibrated for: a scene that correlates and has no
+position, which at the refinement windows is the wall and the textured sky
+below.
+
+**`next` is whether the peak is alone, for the junk `plateau` cannot see.**
+It is the tallest point of the surface outside a box of ten pixels around
+the peak, as a fraction of the peak: the peak-to-sidelobe ratio, the oldest
+test of a correlation peak there is. A genuine match has one peak and the
+rest of the surface is noise; two unrelated pictures have many noise peaks
+of much the same height, and the argmax is whichever happened to be tallest;
+a lattice has a row of equal peaks. The box is ten because the plateau is
+read at eight — inside eight the shape of the peak is the other floor's
+question — and it was measured at 6, 8, 12, 16 and 20 too. A real broad peak's
+skirt is wider than the box, reaching eleven or twelve pixels, so at ten the
+reading is still partly the peak itself: that costs 0.03–0.10 against a reach
+past the skirt, and moves neither the unrelated pairs nor the star fields,
+whose next peak is far away. The browser's table at the 512 window separates
+every right answer (`next` at most 0.69) from every wrong or junk one (at
+least 0.83); on the fixtures every photograph and every dense field is under
+0.65 at every size, and the junk at 0.70–1.00 — gradients 0.76–0.99,
+unrelated pairs 0.75–0.99 at 512, two unrelated JPEGs 0.72–1.00. The floor
+is 0.8, and the case that set it is the noisy sparse sky at the survey
+square: the browser's 400-star field, shrunk twelvefold into the 256×171
+thumbnail with fifteen per cent noise averaged down with it, read 0.76 with
+the right answer in the browser and 0.63–0.89 with the right answer on every
+seed in node; 0.8 admits the browser's and six seeds in ten — about what the
+old floor admitted, at coherence 0.14–0.17 against 0.15 — where 0.75 admits
+two. It sits nearer the junk than the middle for the reason the plateau
+floor does: a coarse move refused is a frame stacked at the identity,
+unaligned by its whole shift, and a junk frame admitted was junk in the
+stack already. It is also the sparse sky and nothing else that spends this
+margin: which draw of the sky a window caught, not how much noise is on it,
+decides how near the floor a real answer lands, and over ten draws a
+twenty-star window at six per cent noise reached 0.72 and a seventeen-star
+one 0.96 — the second refused on one draw in ten although its answer was
+right. What the floor lets through, with the numbers, is in the comment on
+`N_MAX`: a seed here and there of the unrelated pairs, about one seed in ten
+of two unrelated JPEGs (eight of eighty over four qualities, worst at 50 on
+smooth content, where the lattice's nearest aliases sit inside the box and
+the pair sixteen pixels out falls with the scene's own envelope), and the one
+family the old floor caught and
+this does not — two unrelated pictures of which one has little texture,
+whose surface is a few broad bumps rather than many sharp ones (0.67–0.84 at
+512, eight seeds in ten under the floor, at a plateau of 0.43–0.70 the other
+floor does not catch either). The survey square used to refuse that pair on
+every seed of a letterboxed output, and no longer does: over the picture's box
+it reads 0.78–1.00 at 3:2 and 0.68–0.92 at 2:3, admitted on three seeds in
+twenty and fifteen, against a square output's own 0.68–0.94 and eleven. It
+now reaches the refinement from a frame of any shape, which is one family of
+the leak the window paragraph below is about.
+
+**The coarse survey square is judged against a second floor, and needs one.**
+`next` is a ratio of a surface to its own peak, so it does not scale with the
+window — but it does depend on what the window holds, and the coarse square
+holds a thumbnail. The whole frame is resized into a 256 long edge before it is
+correlated, so a photograph's noise is averaged down about twelvefold on the way
+in and its peak comes back sharper than anything the refinement sees; and since
+`lumaSquare` hands `window2d` the picture's box, the ridge that used to stand
+high away from every peak on a letterboxed output is gone. Both push this
+square's whole distribution below 0.8. In the browser, on the built survey path
+over twelve seeds a family, the real families read 0.03–0.29 over the box where
+they read 0.06–0.51 over the whole square, and the junk 0.62–1.00 where it read
+0.82–1.00 — a wider separation than the letterbox ever gave, and in the wrong
+place for a floor of 0.8: a clear 3:2 sky walked under it on eleven seeds in
+twelve and was moved by up to 38 output pixels, which is the failure this gate
+exists to prevent. So the coarse translation peak is judged against
+`N_MAX_SURVEY`, which is 0.45, and everything else keeps 0.8 — the refinement's
+windows, which are full squares at the resolution the frame was shot at, and
+the log-polar surface, which is a whole square whatever shape the output has.
+A test drives each of those through the code that decides it, because a floor
+passed as an argument is exactly the kind of thing a refactor drops.
+
+0.45 is the middle of the band the browser measured: every real family it read
+sits under 0.29 and every junk family over 0.62. Node fixtures that reproduce
+the survey path — the scene rendered twelve times the size of the picture's
+rectangle in the square, which is the ratio the pipeline's own resize has, its
+noise and its 8 bits taken there and then averaged down — narrow that band
+rather than widening it, to 0.20 against 0.577 over twenty-one seeds a family
+at three output shapes. They read the real side within about two hundredths of
+the browser and the skies *below* it, which is the conservative direction: a
+line that clears the fixtures' junk clears the browser's by more.
+
+What it costs is a sparse night sky, and no floor avoids that. Twenty to fifty
+stars left in a 256 thumbnail is the one family that spans the whole band,
+0.223–0.999 over five draws each at three shapes; the browser never measured
+one on this path, and it overlaps every junk family there is, because a sparse
+field's peak genuinely is one of several and at the survey square that is what
+a clear sky looks like too. Of 296 such pairs whose answer is right to within a
+pixel, 0.45 admits 151, 0.5 admits 199 and 0.8 admits 274 — so raising the
+floor buys them back a few at a time and never all of them, and a frame this
+floor refuses stacks at the identity and is not refined either, because a frame
+the coarse pass refused is not refined. A *dense* field, the four hundred stars
+a real night sky leaves in that thumbnail, is admitted on every seed of every
+shape with 0.16 to spare. That is a trade rather than a fix, and it leans the
+opposite way to `N_MAX` on purpose: the junk 0.8 admits is two pictures that
+share nothing, in a set that was never going to stack, where the junk 0.45
+refuses is a clear sky in a set that was perfectly good until the alignment
+invented a move for it. The comment on `N_MAX_SURVEY` in `align.js` has both
+tables, the fixture-to-browser comparison family by family, and the sweep of
+render scales the twelve came from.
+
+The log-polar surface goes through `N_MAX` and is given none of its own:
+real turns read 0.20–0.81 and all but one seed in forty are admitted,
+where the old floor refused fourteen seeds in twenty of a textured
+scene turned nine degrees at thirty per cent noise. The one refused is a
+third of a degree at thirty per cent noise, reading 0.811 — the smaller the
+turn, the nearer its peak sits to the surface's own junk peak at zero shift,
+and the two read as one crowd — and what that costs is the rotation, not the
+frame, which is still aligned by translation. A floor of 0.85 for this
+surface alone would admit it and would also admit the unrelated pairs sitting
+at 0.71–0.86 there, one of which reads a seven-degree turn between two
+pictures that share nothing; that trade was not taken. What neither floor sees
+there is the surface's own junk peak at zero shift — the structure every
+spectrum shares, its axes and its window — which a small turn of a
+low-texture scene lands on one seed in four or five and reads as no turn;
+for a turn under seven degrees the true peak is inside the box of it.
+Coherence did not see it either (the wrong angles read 0.12–0.18, the right
+ones 0.11–0.21), and the test pins one such seed as what happens.
+
+The statistic it replaced was a z-score, the peak over the surface's standard
+deviation, and it did not measure what it seemed to. After whitening every
+live bin has unit magnitude, so a perfect match peaks at *k/n* over a floor of
+about *√k/n* by Parseval, and the score was *√k* — a count of the bins that
+survived the whitening, not a measure of whether the two pictures agreed. It
+read 27 on a featureless gradient and 150 on a textured scene, the gate was set
+at 4, and no frame ever failed it: featureless frames were moved by up to nine
+pixels, with a spurious rotation in similarity mode, while the page reported
+that they had been left where they were.
+
+**A frame the gate refuses is left at the identity.** Not at the shift the
+peak reported — that is the tallest point of a featureless surface, and
+applying it is what the old gate did by never firing. The pipeline discards
+the coarse `dx`, `dy`, angle and scale, records the frame as `measured: false`
+with its four statistics, skips its refinement (a residual measured from the
+identity is not a residual but the whole shift, which was just refused), and
+`commonArea` runs over the final moves with that identity among them. The
+page's "left where they were" is then a description of what happened. The
+reference frame is always `measured: true`: it is what everything else is
+measured against. A log-polar peak the gate refuses is a smaller event: the
+frame is aligned by translation alone and `clamped` stays false, because
+"reported a rotation too large to be a burst" would be untrue of a frame that
+reported no rotation at all — `clamped` is kept for the plausibility bounds
+only.
+
+Rotation and scale come from the same trick applied twice: in log-polar
+coordinates a rotation *is* a shift along one axis and a scale *is* a shift
+along the other. That is Fourier–Mellin, and it is why the "rotation too"
+setting costs one more transform rather than a feature detector.
+
+**Everything `estimate` returns is a correction, never a measurement.** `scale`
+is what the frame must be multiplied by, not how much larger it is; `angle` is
+the turn that puts it straight, not the turn it arrived with. Mixing the two
+conventions in one object is the mistake the whole module is arranged to avoid,
+because getting it backwards does not throw, does not warn and does not look
+wrong in review — it produces a stack blurred by exactly twice the camera
+shake instead of by none of it, which reads as the alignment simply not working
+very well. `tests/js/stack-images-align.test.js` pins it against a shift the
+test itself created, exactly, with no windowing and no tolerance.
+
+Two limits, both on the page:
+
+- every correction is global: a similarity in the simpler modes, or one
+  homography in Auto perspective. A *subject* that moved is not corrected, and neither
+  is a photograph taken from a step to the left, because parallax moves near
+  things further than far ones and no single transform describes that;
+- rotation is only ever recovered within half a turn, because the magnitude
+  spectrum of a real picture is symmetric and 175° looks exactly like −5°.
+
+The coarse log-polar step stays, and it is what finds a *large* turn. Its
+square resolves about 0.7° a row, so two or three degrees comes back within
+0.03° and a third of a degree comes back as a tenth — which is why the
+refinement exists and why the coarse step is still worth its transform. The
+two answer different questions: the log-polar pass finds the turn nothing else
+could search for, and the grid measures what is left of it at output
+resolution.
+
+**Aligning means cropping, and the crop happens at the end.** A frame moved
+twenty pixels left stops covering the right-hand edge, whatever is not covered
+is transparent, and transparent reads as zero to an accumulator — so without
+the crop an averaged hand-held burst comes back with a dark border, which
+somebody would reasonably blame on the stacking. `commonArea` in `plan.js`
+returns the largest rectangle every frame still covers, taking the inner of
+each pair of corners so a rotated quad is handled conservatively, and using
+each frame's own placement box rather than the whole output so that a frame of
+another shape, letterboxed into the middle, is not credited with columns it
+never had.
+
+It is decided **after** the moves are final rather than before, which is what
+lets the refinement move a frame freely: the accumulator covers everything the
+frames covered under their *coarse* moves, every frame is refined on its first
+full-size decode — so the moves are settled by the end of the first band's
+first pass — and the output canvas is allocated at the crop's size the moment
+the crop is known, with each band's rows cut on their way out of the
+accumulator. No second canvas and no copy. The cost is that `plan.peak`'s
+canvas term is now an over-estimate of the canvas actually allocated, by the
+small amount the refinement moved things, which is the safe direction for a
+figure whose job is to keep a tab alive. Reference-window and retained mesh
+buffers are reserved separately by the plan. The accumulator is that box rather than the whole
+output box because the band arithmetic is not indifferent to the difference: a
+run planned on the full box can gain a whole band over a run planned on the
+crop, and a band is a re-read of every frame, so a five-frame stack that read
+each frame once would have read each of them twice. The old arrangement
+decided the crop first and then gave up a fixed margin on every side for the
+refinement to spend, which meant the refinement could not correct more than
+the margin allowed and the margin had to be guessed before anything was
+measured.
+
+Focus stacking gives up a little more: the accumulator has transparent ground
+inside it wherever a refined frame no longer reaches its own coarse boundary,
+`stack.js` reads transparent as a luma of zero, the Laplacian scores that as
+the strongest edge in the picture and the blur spreads it inward by its own
+radius — so the crop is inset by the radius and two more before it is cut, or
+the pixels along its edge take their colour from whichever frame happened to
+end there. That is a black fringe with a plausible explanation, which is the
+worst kind. The inset is per axis and only where there is ground beside that
+axis to catch, so a burst that drifted only downwards keeps its full width.
+`tests/js/stack-images-stack.test.js` pins how far the false edge reaches.
+
+With no alignment every transform is the identity, nothing is refined, and the
+run reports itself cropped only if frames of two shapes were letterboxed into
+one box — which is not a movement, so the page does not call it one. A set
+that overlaps in almost nothing falls back to the whole frame rather than a
+sliver: a stack with visible edges is something a person can look at and
+understand, and a postage stamp is not. That one answer is the only rectangle
+`commonArea` returns that nobody covered, so the refinement is skipped for
+such a run — a grid laid over it would put windows where a frame has nothing,
+and a half-empty window correlates confidently against a full one — and a
+focus stack of it is inset on both axes rather than neither.
+
+A rotation past 30° or a scale outside 0.8–1.25 is refused and the frame falls
+back to translation alone. That is not tidiness: two unrelated pictures still
+produce a peak somewhere, and turning that peak into a 90° rotation and
+applying it is worse than doing nothing.
+
+## Things that will bite
+
+**The whitening is regularised, and the constant is large on purpose.**
+Dividing each frequency by its magnitude is what makes phase correlation
+immune to one frame being brighter than another, and it also lifts the
+thousands of bins a photograph put nothing into — sensor noise, whose phases
+say nothing about the shift — to the same vote as a real edge. On a
+low-texture scene with fifteen per cent noise that put the coarse answer 1.3
+to 2.8 pixels off. So each bin is divided by its magnitude *plus* a floor of
+`WHITEN` times the median bin: a bin well above the floor is whitened, a bin
+below it fades in proportion to how far below it is, and the noise barely
+votes. The median rather than the mean because the mean belongs to the handful
+of low-frequency bins. The constant is 128, not the 0.1–0.3 a regularisation
+constant usually is, because the median of a noisy square *is* the noise
+floor: a small constant leaves the noise bins at nine-tenths of the weight of
+a real one, which measured as no help at all. The comment on `WHITEN` in
+`align.js` has the table; the exponent |X|^0.75 was tried as the alternative
+and was no better than full whitening. The old millionth-of-the-strongest cut
+survives only as a guard against dividing by nothing on a square whose whole
+spectrum is numerically empty: on a picture no bin is zeroed any more, it is
+faded by the floor instead. This is also why the test fixtures are value noise
+over three octaves rather than a few sinusoids: a fixture that puts nothing
+into most of its bins is all rounding error by the time it reaches the peak.
+
+**A sky correlates with itself and still cannot be aligned.** A smooth
+gradient matches itself at any offset, so what comes back is a ridge rather
+than a peak and the argmax is wherever the noise tipped it — one to three
+alignment pixels, which the multiply-up turns into tens of output pixels of
+movement on frames that had not moved. `coherence` cannot see it, because the
+content genuinely correlates; the `plateau` reading in `phaseCorrelate` — how
+much of the peak is still standing eight pixels away — can, and `isMeasured`
+refuses anything over `P_MAX`.
+
+**The letterbox used to make that worse, and hid how much.** Every 3:2 frame
+reaches the coarse square as a 256 by 171 band of picture centred over
+transparent black, and until `lumaSquare` gave `window2d` the picture's own
+box the taper faded the square's four edges and left those two inner ones
+standing: a
+hard step from picture values straight down to nothing, in the same place in
+every frame, and so the strongest thing any two frames shared however the
+camera moved. It pinned the sky's ridge across the other axis and lifted its
+coherence to 0.5, and it pulled every real low-texture answer the survey
+accepted towards itself.
+
+In the browser, on the built survey path, the coarse error fell from 1.98
+output pixels to 1.48 on a low-texture 3:2 pair, 2.64 to 1.46 on a 2:3 one and
+1.81 to 0.76 on a noisier 3:2 one, while a square output — which has no
+letterbox and therefore no rectangle — measured 0.77 either way. That is one
+pair per scene rather than a distribution, and the fixtures give the
+distribution: over ten seeds the low-texture pair lands 1.36–1.96 alignment
+pixels off at 3:2 with the whole square tapered against 0.29–1.09 with its own
+box, and 2.05–2.37 against 0.13–1.05 at 2:3, where the whole of a 2.4-pixel
+horizontal move was being read as 0.25. The fixture's ridge is stronger than a
+photograph's, so those are the shape of the effect and the browser's are its
+size.
+
+The control is the row that explains both. The same pair as a *square* output
+— nothing letterboxed, this function unchanged — lands 0.10–0.72 off, which is
+where the boxed letterboxed pairs land. The box does not make the coarse pass
+better than it was; it stops the letterbox making it worse. The comment on
+`window2d` in `align.js` has both tables and the two alternatives that were
+measured and not taken: cropping the output's middle square to fill the
+alignment square, and filling outside the box with the box's mean before
+tapering the whole square.
+
+**Taking the ridge out costs the gate, and costs it exactly what a square
+output was already paying.** The ridge was doing gate work by accident: it
+stood high away from the peak on every surface, real and junk alike, and
+`next` is a reading of exactly that — so a letterboxed output was refusing junk
+that the same scene as a square output was admitting. Over eleven junk
+families at twenty seeds each, admitted by `isMeasured` **at 0.8**, which is
+the floor the coarse square was still being judged against at that point: a 3:2
+output went from 5 in 220 to 31, a 2:3 output from 1 to 39, and a square output
+read 36 either way. The featureless sky went the same way — refused on every
+seed of every letterboxed shape before, and leaking a seed here and there at
+the rate a square output had always leaked at. Those are the counts that made
+a second floor necessary, not the counts the shipped gate has: every one of
+those eleven families is refused on every seed of every shape at 0.45.
+
+So this change does not open a hole; it gives every output shape the hole a
+square output has always had, which is the one already recorded above: the
+unrelated texture/low and low/low pairs whose surfaces are a few broad bumps
+rather than many sharp ones, left to the consensus check. Two things are worth
+being plain about. That leak is now on the shapes almost every photograph has,
+not on the rare square one. And the consensus check cannot veto a coarse move
+at all — `refineMove` can only decline to improve one — so a junk coarse peak
+that passes is applied, and what the consensus catches is the refinement's own
+nine windows. What was left of that leak is what `N_MAX_SURVEY` closed: over
+fixtures that reproduce the survey path resize and all, the unrelated pairs
+read 0.74–1.00 and the floor of 0.45 refuses every seed of every shape. The
+reason this passage once said no such floor could exist was a fixture without
+the resize in it, which leaves a real scene carrying twelve times the noise the
+pipeline has already thrown away and reads it at 0.71 — level with the junk.
+What the second floor costs instead is a sparse sky, and the comment on
+`N_MAX_SURVEY` counts it.
+
+Two things follow for anyone extending the gate. The fixtures that record how
+the floors were calibrated still window the whole square over a letterbox
+anchored at the top of it, because that is the surface those numbers were read
+from — and it is a *stronger* letterbox than the pipeline's, whose box is
+centred so that its edges sit where the square's own taper has already faded
+them. Anything measured afresh belongs on `surveyBox`, which is `placement`'s
+own rectangle imported into the tests. And the plateau radius is eight at every
+window size, not a fraction of the side: a radius of four at 128 refused the
+low-texture pair with its peak in the right place, and a radius of sixteen at
+512 kept the wall with its peak five pixels wrong. `plateauRadius` in
+`align.js` says why, and the comment on `P_MAX` has the readings at both.
+
+**The gate mostly catches a JPEG's block lattice, and where it does is not
+where it was designed to.** Every frame of a phone burst is a JPEG, and every
+JPEG carries the same 8-pixel grid, so two frames share a feature that did
+not move with the picture. Two unrelated smooth pictures both compressed
+correlate on nothing else, and `next` reads the row of equal peaks for what
+it is — 0.72–1.00 at 512 over eighty seed pairs at qualities 95, 75, 50 and
+20 — but eight of those eighty are admitted, about one in ten, worst on
+smooth content at quality 50. The leak is where the lattice puts its aliases:
+the nearest sit eight pixels from the peak, inside the ten-pixel box, so what
+is read is the pair sixteen or seventeen pixels out, and those fall away with
+the scene's own smooth envelope where the near ones stand level with the
+peak. At the survey square the letterbox used to refuse the same pairs on every
+seed — `next` 0.97–0.98 at a plateau of 0.99 — and over the picture's box they
+read 0.69–0.99 at a plateau of 0.16–0.79 and pass on two seeds in ten at 3:2
+and three at 2:3, where the same pair as a square output passes none. That is
+the widest the box's cost gets on any family measured. What is left to catch it
+is the consensus rather than either floor: at the refinement an argmax on a
+random lattice peak is one window disagreeing with the other eight.
+
+The refinement's own scenario is the same lattice between two frames of *one*
+smooth scene: the coarse move a third of a pixel short, and the residual
+landing on the lattice's alias at +3 pixels, which is small enough to look
+like a residual. Uniqueness
+cannot see that one at all, for the same reason — it reads 0.46–0.93 at
+quality 75 and 0.27–0.40 at 20, the noise beyond the lattice rather than the
+lattice. What refuses it is the plateau, by a coincidence nobody chose: its
+radius is eight because that is where a peak has stopped placing anything,
+and eight is also the block pitch, so the shoulder is read on the alias and
+spikes there — 0.71–0.96 at a radius of eight against 0.50–0.69 at six and
+0.47–0.74 at ten. At qualities 95, 75 and 50 that refuses the lock on every
+seed pair tried. Only at quality 20, where the blocking buries the alias,
+does it get through: eight of ten seed pairs, applying the alias. Textured
+content is immune (0.77–0.91, correct to 0.03 pixels), and so is the coarse
+pass — the thumbnail averages the blocks away. This is a peak of the wrong
+thing, not a weak one; full whitening landed on the same alias, so it is
+inherited rather than introduced by the gate. The tests pin both sides, so a
+plateau radius moved off eight cannot quietly hand the lock back, and
+whatever finally catches it has to say so there.
+
+**A sparse sky is refined at 512 again, and the 64 window is not gated at
+all.** Twenty stars in a 512 window at six per cent noise read `next`
+0.40–0.53 and `plateau` 0.05–0.30 and are refined to within 0.2 pixels,
+where the coherence floor refused them at 0.04 — level with junk, for the
+reason above. That range is one draw of the sky over ten noise seeds; over
+ten different draws the same window reads 0.32–0.72, and a seventeen-star
+one 0.37–0.96, so it is which stars the window caught rather than how much
+noise is on them that decides how near the floor a right answer lands. At
+fifteen per cent the same twenty stars are wrong by 10–105
+pixels and `next` refuses every seed at 0.80–0.99; the browser's own field
+keeps twenty-two stars in its window and is right at fifteen per cent, at
+0.36–0.57. Neither floor scales with the side, and at 128 both hold: the
+real pairs read 0.04–0.45 and the junk 0.67–1.00. At 64 the surface has too
+few bins for junk to read as junk — an 8-bit gradient at one per cent noise
+reads 0.41–0.70 and passes eight seeds in ten, an unrelated pair 0.63–0.97 —
+where the old floor at 0.60 refused both, and every noisy real pair with
+them. That is accepted rather than fixed, and what carries it is the
+consensus rather than a cap on any one window's correction: the refinement
+measures nine windows and applies nothing that four of them do not agree on,
+so a 64-pixel square that read junk has to be joined by three more reading the
+same junk in the same direction before any of it reaches a frame. The comment
+on `N_MAX` has the numbers at every size.
+
+**Focus stacking needs its bands to overlap.** Sharpness is measured from a
+pixel's neighbours, so a band edge scored without them draws a seam across the
+picture — invisible until somebody stacks something with a horizon in it.
+`plan.js` gives that method `radius + 1` rows of context on each side: the
+blur's radius and the Laplacian's own neighbour. `bands()` returns the read
+window separately from the written one, so the same neighbourhood is scored
+on either side of a band boundary.
+
+**The alignment square must be built from the *output* box, not from each
+frame.** Every frame is drawn into it the same way — the output box,
+letterboxed into 256 — so that one number converts a shift there into a shift
+in the output. Fitting each frame to the square separately makes that number
+different per frame, and different per axis for any frame of a different
+shape. The rectangle the window tapers is that same box — `fit` describes the
+draw and the taper, so the two cannot drift apart — and not each frame's own
+spot in it, for the same reason: it has to be identical in every frame or one
+number no longer converts a shift here into a shift there. So a frame of a
+different shape from the output keeps a hard edge of its own where its picture
+stops, which is the mixed-set cost `commonArea` is about rather than something
+every set pays.
+
+**A minimum over no frames is not white.** The accumulator starts at 255 so the
+first frame can only lower it, and reporting that starting point as an answer
+gives a white rectangle that reads as a bug rather than as no input.
+
+**The variance of identical frames is slightly negative.** Computed from a sum
+and a sum of squares it can round below zero when every value was the same,
+which is exactly what a clean stack of a static scene hits, and the square root
+of that is `NaN`.

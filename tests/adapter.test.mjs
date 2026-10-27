@@ -162,7 +162,7 @@ test('capabilities describes local operations and the input bound', async () => 
   assert.equal(result.processing, 'local');
   assert.equal(result.max_input_bytes, INPUT_LIMIT);
   assert.deepEqual(result.operations.map(operation => operation.name).sort(), [
-    'abox_barcode_generate', 'abox_base64', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf', 'abox_json_format',
+    'abox_barcode_generate', 'abox_base64', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_gif_inspect', 'abox_gif_split', 'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_redact', 'abox_image_resize', 'abox_image_stack', 'abox_image_to_ico', 'abox_image_trace', 'abox_images_to_pdf', 'abox_json_format', 'abox_password_generate',
     'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
   ]);
   assert.equal(typeof result.browser.available, 'boolean');

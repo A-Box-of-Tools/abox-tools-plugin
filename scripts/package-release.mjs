@@ -98,8 +98,8 @@ const bundledPackage = { ...project, scripts: { start: project.scripts.start, do
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(bundledPackage, null, 2)}\n`);
 const mcpb = {
   manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version: project.version,
-  description: 'Local image, PDF, QR/barcode and structured-text tools, file diffs, encodings and checksums.',
-  long_description: 'Published by Abox Technologies. Reuses abox.tools engines on local paths, with Node and dependencies included. Image processing, PDF compression, watermark rendering and QR/barcode PNG use installed Edge, Chrome or Chromium. SVG codes, structured text, file comparisons, data URIs, PDF pages/table extraction, metadata and checksums need no browser. PDF extraction performs no OCR and requires review. File contents stay local.',
+  description: 'Local image, GIF, PDF and text tools, passwords, QR/barcodes, encodings and checksums.',
+  long_description: 'Published by Abox Technologies. Reuses abox.tools engines on local paths, with Node and dependencies included. Adds GIF inspection/frame extraction, bitmap tracing, aligned image stacking, solid image redaction and password/passphrase generation. Secrets remain in new local plaintext files. Image processing, GIF PNG extraction, PDF compression, watermark rendering and QR/barcode PNG use installed Edge, Chrome or Chromium. Other operations need no browser. PDF extraction performs no OCR and requires review. File contents stay local.',
   author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
   homepage: 'https://abox.tools/',
   documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

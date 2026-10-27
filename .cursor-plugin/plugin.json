@@ -1,7 +1,7 @@
 {
   "name": "abox-tools",
   "displayName": "abox.tools",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Local image, PDF, QR/barcode, structured-text and file tools. Source installs need Node.js and one-time adapter setup.",
   "author": { "name": "Abox Technologies" },
   "publisher": "Abox Technologies",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "logo": "assets/icon.png",
   "category": "Productivity",
-  "keywords": ["local-files", "images", "pdf", "qr", "barcode", "yaml", "xml", "diff", "mcp"],
+  "keywords": ["local-files", "images", "gif", "pdf", "qr", "barcode", "yaml", "xml", "diff", "passwords", "mcp"],
   "skills": "./skills/",
   "mcpServers": "./cursor-mcp.json"
 }

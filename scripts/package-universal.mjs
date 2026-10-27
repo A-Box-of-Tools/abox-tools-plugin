@@ -23,8 +23,8 @@ exec "$root/runtime/$runtime/node" "$root/bin/abox-mcp.mjs" "$@"
 export function universalManifest(version) {
   return {
     manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version,
-    description: 'Local image, PDF, QR/barcode and structured-text tools, file diffs, encodings and checksums.',
-    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. File contents stay local. Image processing, PDF compression, watermarks and QR/barcode PNG need installed Edge, Chrome or Chromium. SVG codes, structured text, file diffs, data URIs, PDF pages/table extraction, metadata and checksums need no browser. PDF extraction performs no OCR and requires review.',
+    description: 'Local image, GIF, PDF and text tools, passwords, QR/barcodes, encodings and checksums.',
+    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. Adds GIF inspection/frame extraction, bitmap tracing, aligned image stacking, solid image redaction and password/passphrase generation. Secrets remain in new local plaintext files. Image processing, GIF PNG extraction, PDF compression, watermarks and QR/barcode PNG need installed Edge, Chrome or Chromium. Other operations need no browser. PDF extraction performs no OCR and requires review.',
     author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
     homepage: 'https://abox.tools/',
     documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

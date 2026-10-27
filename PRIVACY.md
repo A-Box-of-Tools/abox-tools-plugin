@@ -2,8 +2,8 @@
 
 Effective 27 October 2026.
 
-The abox.tools local plugin processes images, PDFs, QR/barcodes, structured text,
-file comparisons, encodings and checksums on the computer where its
+The abox.tools local plugin processes images, GIFs, PDFs, QR/barcodes, structured text,
+file comparisons, encodings and checksums, and generates passwords on the computer where its
 MCP server runs. The adapter has no hosted processing service, analytics,
 telemetry, account system, or API key. It does not upload file contents to
 abox.tools or another processing service.
@@ -14,6 +14,9 @@ The agent supplies absolute input and output paths and operation settings. The
 adapter reads the selected local file, processes its bytes in memory, and writes
 new local outputs. It refuses to overwrite existing outputs. A large PDF split
 also creates a local manifest listing the output files and source page numbers.
+GIF frame extraction creates a local timing manifest. Password generation
+writes plaintext secrets only to the selected new local file. It does not
+register accounts, change credentials or keep a password history.
 
 The MCP response contains paths, operation settings and results such as file
 sizes, page counts, image dimensions, metadata inventory counts, checksum digests,
@@ -34,6 +37,15 @@ contain that payload. Unified text patches and image embeddings are written only
 to local output files. Image data URIs preserve source bytes and metadata, including
 SVG markup; encoding does not sanitize or anonymize the embedded image.
 Compression does not require visiting the abox.tools site.
+Generated passwords, passphrases, their hashes and samples are excluded from
+tool results. Optional password configuration and image redaction rectangles
+are read from bounded local JSON files. Rectangle coordinates are not returned
+in tool results. The agent still receives their file paths. Redaction replaces
+the specified pixels in a new flattened PNG; it does not locate sensitive
+content or verify that the chosen rectangles cover everything private.
+GIF inspection returns header summaries without comment/application contents,
+and explicitly does not verify compressed pixels. Image stacking and tracing
+return counts and geometry without source pixels or SVG path data.
 The plugin does not download a browser or processing dependencies during an
 operation.
 

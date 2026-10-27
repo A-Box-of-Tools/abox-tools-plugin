@@ -42,6 +42,18 @@
     "tools/image-to-data-uri/src/encode.js",
     "tools/image-to-data-uri/src/shapes.js",
     "tools/image-to-data-uri/src/metadata.js",
+    "tools/gif-analyzer/src/gif.js",
+    "tools/gif-analyzer/src/budget.js",
+    "tools/gif-analyzer/src/lzw.js",
+    "shared/js/gif-decode.js",
+    "shared/js/gif-compose.js",
+    "tools/split-gif/src/frames.js",
+    "tools/split-gif/src/working.js",
+    "tools/password-generator/src/generate.js",
+    "tools/password-generator/src/strength.js",
+    "tools/redact-image/src/redact.js",
+    "tools/image-to-svg/src/trace.js",
+    "tools/stack-images/src/stack.js",
     "shared/js/pdf-reader.js",
     "shared/js/pdf-writer.js",
     "shared/js/example-pdf.js"
@@ -80,6 +92,21 @@
     {
       "path": "shared/js/gf256.js",
       "sha256": "2e676935c8bd3a5025271ed186a3c95bbe265f689e90cd2ab76b043d21764034",
+      "generated": false
+    },
+    {
+      "path": "shared/js/gif-compose.js",
+      "sha256": "3d82a692838ee2397e66d61329af69280a9387eb10208e08f4589d71fec8da9a",
+      "generated": false
+    },
+    {
+      "path": "shared/js/gif-decode.js",
+      "sha256": "1ca2dd5b97cd03f2aaa132d6ef812c410fb68af0ef2589473f4425eeeacc2793",
+      "generated": false
+    },
+    {
+      "path": "shared/js/gif-working-budget.js",
+      "sha256": "0f5224ac57eb4e6365cab76566128132428f6e8d87ea307f6738e19e26c7961d",
       "generated": false
     },
     {
@@ -363,6 +390,36 @@
       "generated": false
     },
     {
+      "path": "tools/gif-analyzer/README.md",
+      "sha256": "c5b8ae1281bc259884edbd238479c7f685de1caa56c3ea1d9759a39620b9ce1f",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-analyzer/src/analysis-steps.js",
+      "sha256": "db3d61d71814a2f306d1fb146912c508ad88d879194b536c592bf2243526d34e",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-analyzer/src/budget.js",
+      "sha256": "6fc0433eaecbced81f0ee76b0a99c1a8bf41a90d05780a8d263b433e43c03361",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-analyzer/src/gif.js",
+      "sha256": "19eecf760b9c9d1d7c1a02635b3adf639b0d865cd664750f3a439ac600eb57d4",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-analyzer/src/lzw.js",
+      "sha256": "b36277acc9a3dadf9c1f6514e87d6525d03237ff4130f62f7c738fcbcf209e11",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-analyzer/src/reader.js",
+      "sha256": "66df069ffef45767a453af59d6755b6c04a90f440a7a3dfd773f677c596f780f",
+      "generated": false
+    },
+    {
       "path": "tools/hash-checksum/README.md",
       "sha256": "f8ab3081c8daf733f2f452f723daa3e421af6431126b371330ad2a8f0342a0e6",
       "generated": false
@@ -473,6 +530,31 @@
       "generated": false
     },
     {
+      "path": "tools/image-to-svg/README.md",
+      "sha256": "500cdd9aa149209fa1b012e1f55cc160ba47b36400f77231b1fe0940a5728e3a",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-svg/src/contour.js",
+      "sha256": "eadcf25413d943cddfef5dda59bd7cb9869fc0d8c1ca8766b191e2ff913254d8",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-svg/src/fit.js",
+      "sha256": "27493d05ed9e9c86cd48d5c2f113fa54e51f2fbec4beabd526e7561c3d591e14",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-svg/src/mask.js",
+      "sha256": "ef9219ee4dcce0a805a4281acd2115e115de05297d19cf1fedf4836d1b1d7771",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-svg/src/trace.js",
+      "sha256": "7690c2aad9d36f387d9c4f51bf9f4ef825e10d3e68b76aee4a7891fd8434260c",
+      "generated": false
+    },
+    {
       "path": "tools/images-to-pdf/README.md",
       "sha256": "5b8a8ac67545f448a237adc71126ebe27ab7267349a8402a279a647e2eb8bea1",
       "generated": false
@@ -556,6 +638,31 @@
       "path": "tools/merge-pdf/src/shared/pdf-pages.js",
       "sha256": "f9035288281a6a042fdc40b4c09a415ec1aa44c07451dfd697c898ee37d3db03",
       "generated": true
+    },
+    {
+      "path": "tools/password-generator/README.md",
+      "sha256": "d3860f09e2f08e1a949360594dbbe90c351c028841819dd07f200a8a23b98c76",
+      "generated": false
+    },
+    {
+      "path": "tools/password-generator/src/generate.js",
+      "sha256": "148006d68fba4ff9f86c43fe7a122d3bb831882a18b3a6372d1c1a66e6a6fec4",
+      "generated": false
+    },
+    {
+      "path": "tools/password-generator/src/random.js",
+      "sha256": "ae96fa6fc7e4569642df381e366c04c2bb53c8b1e866bee705b709e973904c7a",
+      "generated": false
+    },
+    {
+      "path": "tools/password-generator/src/strength.js",
+      "sha256": "cabe0d4f36924fe76ddb3c2e96be727d2461284afb851cacaaeafe2a9b7c5d26",
+      "generated": false
+    },
+    {
+      "path": "tools/password-generator/src/wordlist.js",
+      "sha256": "4a7c53b3df16f60f55f542306140c9273e041cfe90d990287d6827eb704d9b5c",
+      "generated": false
     },
     {
       "path": "tools/pdf-to-csv/README.md",
@@ -663,6 +770,21 @@
       "generated": false
     },
     {
+      "path": "tools/redact-image/README.md",
+      "sha256": "2f4d3b5d59940d583530e76259b2cc6facda100243a96ba5cce0c0f757b0ded8",
+      "generated": false
+    },
+    {
+      "path": "tools/redact-image/src/redact.js",
+      "sha256": "6671b3a4dc5d778a680e463b256093e08f0bc210fd9259e737b5135472fa6b35",
+      "generated": false
+    },
+    {
+      "path": "tools/redact-image/src/regions.js",
+      "sha256": "c448296b20fafbe6b34f4c5af5bf1af538b457316bbeeb5b9709f8b5056693bf",
+      "generated": false
+    },
+    {
       "path": "tools/resize-image/README.md",
       "sha256": "cfcb4a03023e110bc77a1c217eed3d0ac181e5700c70f81f431fb2327fffdd26",
       "generated": false
@@ -696,6 +818,46 @@
       "path": "tools/resize-image/src/shared/phrases.js",
       "sha256": "d77233a07d95379a1e3092fa81c90c1c376a8b59737a0e178de4630deaaa14a1",
       "generated": true
+    },
+    {
+      "path": "tools/split-gif/README.md",
+      "sha256": "0ed3fae89a48d571c927c218cd2289acc5d5bc9312ec6227ead2d82b86aed852",
+      "generated": false
+    },
+    {
+      "path": "tools/split-gif/src/frames.js",
+      "sha256": "a55e9b5f044aed24551aec66da028decaa186d44dacbf9442e0455814e666d19",
+      "generated": false
+    },
+    {
+      "path": "tools/split-gif/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/split-gif/src/shared/format.js",
+      "sha256": "ff41f0695cafa1fdca9e50e120ab8eea0d8600bba2272a598b9f16a16464ae92",
+      "generated": true
+    },
+    {
+      "path": "tools/split-gif/src/shared/gif-working-budget.js",
+      "sha256": "ea8b8f2122379036e7ec8e55624a89e24982c9b8d1b4e58679e92f40b99945fd",
+      "generated": true
+    },
+    {
+      "path": "tools/split-gif/src/working.js",
+      "sha256": "f2ea98f9878e2002ea544ca227ee565ded870e1661cc4b78d50dc3c81939ce46",
+      "generated": false
+    },
+    {
+      "path": "tools/stack-images/README.md",
+      "sha256": "a445ce30402152671704b0442973b7a5f6587dbde11f1e617be1c9dbce0a83d4",
+      "generated": false
+    },
+    {
+      "path": "tools/stack-images/src/stack.js",
+      "sha256": "9518caad2f692623a3c481f6c3e416341cc76bcf1e92815e7395ea279da0059a",
+      "generated": false
     },
     {
       "path": "tools/svg-to-image/README.md",

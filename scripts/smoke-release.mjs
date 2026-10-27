@@ -19,8 +19,8 @@ import { PdfWriter } from '../vendor/abox/shared/js/pdf-page-writer.js';
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
-  'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
-  'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf', 'abox_json_format',
+  'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_gif_inspect', 'abox_gif_split',
+  'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_redact', 'abox_image_resize', 'abox_image_stack', 'abox_image_to_ico', 'abox_image_trace', 'abox_images_to_pdf', 'abox_json_format', 'abox_password_generate',
   'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
 ];
 const expectedPublisher = 'Abox Technologies';
@@ -748,6 +748,50 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.ok(patch.startsWith('--- a\n+++ b\n'));
     assert.ok(patch.includes('-old\n\\ No newline at end of file\n+new\n'));
     assert.deepEqual(await readFile(leftPath), leftBytes); assert.deepEqual(await readFile(rightPath), rightBytes);
+
+    const gifPath = path.join(workspace, 'local animation.gif');
+    // Independent clear/literal/end LZW codes, with one opaque black pixel.
+    const gifBytes = Buffer.from('47494638396101000100800000000000ffffff21f90404010000002c00000000010001000002024401003b', 'hex');
+    await writeFile(gifPath, gifBytes);
+    const gifInfo = await call(client, 'abox_gif_inspect', { input_path: gifPath });
+    assert.equal(gifInfo.container_complete, true); assert.equal(gifInfo.frame_count, 1);
+    assert.equal(gifInfo.header_only, true); assert.equal(gifInfo.verified, false);
+    const gifFrames = await call(client, 'abox_gif_split', { input_path: gifPath, output_dir: path.join(workspace, 'extracted frames') });
+    assert.equal(gifFrames.verified, true); assert.equal(gifFrames.output_count, 1);
+    const gifManifest = JSON.parse(await readFile(gifFrames.manifest_path, 'utf8'));
+    assert.equal(gifManifest.outputs.length, 1); assert.equal(gifManifest.outputs[0].delay_cs, 1);
+    const frameHeader = pngChunks(await readFile(gifManifest.outputs[0].output_path)).find(chunk => chunk.type === 'IHDR').data;
+    assert.equal(frameHeader.readUInt32BE(0), 1); assert.equal(frameHeader.readUInt32BE(4), 1);
+    assert.deepEqual(await readFile(gifPath), gifBytes);
+
+    const tracedPath = path.join(workspace, 'traced shape.svg');
+    const traced = await call(client, 'abox_image_trace', { input_path: vectorPath, output_path: tracedPath, threshold: 128 });
+    assert.equal(traced.verified, true); assert.equal(traced.width, 80); assert.equal(traced.height, 40);
+    assert.ok(traced.verification.passive_single_path); assert.ok(traced.contours > 0);
+    assert.ok((await readFile(tracedPath, 'utf8')).includes('<path '));
+
+    const stackPath = path.join(workspace, 'averaged local images.png');
+    const stacked = await call(client, 'abox_image_stack', { input_paths: [imageInput, imageInput], output_path: stackPath });
+    assert.equal(stacked.verified, true); assert.equal(stacked.image_count, 2);
+    assert.equal(stacked.width, 256); assert.equal(stacked.height, 256);
+    assert.equal(stacked.verification.png_pixel_checks, 256 * 256);
+
+    const regionsPath = path.join(workspace, 'redaction regions.json');
+    await writeFile(regionsPath, JSON.stringify({ image_width: 256, image_height: 256, regions: [{ x: 2, y: 2, width: 4, height: 4 }] }));
+    const redactedPath = path.join(workspace, 'redacted local image.png');
+    const redacted = await call(client, 'abox_image_redact', { input_path: imageInput, output_path: redactedPath, regions_path: regionsPath });
+    assert.equal(redacted.verified, true); assert.equal(redacted.redacted_pixels, 16);
+    assert.equal(redacted.redaction, 'opaque-black-fill'); assert.equal(redacted.source_metadata_copied, false);
+    assert.equal(redacted.verification.all_pixels_checked, 256 * 256);
+    assert.ok(!pngChunks(await readFile(redactedPath)).some(chunk => chunk.type === 'tEXt'));
+
+    const secretsPath = path.join(workspace, 'generated secrets.txt');
+    const generated = await call(client, 'abox_password_generate', { output_path: secretsPath });
+    assert.equal(generated.verified, true); assert.equal(generated.count, 1); assert.equal(generated.length, 24);
+    const generatedBytes = await readFile(secretsPath);
+    assert.equal(generatedBytes.length, 25); assert.equal(generatedBytes.at(-1), 10);
+    assert.ok(!JSON.stringify(generated).includes(generatedBytes.toString('utf8').trim()));
+    generatedBytes.fill(0);
     assert.equal(hash(await readFile(imageInput)), hash(png));
     assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));
