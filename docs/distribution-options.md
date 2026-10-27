@@ -114,3 +114,16 @@ do not describe the application as accepted or pending review.
 - **mcp.so** currently advertises a $39 one-time fee on its
   [submission form](https://mcp.so/submit?type=server). Free discovery and local
   installation routes take priority. No payment or submission was made.
+- **PulseMCP** currently says **submissions and changes are temporarily paused**
+  on its [submission page](https://www.pulsemcp.com/submit), verified directly
+  in the browser on 27 October 2026. The notice is dated 3 September 2026 and
+  gives no reopening date. It recommends the Official MCP Registry and says
+  it will pick up those entries after reopening. This project already publishes
+  there; no separate submission was possible or confirmed.
+- **LobeHub** directs publishers to CLI self-service with Node 22+, LobeHub
+  sign-in, a GitHub connection and repository ownership or push access. Its
+  [maintainer instructions](https://github.com/lobehub/lobehub/issues/17492)
+  link to the [publisher guide](https://lobehub.com/publish-mcp/skill.md),
+  which returned HTTP 403 during research. Current fees, license conditions
+  and the exact GitHub grant were not established. No CLI login, GitHub access
+  grant or submission was made, and an existing abox listing was not confirmed.

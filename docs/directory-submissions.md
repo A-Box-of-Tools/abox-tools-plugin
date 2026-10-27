@@ -98,8 +98,11 @@ installation or replace that recording.
 
 ## Submission status and access
 
-Checked 26 October 2026: version 0.5.0 is active in the Official MCP Registry,
-identifying Abox Technologies as publisher. Claude's form confirmed the
+Checked 27 October 2026: [version 0.6.0 is active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0),
+identifying Abox Technologies as publisher. The [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529057381)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529056329)
+record the nineteen-operation release from [bac1981](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/bac19813156d93b18b27b8083f8fe85711889252).
+Claude's form confirmed the
 publisher correction and the 0.3.0 review download link; directory review remains
 pending. Its original 0.2.1 attachment cannot be replaced through response
 editing, so the updated feedback directs reviewers to the current public MCPB.
@@ -107,12 +110,21 @@ Version 0.2.1 is installed and Running in Claude Desktop on Windows. OpenAI
 remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Gemini's normal public-release installation and all four platform
-archives are verified; a gallery listing is unconfirmed after adding its discovery
+is public. Gemini's normal public-release installation was verified for v0.6.0;
+version 0.6.0's four platform archives and offline skill setup are checked in CI.
+The shared skill's real v0.6.0 GitHub release download and integrity verification
+also passed on Windows on 27 October 2026 in an isolated directory.
+A gallery listing is unconfirmed after adding its discovery
 topic. Cursor's native installation link and source launcher are tested. Its
 Marketplace application was submitted on 26 October 2026 for Abox Technologies
 with the accepted `abox-tools` handle. Cursor acknowledged receipt; review is
 pending and no live Marketplace listing is confirmed.
+
+The native bundle also includes a VS Code installation link. Its decoded
+configuration and local MCP connection are tested; desktop installation in VS
+Code remains unverified. The authorized AgentSkillsDir submission attempt was
+not accepted: the backend reported “Resource submissions are currently closed”.
+Smithery publication remains a follow-up for the publisher.
 
 The Official MCP Registry workflow publishes metadata only after the release is
 public and its universal MCPB has passed all four native smoke checks. A

@@ -9,7 +9,7 @@ image metadata; and calculate file checksums with the existing
 output paths and short JSON results. File bytes stay on your computer.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.5.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 

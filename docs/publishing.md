@@ -6,12 +6,12 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.5.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.5.0),
-with **Abox Technologies** as publisher. All fifteen operations passed native and
+Version 0.6.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0),
+with **Abox Technologies** as publisher. All nineteen operations passed native and
 universal package checks on all four platforms. Gemini CLI installation, skill
 discovery and offline standalone adapter setup also passed on all four platforms.
-The public Gemini release install command and the skill's actual GitHub download
-were verified on Windows after publication. The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
+The public Gemini release installation route and the skill's actual GitHub download
+were verified on Windows for v0.6.0 on 27 October 2026. The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is live; Gemini's gallery crawler is enabled, with gallery listing unconfirmed. The initial 0.2.1 universal MCPB
 was installed in Claude Desktop on Windows, where its server reported Running.
 The Claude desktop extension form confirmed the publisher correction and current
@@ -21,6 +21,20 @@ reviewers to the current public MCPB download. OpenAI directory submission remai
 pending the publisher's local-MCP partner approval. Other distribution routes
 are documented in [Platform support and publishing](platforms.md).
 
+The released source is [bac1981](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/bac19813156d93b18b27b8083f8fe85711889252).
+The [v0.6.0 release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529057381)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529056329)
+record the publication checks. Before publication, local validation passed 75
+core checks and 31 browser checks. The extracted
+native package exposed 20 MCP tools, including capabilities and all 19 file
+operations; local Gemini installation and offline standalone setup also passed.
+
+Version 0.6.0 adds the native bundle's VS Code installation link. URI decoding
+and a real MCP connection verify its configuration; installation through VS
+Code's desktop interface remains unverified. On 27 October 2026, AgentSkillsDir did not accept the
+authorized submission attempt because resource submissions were closed.
+Smithery remains a follow-up for the publisher.
+
 After publication, `npm run smoke:gemini -- --from-release` verifies the exact
 public Gemini installation route in a disposable profile. `npm run smoke:skills`
 checks the public shared-skill installation in an isolated project. Neither
@@ -29,6 +43,7 @@ changes the user's agent settings or processes private sample files.
 | Route | What it distributes | Next step |
 | --- | --- | --- |
 | GitHub Release + local marketplace | Full Codex plugin, skill, local adapter, runtime, dependencies | Share the release ZIP; users open `START-HERE.html` and install through the app. |
+| Native Cursor / VS Code installation links | Local MCP tools using the extracted bundle's runtime | Select the app in `START-HERE.html`, review its configuration, and keep the folder in place. Shared skills are installed separately. |
 | OpenAI public directory | Reviewed desktop plugin in ChatGPT/Codex | Confirm local-MCP submission eligibility, then submit the package. |
 | Claude desktop extensions | Local MCP tools through `.mcpb` | Submit the universal MCPB using the prepared directory materials. |
 | Official MCP Registry | Discoverable metadata pointing to the universal local MCPB | Tagged releases publish verified metadata automatically through GitHub Actions OIDC. |
