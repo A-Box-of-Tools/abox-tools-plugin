@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.8.0",
-  "description": "Local image, GIF, PDF, QR/barcode and text tools, password generation, encodings and checksums.",
+  "version": "0.9.0",
+  "description": "Local image, PDF, audio, video and OCR tools, codes, text, passwords and checksums.",
   "author": {
     "name": "Abox Technologies",
     "url": "https://abox.tools/"

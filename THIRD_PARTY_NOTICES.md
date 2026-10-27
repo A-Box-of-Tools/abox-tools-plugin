@@ -3,7 +3,7 @@
 The processing engines under `vendor/abox/` come from
 [A Box of Tools](https://github.com/A-Box-of-Tools/website), Copyright (c) 2026
 A Box of Tools, under the MIT license included at `vendor/abox/LICENSE`, except
-for the passphrase wordlists described below.
+for the separately licensed wordlists, artwork and OCR components described below.
 `vendor/abox/provenance.json` records the exact source commit and SHA-256 of
 every copied file. The source modules are unchanged. Small generated re-export
 modules resolve the website build's `./shared/` imports to one shared copy.
@@ -18,6 +18,22 @@ offers its original material under [Creative Commons Attribution 4.0 Internation
 The unchanged upstream header also records the earlier CC BY 3.0 US attribution.
 The wordlists are not covered by this repository's MIT license. No EFF
 endorsement is implied.
+
+Height charts reuse the website's public-domain/CC0 people artwork by pitr,
+Madeleine Price Ball, Ryan Kissinger/NIAID and OpenClipart-Vectors. The source
+credits and modification notes are preserved in
+`vendor/abox/tools/compare-heights/vendor/LICENSE.md`. The imported object-art
+module also carries Phosphor Icons (MIT) and Google Material Symbols
+(Apache 2.0), even when only people or a plain rectangle are selected. Its
+credits and complete notices ship under
+`vendor/abox/tools/compare-heights/vendor/objects/`.
+
+Receipt OCR reuses the website's pinned Tesseract.js 6.0.1 worker,
+Tesseract.js-core 6.0.0 LSTM WebAssembly and English language data, under
+Apache 2.0. Exact source archives, hashes, the website's offline binary/model
+wrappers, licenses and component notices are preserved under
+`vendor/abox/tools/receipt-invoice-extractor/vendor/`. No engine or language
+data is downloaded while a receipt is processed.
 
 The adapter uses the official Model Context Protocol TypeScript SDK, Zod, and
 Playwright Core. Their licenses and exact versions travel with installed npm

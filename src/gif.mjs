@@ -104,6 +104,10 @@ async function analyzeWorker(bytes, options, verifyLzw = false) {
   });
 }
 
+// Conversion callers may admit stricter geometry from headers before asking
+// the same isolated worker to validate every compressed frame through EOI.
+export const analyzeGifInput = (bytes, options = {}) => analyzeWorker(bytes, options, options.verify_lzw !== false);
+
 export async function inspectGif(args, options = {}) {
   options.signal?.throwIfAborted();
   const offset = args.frame_offset ?? 0, limit = args.frame_limit ?? 20;

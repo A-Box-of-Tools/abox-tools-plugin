@@ -1,0 +1,368 @@
+# ID Photo Maker
+
+Live at **[abox.tools/id-photo/](https://abox.tools/id-photo/)**.
+
+Pick a country and a document, and this crops a photograph to that country's
+published rule: the print size in millimetres, the head-height band, the eye
+line, the background colour, the DPI floor, and the pixel and file-size limits
+its web form enforces. It writes three files — a print, a sheet to cut up, and
+an upload — and it does all of it in the browser, on the visitor's own machine.
+
+Nothing is uploaded, which matters more here than on most of these tools: the
+file is a photograph of somebody's face, and what they are about to do with it
+names the country whose document they are applying for.
+
+---
+
+AVIF photographs are decoded by the browser alongside the other image inputs.
+The chooser names both `image/avif` and `.avif`, and the extension fallback
+also accepts an AVIF that the operating system labelled with a generic MIME
+type. The file must still decode successfully. Print, sheet and portal outputs
+keep their existing JPEG path.
+
+## What the job actually is
+
+Almost every "passport photo" tool is a crop box with a fixed aspect ratio. That
+gets the *shape* right and misses the two things a passport office measures:
+
+1. **How much of the frame the head fills**, chin to crown. Usually 70–80 % of
+   the height — but the UK wants 29–34 mm of a 45 mm frame, which is 64–76 %, so
+   a photo cropped to the ICAO rule is refused there for having too large a head.
+2. **Where the eye line falls**, measured up from the bottom edge.
+
+And then a third thing that is not geometry at all: the file the web form will
+accept. Indian examination portals want 200 × 230 pixels and **20–50 KB**. That
+is a floor as well as a ceiling, and a floor cannot be met by compressing less
+once the encoder has run out of less.
+
+So there are three separate problems here, and each has its own module.
+
+---
+
+## The files
+
+| File | What it holds |
+|---|---|
+| `src/specs.js` | The rulebook. Every country's published figures. |
+| `src/sources.js` | Where each of them came from, and what the country and the document are called in their own language. |
+| `src/detect.js` | Where the four points come from: an outline against the wall, and the dark patches where eyes are. No model. |
+| `src/geometry.js` | The arithmetic: four marked points in, one crop rectangle out, and every measurement back again. |
+| `src/sheet.js` | The 4 × 6 layout: how many copies fit, where they go, and where the cut marks go. |
+| `src/background.js` | Colour and evenness, in CIE Lab. Also the signature check, which is a different question. |
+| `src/jpeg.js` | The two byte-level header edits a canvas cannot make: the print resolution, and the padding. |
+| `src/encode.js` | Canvas drawing, and the search that lands a file inside a KB band at both ends. |
+| `src/cropper.js` | The crop box and the overlay drawn inside it. |
+| `src/combo.js` | The country chooser: one box that is typed into and the list it narrows. Its header says why it is not a `<select>` with a search box over it, which it used to be. |
+| `src/marks.js` | The four dots on the face: placing them, and dragging them. |
+| `src/files.js` | Names, and the sentences the page reads out. |
+| `src/main.js` | The wiring, and nothing else. |
+| `landing/emit.mjs` | Writes `landing/pages.json` from the rulebook: every rule that gets a page of its own, and the figures that page prints. |
+| `landing/pages.json` | What it wrote. Generated, committed, and read by the build. |
+
+`geometry.js`, `sheet.js`, `background.js`, `jpeg.js`, `specs.js` and `files.js`
+are pure functions on numbers and byte arrays, which is why
+`tests/js/id-photo.test.js` can cover them properly. What is left in the canvas
+code is one `drawImage` and one `toBlob`.
+
+---
+
+## Four decisions worth not re-deriving
+
+### The published figure is what is written down
+
+The rulebook stores head height and eye position as **millimetres**, exactly as
+the authority publishes them, and derives the fractions the crop arithmetic
+needs:
+
+```js
+head: mmBand(29, 34, 45),   // 29-34 mm of a 45 mm frame
+```
+
+A reader checking that line against gov.uk is comparing two numbers, not doing
+arithmetic. A test asserts that the millimetres and the derived fractions still
+agree, because a transcription error is the one bug in this tool that no amount
+of correct code would catch — and the failure mode is a letter six weeks later,
+not an exception.
+
+Every cited entry also carries `source.authority`, `source.document`, an HTTPS
+`source.url` and `source.checked`. The page links the citation to the official
+publication and prints the date the figures were read. Adding or repairing a
+URL does not move that date: finding the publication again is not a recheck of
+every number. Move it when the transcribed facts or attribution are rechecked.
+Governments change these. A
+tool that quietly applies a rule from three years ago is worse than one that
+admits it is a transcription and says when it was made.
+
+A preferred pixel size is stored with `digital.advisory: true`. The exporter
+still writes that preset, but the chooser, facts and landing metadata mark it
+as guidance. The byte limits remain requirements. A note names the distinction
+and directs the applicant to their current form or examination notice.
+
+### The four points are found, and there is still no face model
+
+Four points — crown, chin, both pupils — are enough to place the box exactly. A
+crop of a fixed shape has two degrees of freedom that matter: how tall it is,
+which fixes the head height, and where its top edge sits, which fixes the eye
+line. One each.
+
+The first version of this tool asked you to drag all four, and the reason was
+never that finding them is hard. It was that finding them the usual way means
+shipping a model: weights to download, an inference runtime to run them in, and
+a failure mode that is uneven — published detectors are measurably worse on some
+faces than on others, and the people whose photographs already get rejected most
+often are the ones a bad one lets down. The browser's own `FaceDetector` had a
+second problem on top of that: it exists in one browser behind a flag, which is
+not a feature, it is a difference in how well the site works depending on what
+you opened it in.
+
+`src/detect.js` does it without either, by using something a general detector is
+not allowed to assume and this tool is: every specification in `specs.js` demands
+the same scene — one person, facing the camera, against a plain evenly-lit wall.
+
+* **the crown** comes from the wall. The colour of the border of the picture is
+  read, everything that is not that colour is the person, the highest
+  substantial run of it is the head, and the top of that is the crown, hair
+  included — which is the point people most often get wrong by hand, because
+  they mark the hairline;
+* **the eyes** come from contrast inside the face, never from skin colour. What
+  is scored is how much darker a patch is than what lies to its left, to its
+  right and below it — the *worst* of the three, not their average — so a patch
+  twelve units darker than its own surroundings scores twelve on every face
+  there is. Two of them are wanted, level with each other and either side of the
+  middle of the head, which is what stops a nostril winning; and when a second
+  pair is found close below the first, the lower one is taken, because eyebrows
+  beat eyes at everything except being where eyes are;
+* **the chin** cannot honestly be found this way — a jaw against a neck is a
+  soft edge with no colour change across it. It is worked out from the pupils,
+  which sit a little below the middle of a head once the hair on top of it is
+  counted, and then checked against the point where the outline falls away into
+  the neck.
+
+### Four things the first real photograph did that no fixture had
+
+Every one of these passed on synthetic faces and failed on a photograph, and
+each has a test now because the fixture that would have caught it did not exist.
+
+| What happened | Why | What it needed |
+|---|---|---|
+| The eye line landed on the **hairline** | The four sides around a patch were averaged into one number, so one bright forehead under a mass of hair outvoted three dark sides. Hair is far darker against skin than an iris is | Score against the *worst* of left, right and below, never their mean |
+| **Hair beside a cheek** outscored the eyes | It is a narrow dark band with the wall on one side and a face on the other, which is exactly what an eye looks like locally | An eye is well inside the outline; anything whose neighbourhood strays off the silhouette is not one |
+| The eyes were **not found at all** on a white background | The white of an eye is close enough to a pale wall to be cut out of the mask, so both eyes were holes punched through the head and every candidate sat on the edge of one | Fill what the outline encloses: paint inward from the border and keep whatever is left |
+| The head came out **twice its real width** | Where a head stops was assumed to be a fraction of the picture. In the photograph this tool asks for — taken a metre and a half away — the shoulders start well inside that fraction, and the widest row was one | Walk down and find the neck: a head narrows, then the shoulders widen again, and that turn is the only honest mark |
+| The **chin landed on the collar**, on every photograph | The pupils were taken to sit at 0.49 of the way down a head. That is the figure for a bare skull, and the crown this tool measures is the top of the *hair* — which moves the crown up without moving the pupils, so the real ratio is nearer 0.55. Worse, the outline check that exists to catch exactly this could never agree with a number that far out, so it was switched off by the same error and every photograph came back saying the chin was assumed | 0.55, and a fixture whose eye level is a parameter rather than a copy of the constant the code uses. Every face here was drawn with its eyes at 0.49, so the chin worked out from them was right by construction and no test in the file could disagree with it |
+
+The eyes are looked for at three box sizes, the smallest about the size of an
+iris. That one is doing most of the work: an eye is not a dark patch, it is a
+small dark iris with bright sclera either side, and a box drawn around the whole
+opening averages that white back in until the eye is barely darker than a cheek.
+It also happens to be the cheapest way to lose an eyebrow, which is a long dark
+bar with more of itself to the left and right of any box you put in the middle
+of it.
+
+Which is why none of it is final. The page says which of the four it measured
+and which it had to work out, refuses outright on a picture with no plain
+background rather than inventing an answer, and leaves every dot draggable —
+`geometry.js` never learns which were measured, because the crop is taken from
+wherever the dots end up. Moving one by hand switches the page to *I'll place
+them*, and so does choosing it, which turns the whole thing off.
+
+`tests/js/id-photo-detect.test.js` is where that holds: the same synthetic face
+at four skin tones and two hair colours, to one tolerance, plus one fixture for
+each row of the table above.
+
+Each dot is also a button reached with Tab. The arrow keys move it by one
+source-image pixel, or ten with Shift held. Focusing a dot or finishing a burst
+of key presses reports its distance from the photograph's left and top edges
+in a visible, polite live status. Repeated keys settle into one reading rather
+than making someone listen to positions that have already changed; hiding,
+resetting or clearing the dots retires any pending reading. This only describes
+the marked point: it does not change the geometry or the exported photograph.
+
+`tests/js/id-photo-marks.test.js` covers that feedback and its retirement when
+the photo or the landmarks change.
+
+### Colour is measured in Lab, and evenness is measured separately
+
+Two greys forty RGB units apart are hard to tell apart; forty units of blue is a
+different colour entirely. A checker built on RGB distance would be confidently
+wrong in both directions, which is worse than having no checker. So
+`background.js` converts to CIE Lab and reports a plain ΔE.
+
+Evenness is a **second** finding, not part of the first, because almost nobody
+submits a photo with a bookcase in it and enormous numbers of people submit one
+taken a foot from a white wall with a shadow of their own head on it. Those two
+failures have different fixes, and a single "rejected" would send people to
+change the wrong thing. A third finding compares the three sides against each
+other, which is how side lighting shows up.
+
+What the tool will **not** do is replace a background. That is a segmentation
+model, and a bad one eats the hair of exactly the people whose photographs
+already get rejected most often. Standing a foot further from the wall fixes
+more of these than any filter would, and the page says so.
+
+### The KB floor is met by padding, and the padding says so
+
+`encodeToBand` searches for the highest quality that fits under the ceiling —
+the same bisection the image compressor uses, minus the resolution half, because
+the pixel size is mandated and there is nothing to spend there.
+
+The floor is the interesting end. A 200 × 230 photograph is 46,000 pixels; at
+the best quality a browser will write, that is often 15 KB when the form demands
+20. There is no "compress less" left. So `padTo` in `jpeg.js` inserts a **COM
+segment full of spaces**.
+
+That is worth stating plainly rather than burying: a comment segment is part of
+the JPEG standard and is skipped by every decoder ever written. The picture is
+bit-for-bit the same picture; what changes is the length of the file, which is
+the number the form is measuring. The padding leads with an English sentence
+saying exactly that, so anybody who opens the file in a hex editor finds an
+explanation rather than a mystery.
+
+---
+
+## The other thing a canvas will not write: the resolution
+
+`canvas.toBlob` emits a JFIF header with the density units set to `0`, which
+means "these two numbers are an aspect ratio, not a resolution". So a
+413 × 531 pixel file arrives at a print shop as an image of no particular size,
+and their software guesses.
+
+`setDensity` patches five bytes — units to `1`, and both densities to the DPI —
+so the same pixels say "I am 35 × 45 mm". Nothing is decoded, no quality is
+spent, and it is the difference between a photo that prints at the right size
+and one that prints at whatever the shop assumed.
+
+---
+
+## The sheet
+
+A booth charges several pounds for six photographs. A photo counter prints a
+6 × 4 for pennies and every one of them will do it. So the useful output of this
+tool is not one 35 × 45 image, it is a 4 × 6 with eight of them on it and lines
+saying where to cut.
+
+Three rules the layout follows, each learned by cutting one out badly:
+
+- **Nothing is scaled to fit.** Every cell is exactly the specification's size in
+  millimetres at the sheet's DPI. A layout that shrank a photo by two per cent to
+  fit one more copy on would produce eight photographs that are all the wrong
+  size, which is the failure this whole tool exists to prevent.
+- **The marks sit in the gaps, never on the picture.** Cutting between two ticks
+  is easier than cutting along a line drawn on the thing you are cutting out —
+  and a line drawn on the picture is ink you then have to trim off.
+- **The paper is tried both ways round.** A 35 × 45 fits eight to a landscape
+  6 × 4 and six to a portrait one, so both are laid out and the one holding more
+  copies wins.
+
+The margin is 3 mm and the gap is 2 mm, and those two numbers are load-bearing:
+at 4 and 3 the same sheet holds six photographs instead of eight.
+
+---
+
+## What is deliberately not here
+
+| Left out | Why |
+|---|---|
+| Background replacement | A segmentation model. See above. |
+| A shipped face model | The four points are found by arithmetic instead. A model would be weights to download and unevenly wrong. See above. |
+| Straightening a tilted head | Rotating re-samples the picture, and every specification here asks for a level camera rather than a corrected photograph. The tilt is measured and reported instead. |
+| Smile/eyes-open/glasses checks | These are classifiers, not measurements, and a wrong "your eyes are closed" is worse than no check. The guide says what an examiner looks for. |
+| A promise that the application will be accepted | No tool can honestly make one. What this does is apply the published figures exactly and show every measurement it made. |
+
+---
+
+## The page each rule has to itself
+
+`/id-photo/us-passport/`, `/id-photo/de-passport/` and the other sourced portraits,
+in every language the tool is published in. The tool's own page is one address
+holding the rulebook behind a menu, so it can answer "Canada passport photo
+size" for nobody who has not already opened it. A landing page is that answer
+somewhere it can be found: the figures, the notes, who published them and the
+day they were read - and then a button to `../#ca-passport`, which
+`specFromHash` in `src/specs.js` turns into the tool opening on Canada.
+
+It is deliberately not the tool over again, and `buildlib/landing.py` says why.
+What matters here is that **the figures are not written twice**:
+
+- `specFacts()` and `sourceLine()` in `src/files.js` build the rows and the
+  citation. The panel under the chooser calls them with `phrase`; the emitter
+  calls them with a `t` that hands back the key and its values instead of a
+  sentence. So `pages.json` holds phrase *keys*, and the build resolves them
+  against the `#phrases` of each language's body - the table the tool itself
+  reads. A landing page in German says what the German tool says.
+- Only the frame is new writing: `[landing]` in `tool.toml`, translated in
+  `locales/*/tools/id-photo.toml` like the rest of that file.
+- A rule gets a page when it is a portrait, has a citation in `sources.js`,
+  and its authority publishes figures. Not the signature, not the sizes that
+  are common practice, not the form you fill in yourself, and not the
+  `published: 'words'` countries - "Sweden publishes no measurements" is a true
+  sentence and a thin page.
+
+**After touching `specs.js` or `sources.js`, run the emitter and commit what it
+writes:**
+
+```bash
+node --import ./tests/js/resolve-shared.mjs tools/id-photo/landing/emit.mjs
+```
+
+`tests/js/id-photo-landing.test.js` fails until that has been done, which is
+the point: the alternative is a page quoting last month's numbers under this
+month's date. The build itself runs without Node and only ever reads the file.
+
+## Adding a country
+
+One entry in `RULES` in `src/specs.js` and one in `SOURCES` in
+`src/sources.js`, and nothing else — the chooser, the figures panel, the
+overlay, the crop, the sheet and the file-size search are all driven from them.
+The rule needs:
+
+- `print` in millimetres with a DPI floor, or `null` where the rule is only ever
+  a web form's rule;
+- `head` and `eye` as `mmBand(min, max, frameHeight)` where the authority
+  publishes millimetres, or `band(min, max, true)` where it publishes nothing and
+  the figures are guidance — the page labels those, and never paints them red.
+  `mmBand` takes the same flag for a figure that *was* published and is not any
+  more, which is what happened to the American eye line in 2026;
+- `crown: 'skull'` where the authority measures the head with the hair left out,
+  as France and Poland do. It changes no arithmetic — nothing can find a skull
+  under hair, and a guessed constant for it is the mistake `EYE_LEVEL` already
+  made once — but the rule then owes the reader `note.crown-skull`, and a test
+  checks that it carries it;
+- a `background` key from `BACKGROUNDS`. An entry there may name several
+  colours with `accepts`, because plenty of rules do — the reading is
+  measured against whichever of them the wall is nearest, since averaging
+  three colours into one gives a fourth that fails all three. It may also
+  `forbid` one: France's background must be light and must not be white, and
+  a single hex with a tolerance wide enough to mean “light grey” passes a
+  white wall every time;
+- `digital`, where the form states pixel or file-size limits;
+- `notes`, which are shown verbatim. A note is for a trap, not a restatement:
+  if the figure is already in the panel above it, it is not a note. Most of what
+  a new country would otherwise repeat — the neutral expression, the plain even
+  background, the six months — is already a shared `note.` key, and reaching for
+  one of those is the usual answer.
+
+Everything the rule names is a phrase key and has to be defined in
+`body.html`'s `#phrases` block, **and in the German and Chinese copies of it**,
+or it reaches the page as its own key. `tests/python/test_phrases.py` fails on a
+key the English block lacks and on a key a translation lacks, in that order.
+
+The citation is the other half, and it is a separate file because it is
+somebody else's writing rather than ours: the authority, the title of the
+document, its official HTTPS address, the date it was read, and `native` where the document's own name for
+itself is a different word from the one this site prints.
+`tests/js/id-photo-sources.test.js` keeps that file a table of names and URLs —
+short names, no sentences, and HTTPS links without credentials — which is what pays for its exemption
+from the count in `tests/python/test_english_in_js.py`.
+
+Then run `landing/emit.mjs` - see the section above - so the country's page
+is written from the entry you have just made.
+
+The tests will then check the rest: that it can be cropped to, that its bands
+are bands, and that its millimetres and fractions agree.
+
+The set of files captures its rule, crop, paper and DPI before the first JPEG
+encode. Both photo crops are rendered at that point, so a setting changed
+while encoding belongs to the next run and cannot mix sheet pixels at one DPI
+with a density tag at another. Clearing the photo discards the pending result;
+a replacement decode must finish before another set can be made.

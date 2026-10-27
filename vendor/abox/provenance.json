@@ -31,6 +31,10 @@
     "tools/base64/src/encode.js",
     "tools/yaml-to-json/src/convert.js",
     "shared/js/parse-xml.js",
+    "tools/xml-formatter/src/convert.js",
+    "tools/json-formatter/src/format.js",
+    "tools/json-formatter/src/css.js",
+    "tools/share-text/src/markdown.js",
     "tools/text-diff/src/diff.js",
     "shared/js/qr.js",
     "tools/qr-barcode/src/barcode.js",
@@ -54,6 +58,54 @@
     "tools/redact-image/src/redact.js",
     "tools/image-to-svg/src/trace.js",
     "tools/stack-images/src/stack.js",
+    "tools/qr-barcode-reader/src/scan.js",
+    "tools/gif-maker/src/encode.js",
+    "shared/js/pdf-crypt.js",
+    "shared/js/pdf-permissions.js",
+    "tools/protect-pdf/src/password-validation.js",
+    "tools/unlock-pdf/src/document-for-export.js",
+    "shared/js/audio-decode.js",
+    "shared/js/wav-async.js",
+    "tools/edit-audio/src/edit.js",
+    "tools/trim-audio/src/trim.js",
+    "shared/js/mp4-reader.js",
+    "tools/trim-video/src/copy.js",
+    "tools/trim-video/src/clips.js",
+    "tools/document-scanner/src/write-scan.js",
+    "tools/document-scanner/src/warp.js",
+    "tools/document-scanner/src/clean.js",
+    "tools/document-scanner/src/encode.js",
+    "tools/document-scanner/src/document.js",
+    "tools/id-photo/src/geometry.js",
+    "tools/id-photo/src/sheet.js",
+    "tools/id-photo/src/encode.js",
+    "tools/business-profile-preview/src/surfaces.js",
+    "tools/business-profile-preview/src/view.js",
+    "tools/business-profile-preview/src/profile.js",
+    "tools/business-profile-preview/src/raster.js",
+    "tools/business-profile-preview/src/preview-time.js",
+    "tools/business-profile-preview/src/photo.js",
+    "tools/compare-heights/src/chart.js",
+    "tools/compare-heights/src/figures.js",
+    "tools/compare-heights/src/units.js",
+    "tools/compare-heights/src/save.js",
+    "tools/compare-heights/src/chart-measurements.js",
+    "tools/receipt-invoice-extractor/src/ocr.js",
+    "tools/receipt-invoice-extractor/src/receipt.js",
+    "tools/dicom-viewer/src/dicom.js",
+    "tools/dicom-viewer/src/pixels.js",
+    "tools/dicom-viewer/src/window.js",
+    "tools/images-to-video/src/encoder.js",
+    "tools/gif-to-mp4/src/encode.js",
+    "tools/rotate-video/src/rotate.js",
+    "tools/convert-to-mp4/src/convert.js",
+    "tools/gif-to-mp4/src/plan.js",
+    "tools/gif-to-mp4/src/working.js",
+    "tools/receipt-invoice-extractor/vendor/ocr-worker.js",
+    "tools/receipt-invoice-extractor/vendor/worker.min.js",
+    "tools/receipt-invoice-extractor/vendor/tesseract-core-lstm.js",
+    "tools/receipt-invoice-extractor/vendor/wasm-data.js",
+    "tools/receipt-invoice-extractor/vendor/eng-data.js",
     "shared/js/pdf-reader.js",
     "shared/js/pdf-writer.js",
     "shared/js/example-pdf.js"
@@ -65,8 +117,43 @@
       "generated": false
     },
     {
+      "path": "shared/js/aac.js",
+      "sha256": "742e94457d57d398720928c950f30c0f66b148afb3e1e473c828e44cfb6f3e2c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/aes.js",
+      "sha256": "3930ce977b5a0fa466763f170ae24d8df2419f5ad2fe17efb1f357da68aeab2a",
+      "generated": false
+    },
+    {
+      "path": "shared/js/audio-decode.js",
+      "sha256": "8e80633b9f82d5544eadd28525cc7b6a22b70e10cd3a71432e1b7e5421bf661f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/codec-support.js",
+      "sha256": "367eb21bbf7289c09a042fee005613540148b0215afabc5e21462b4a6dc67afc",
+      "generated": false
+    },
+    {
+      "path": "shared/js/cooperative-work.js",
+      "sha256": "beb80f1c74addbb3c10db11a31267ae020408b67a6d31e93f3fe06874845a265",
+      "generated": false
+    },
+    {
+      "path": "shared/js/copy-tracks.js",
+      "sha256": "7ce780189fec17a88677ed3e0eb9ebabc80a0c8e6fbcbe3b213f4b065a618e8e",
+      "generated": false
+    },
+    {
       "path": "shared/js/crc32.js",
       "sha256": "e74400b612a87bb9d0cc93f81b5f45d4150ca5ac3aa1bdb4e88c5b1df3c5286f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/document-geometry.js",
+      "sha256": "8cbd0307e750e80746ef9ddd6b93c8cff76fce8abb0e33d8e0804b41cc5f922f",
       "generated": false
     },
     {
@@ -87,6 +174,11 @@
     {
       "path": "shared/js/format.js",
       "sha256": "e20650f3295a7e05b5d82746a7ccf4e2e2c828c7aa1506f4d7aded0e9bbfc08c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/frame-canvas.js",
+      "sha256": "6afa619ba057d38b4e22031b59c5dacfd32151f958e6350f4d3c055347845915",
       "generated": false
     },
     {
@@ -140,6 +232,26 @@
       "generated": false
     },
     {
+      "path": "shared/js/mp4-boxes.js",
+      "sha256": "b46457e14b4c4714276cb664824df6bf2f41500cd1fbd08d72fa0df4886d2a94",
+      "generated": false
+    },
+    {
+      "path": "shared/js/mp4-muxer.js",
+      "sha256": "2360e0b0c94460d57465b9658fd216ad912d04a3fd7a27e913de466e0b339149",
+      "generated": false
+    },
+    {
+      "path": "shared/js/mp4-reader.js",
+      "sha256": "2b280dcdd2962b1532f967e402bb6ea8a878f1c79689637acbb6c1b13260ea66",
+      "generated": false
+    },
+    {
+      "path": "shared/js/mp4-writer.js",
+      "sha256": "444ef2081f0ba8cb73bd6ab4a76ad971c18c5471f409b8aaac417af67d8e0040",
+      "generated": false
+    },
+    {
       "path": "shared/js/parse-errors.js",
       "sha256": "00017aa5b0c8763968529a9b77dca87c07c8557e12bb70464ead2aaec4c90970",
       "generated": false
@@ -170,6 +282,11 @@
       "generated": false
     },
     {
+      "path": "shared/js/pdf-crypt.js",
+      "sha256": "51fe95cd3c1a19664025f51a7beb7788a26e43409d9fd837bbbf4bf0c11d8db9",
+      "generated": false
+    },
+    {
       "path": "shared/js/pdf-filters.js",
       "sha256": "59b28ff58fa8c87dde8cf9bf30129950abdf3c6b41d73ed64eb9c50d1026d53b",
       "generated": false
@@ -192,6 +309,11 @@
     {
       "path": "shared/js/pdf-pages.js",
       "sha256": "d93624db8a4dc19b305e2d32985b1399ecf111d1584e8f9d60819f8b93214adf",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-permissions.js",
+      "sha256": "e70b838de926c32badcdba7cda6f998985b9886c979df75542eebb8270c95efa",
       "generated": false
     },
     {
@@ -235,8 +357,53 @@
       "generated": false
     },
     {
+      "path": "shared/js/rc4.js",
+      "sha256": "19257f7819fabbfbfb84b52e025a3b2dda0cb6d86157c07738b837768ba13bc9",
+      "generated": false
+    },
+    {
+      "path": "shared/js/reencode-sound.js",
+      "sha256": "9bc0d447aa31ae9d26ad8ff732edaadf5d07520e1bb2f2e848c0cefb7173a2af",
+      "generated": false
+    },
+    {
+      "path": "shared/js/reencode-video.js",
+      "sha256": "8d0db9b93a1b2dd0b81e60b4a1c2fc040c6c430f3c486e7c100211a8ab72ea2d",
+      "generated": false
+    },
+    {
+      "path": "shared/js/samplerate.js",
+      "sha256": "b1ebaee2b57112b503a33f399509e890e35d2ec688a78a423cd53914a35834ec",
+      "generated": false
+    },
+    {
       "path": "shared/js/svg-text.js",
       "sha256": "9393cea6a3bc833a19992460ce8418199629776b599af908862d9512c2f7cac1",
+      "generated": false
+    },
+    {
+      "path": "shared/js/video-support.js",
+      "sha256": "c6518cc3331b67ed1872bc7c1a9955955bdcc0ec22be51af6465a9036d43fc20",
+      "generated": false
+    },
+    {
+      "path": "shared/js/wav-async.js",
+      "sha256": "74afcbbbf5f1d2e6f5964c8b8193a4d0ead0fd6af42ee2cfa843ac782be44e3a",
+      "generated": false
+    },
+    {
+      "path": "shared/js/wav.js",
+      "sha256": "b06452fe3b682211f009e3487d3656901c86d6ec3aea32221fd86ce398a854ea",
+      "generated": false
+    },
+    {
+      "path": "shared/js/webcodecs.js",
+      "sha256": "4b164f0c149a69c6151540df6866105fc0a613230dc022aeadf7a77b1a0d8ebc",
+      "generated": false
+    },
+    {
+      "path": "shared/js/zip.js",
+      "sha256": "020076a0d010e3269d0fe214090787f2a002aeacbefee6e79e581888f03b6ce9",
       "generated": false
     },
     {
@@ -247,6 +414,116 @@
     {
       "path": "tools/base64/src/encode.js",
       "sha256": "bebb9bbf81d32575b707aa18137f26474759b789f77b71a070a0513ee4a1809c",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/body.html",
+      "sha256": "a6cc09fb0db457eab35886dae643a6a5bcf93e2a2ccec6d15746b16758d0a55c",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/README.md",
+      "sha256": "4d1f5857f9eb791a9a1abdd492951185dd5340737f5503db13b989af871727ff",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/photo.js",
+      "sha256": "81adb89e5698ec4a7787b75c328a96eea9f946e1940ede92f5965d6279a84c2b",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/preview-time.js",
+      "sha256": "a6b331ced72411f54c7a90d3bfad2f0aa13a025c21b93a374cdce242dea8a718",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/profile.js",
+      "sha256": "ed29829e64096491dc8d37e7ed5625b35ebe87b5d9b39d7dfddb2a50e26ba8dc",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/raster.js",
+      "sha256": "6ddde65f3926da06a18e44b46d652fce01b47187c5a89c2102351730e262e403",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/render.js",
+      "sha256": "99e68c142a5959c2acc01e5e9b2f508b84320c29b6eb56a07c126d35089e2044",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/business-profile-preview/src/surfaces.js",
+      "sha256": "dad7d3d9fecde3620a86ff6d492a3a35b0b9dd5d7dd1e3901c0974fab5891406",
+      "generated": false
+    },
+    {
+      "path": "tools/business-profile-preview/src/view.js",
+      "sha256": "dd9afac3ab4b9c289525967c56a214f256e5b7b71b69a0a9c6be7efc9f2605dc",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/README.md",
+      "sha256": "19b12f2e549cb1db72f3f783b90ec6e64cf8c8dadf845fa2aa09a6b3457f7c32",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/chart-measurements.js",
+      "sha256": "f6f167a16b80738d5fe741fe9e759fdd483fc3da0b7568ba4c73f90437760039",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/chart.js",
+      "sha256": "3434850b323a9882f65d2fa0d59620cdb2adb38d86fb54a91658340999b31593",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/figures.js",
+      "sha256": "2bd0b1a0d12eb14d4461acf029c53df0c910f3a46fcea49b8051c3a1f46ce8d3",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/objects.js",
+      "sha256": "f32304cc3eb8fb4f8dcc3b1e4eefb81b8e5d7d467c13980832b4f210bbfebccf",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/save.js",
+      "sha256": "e00de90aa65b1743a608ca148c9524a58ebeb7deabf9a7cee55acd6170d0f7e0",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/traced.js",
+      "sha256": "ad65f35f38d34ca935039abf6b9d99a819dfca0b13f26b1be2d23e519daceeea",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/src/units.js",
+      "sha256": "8db0d0e3f86d894d14cd8a078d1ab9bb3682fe8ba0b070f64a9be578a930061f",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/vendor/LICENSE.md",
+      "sha256": "4f2b778339c496cedbcd631611fa34fafb64b6dec9247c46479c7b02192d54c4",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/vendor/objects/LICENSE-material-symbols-Apache-2.0.txt",
+      "sha256": "58d1e17ffe5109a7ae296caafcadfdbe6a7d176f0bc4ab01e12a689b0499d8bd",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/vendor/objects/LICENSE-phosphor-MIT.txt",
+      "sha256": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2",
+      "generated": false
+    },
+    {
+      "path": "tools/compare-heights/vendor/objects/LICENSE.md",
+      "sha256": "4976fc09f3d40731a8994765975dc1947659e98e91eda19d8cf2f7a2800d870c",
       "generated": false
     },
     {
@@ -328,6 +605,181 @@
       "path": "tools/compress-pdf/src/shared/pdf-writer.js",
       "sha256": "c1d74d9758a5516d515fd58757160818d6208961f9e27f47e5623d2e4f421da4",
       "generated": true
+    },
+    {
+      "path": "tools/convert-to-mp4/README.md",
+      "sha256": "f0ef55a561fcc8adf111fece8d39bb98b0e0a074189cccb190d622e35f284225",
+      "generated": false
+    },
+    {
+      "path": "tools/convert-to-mp4/src/convert.js",
+      "sha256": "5355c7400e757619e0dab8860f8723f10c0cc64872f8d334200d7b85c27e8ccb",
+      "generated": false
+    },
+    {
+      "path": "tools/convert-to-mp4/src/shared/copy-tracks.js",
+      "sha256": "da4a5c646685aa2cb876e6277030964a0cb267a3d0373351aaa9487e0126d999",
+      "generated": true
+    },
+    {
+      "path": "tools/convert-to-mp4/src/shared/mp4-writer.js",
+      "sha256": "f4c760d6dede4b2b4d5f760039c1eefa5a0026c8b745c25d29a7d662f6e47bc1",
+      "generated": true
+    },
+    {
+      "path": "tools/convert-to-mp4/src/shared/reencode-sound.js",
+      "sha256": "5e55a3f0ece9bef732c4d3cc5bd206e675286aa2426f5a845037c944609b9989",
+      "generated": true
+    },
+    {
+      "path": "tools/convert-to-mp4/src/shared/reencode-video.js",
+      "sha256": "18cec2eb4796251ced5a69c2fb908e4ecd740669c9d89bc00fa9de4acc8b0315",
+      "generated": true
+    },
+    {
+      "path": "tools/dicom-viewer/README.md",
+      "sha256": "b916c851b1794d31f284bf88a10d6c8b61d1b4f072b24e708d5132186ef5b505",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/dicom.js",
+      "sha256": "9dff73e8a61d70c92e7682ada36cd1efba907cc5bef80ca5efae54d3639bf00b",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/dictionary.js",
+      "sha256": "4e44d6fbc8f246689b527ac0fa296e8aeb0c3db89d6e589d9ab3d898335ed76a",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/jpeg-lossless.js",
+      "sha256": "f70ad047cd02f4bbd79632893daff2d4597705ee773f04d25dc63fe67a8cfac9",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/pixels.js",
+      "sha256": "7e775ede6ec7cc8067cfe105f2ff7ac29794ddb4fd0e42d8d94ceadaad554f43",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/reader.js",
+      "sha256": "12176c2a548d9ff0132cae1e18f9a86c71c03c4282219a08d5f34c3e0f07d57c",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/refusal.js",
+      "sha256": "939e1b0b340909825ef10c0b1f87e8a5c40c4b097455fcac6c6cb1a621740507",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/rle.js",
+      "sha256": "38c879923d3683066295c2a7e0ffd6701e371b9759c9148f68b3c95d2c663394",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/uids.js",
+      "sha256": "276e1eb0ee217dc0f7495dd26ec3cfe6fc8eb362dc92a34356def40e96fb40ec",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/values.js",
+      "sha256": "5dab22fa5eb73e737fee835270b45b4720515a9af1eb1a4049163af8335fb9c8",
+      "generated": false
+    },
+    {
+      "path": "tools/dicom-viewer/src/window.js",
+      "sha256": "018963735d868212fd68a56d0ee2edab386f17471f9814bfe7cdb905940a64c9",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/README.md",
+      "sha256": "6b3ae54d0376b13588d2da5c7c59f73a934a45c623d95cad1a0cfecc39b09b41",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/clean.js",
+      "sha256": "26a28b655a52885b7710654c2d9219e1323e31cbd9d92a3c4ffdb930a41bd076",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/document.js",
+      "sha256": "ba1e5c6ebbaeb238ebcc3c5e89311098c9912c24b305b49d3bea3970fc35906c",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/encode.js",
+      "sha256": "dfc27458ce4858680be07ce98f63ba3652fed22dac2c75f735b5693b931f9cf0",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/pages.js",
+      "sha256": "f86ad8dc425249ca45f6c1fc42579e4e3475b2b82dd84a1f1efe943e70c3d335",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/shared/document-geometry.js",
+      "sha256": "a02cd62252e405ecadef78455a9015331665f61789b059719990b1a5b6a84781",
+      "generated": true
+    },
+    {
+      "path": "tools/document-scanner/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/document-scanner/src/shared/image-input.js",
+      "sha256": "628bd834697c89bb2c2cf8b89fe5130c3f4100d7377d1c17c889cbfd4ba2061b",
+      "generated": true
+    },
+    {
+      "path": "tools/document-scanner/src/shared/pdf-page-writer.js",
+      "sha256": "fb0003511fa04903d8a0eed29b98a546af026a05575993567415b5f3bfb0b5c5",
+      "generated": true
+    },
+    {
+      "path": "tools/document-scanner/src/shared/zip.js",
+      "sha256": "5972b07a64603b6dd840621b01a67dd918a06c71ce0459b0604a0e2de8db411a",
+      "generated": true
+    },
+    {
+      "path": "tools/document-scanner/src/warp.js",
+      "sha256": "0a589f75d2c50d8c38f11a0639c712a37fe17c5cc2309427ceb097cb79e48c96",
+      "generated": false
+    },
+    {
+      "path": "tools/document-scanner/src/write-scan.js",
+      "sha256": "6acf56a8423ea752767559e92dbd1bac331a2435a6bfdf552c6754488384840c",
+      "generated": false
+    },
+    {
+      "path": "tools/edit-audio/README.md",
+      "sha256": "ad71dda79bf01547b00d57a5e0faf82596cf23c6c06f59898ac31a18cf692387",
+      "generated": false
+    },
+    {
+      "path": "tools/edit-audio/src/edit.js",
+      "sha256": "437f4297b29063204ff9eb3007f4e804f566e954677959843157e11ade239665",
+      "generated": false
+    },
+    {
+      "path": "tools/edit-audio/src/effects.js",
+      "sha256": "95cec806434cb537924bd05385dfc69c487f9ab3fad2c254003356c90e680875",
+      "generated": false
+    },
+    {
+      "path": "tools/edit-audio/src/shared/cooperative-work.js",
+      "sha256": "3e126e65ad9019bb2e5ea679da034683bbeb3726a68fd629d66324202374762a",
+      "generated": true
+    },
+    {
+      "path": "tools/edit-audio/src/speed.js",
+      "sha256": "64d5d5b43dfda8de06bd62b1aa252a51e0c478fadad15aef30ccb8a4ec3e6bc4",
+      "generated": false
+    },
+    {
+      "path": "tools/edit-audio/src/stretch.js",
+      "sha256": "aa4e00322b840ab7426818ffe0b810e73aa998f802dd0905864555cbb10f31dd",
+      "generated": false
     },
     {
       "path": "tools/exif-editor/README.md",
@@ -420,6 +872,111 @@
       "generated": false
     },
     {
+      "path": "tools/gif-maker/README.md",
+      "sha256": "c8fc01f9e3faabb72e9c566b7f05e840302a68be90f92c1524a6ded46baeb4b6",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/bytes.js",
+      "sha256": "3b33193717399fbccf59e9c414f11d242f99fd1a5bc823b9116d42bebe991917",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/compose.js",
+      "sha256": "5d6e60999d0dd37ad5172c24a8641f36a22c1a7998deed1d5646d9949eea50ef",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/encode.js",
+      "sha256": "2ee8410f4cb2b444bffb49b750e711b3ba9a36d41c4f348ee88584d5cba97a40",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/gif.js",
+      "sha256": "00e369f54f9a45d0302e4fbc3f5dc3338d95df9252802ff2242150529d72dc92",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/images.js",
+      "sha256": "b989b7db9b6d8f758936dd0afecfdb8a1a28ada6c5ff23a49356a018c9792776",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/lzw.js",
+      "sha256": "7ad7f98ce51cb195aa7b40e09bf96ff2ee655aeea348c04df909c8adbe988ca6",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/quantize.js",
+      "sha256": "94a8d3e2b7d8584d30d359fd00944c893e530ad71b46b7c47f8804e32c13046e",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-maker/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-maker/src/shared/image-list.js",
+      "sha256": "41bc7b866fde4d2cfbec16ad14336060b5939d96821d882c3eb8c1ce738dcce7",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/README.md",
+      "sha256": "d91e99dccdfd399a37ce4501bdac8170fb8b53bcfef5a8569e038859ddc90969",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-to-mp4/src/encode.js",
+      "sha256": "b50c806a798a5836acd61bce0d99f76c6db97df2f65f79cd20667f0e2ed842a9",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-to-mp4/src/plan.js",
+      "sha256": "6638838445c87e2ce1087e0731c239b95e227ed07ef2e98a034983fc8c9f6cbf",
+      "generated": false
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/gif-compose.js",
+      "sha256": "c91c0288b9a6e09b48025abadcc339dca1905757ee3afd1aac580a8b5136d3d7",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/gif-decode.js",
+      "sha256": "c6681f1e07c9681f695d2b2489fdbc9fd2c0217a0965b3f01ce7cd457e85a473",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/gif-working-budget.js",
+      "sha256": "ea8b8f2122379036e7ec8e55624a89e24982c9b8d1b4e58679e92f40b99945fd",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/mp4-muxer.js",
+      "sha256": "53c883bb7e1f019e8c60f1e17f90711970764d5d9d2a32a1b795941da57bbc31",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/video-support.js",
+      "sha256": "5e21537117e8d0084e88eb26924da030e058e813781b8356ef951388ab0e4a5a",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/gif-to-mp4/src/working.js",
+      "sha256": "194d3db681e236fa2c6d07debe119b89544dfc74b45951b827b5e6fde8e6c632",
+      "generated": false
+    },
+    {
       "path": "tools/hash-checksum/README.md",
       "sha256": "f8ab3081c8daf733f2f452f723daa3e421af6431126b371330ad2a8f0342a0e6",
       "generated": false
@@ -453,6 +1010,31 @@
       "path": "tools/hash-checksum/src/shared/md5.js",
       "sha256": "693144b901bd910d29bcedce17ed9c422bd8f8dced15ab7cac137104aa199e70",
       "generated": true
+    },
+    {
+      "path": "tools/id-photo/README.md",
+      "sha256": "ccf5e0c554d23bb68867117a9a9b77eb36bc97d8a2e1fc06ae68d19b67122186",
+      "generated": false
+    },
+    {
+      "path": "tools/id-photo/src/encode.js",
+      "sha256": "5703dfefbb750e3f59854f626b10e9f7a66874283178ee70c35f63143e41f455",
+      "generated": false
+    },
+    {
+      "path": "tools/id-photo/src/geometry.js",
+      "sha256": "de9f2d5a4101f831e22862b7abc7d48e2808b172db37d0c654d220b049c9507a",
+      "generated": false
+    },
+    {
+      "path": "tools/id-photo/src/jpeg.js",
+      "sha256": "7f85ebc494ddd0d1ca8ccd524d887c6ccfd720af78f1ab6263544fd1c8e52a73",
+      "generated": false
+    },
+    {
+      "path": "tools/id-photo/src/sheet.js",
+      "sha256": "2df95831eec01c54a6d881306565b5c9f3d6821d0719827fce8fd62719cd9b6d",
+      "generated": false
     },
     {
       "path": "tools/image-layout/README.md",
@@ -590,9 +1172,89 @@
       "generated": true
     },
     {
+      "path": "tools/images-to-video/README.md",
+      "sha256": "4fa4dfb194bab6050e48ed45ab4df926c6d400673fa71628fac119ba44418561",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-video/src/compose.js",
+      "sha256": "fba5d0d29f71934c7c6d44752c82262f6a6ef96e05476395c0dcd6820100ee76",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-video/src/encoder.js",
+      "sha256": "0e0de99c090316948a37dede44e1f0fa0a93a4aa412586a7ca241d6ad9940aaf",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-video/src/images.js",
+      "sha256": "99e2fca14d52d9ed92521a04c3245221dd5d70f7c0ff119ded214b16751fd02b",
+      "generated": false
+    },
+    {
+      "path": "tools/images-to-video/src/shared/codec-support.js",
+      "sha256": "984b74bfeb0b1eccd518954bc32e3b2a798d9652d2884424a463bac814276006",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-video/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-video/src/shared/image-list.js",
+      "sha256": "41bc7b866fde4d2cfbec16ad14336060b5939d96821d882c3eb8c1ce738dcce7",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-video/src/shared/mp4-muxer.js",
+      "sha256": "53c883bb7e1f019e8c60f1e17f90711970764d5d9d2a32a1b795941da57bbc31",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-video/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/images-to-video/src/support.js",
+      "sha256": "7cf074888740f0d3ea638746691aabbf46d3237284756225b796e02f19c2274c",
+      "generated": false
+    },
+    {
       "path": "tools/json-formatter/README.md",
       "sha256": "b0069e00ad4b14e13e2e71e6a57e6abb065dce526673b9123847469fa79905ef",
       "generated": false
+    },
+    {
+      "path": "tools/json-formatter/src/css.js",
+      "sha256": "f655c090e3af4918a3b61c8259c1c9bdee73558898a7dd4cc5314fb983064816",
+      "generated": false
+    },
+    {
+      "path": "tools/json-formatter/src/format.js",
+      "sha256": "f1277d5fe717e2d8687022f6597f7e12bf391ec4e0ad1965952b970d5e866de5",
+      "generated": false
+    },
+    {
+      "path": "tools/json-formatter/src/shared/parse-errors.js",
+      "sha256": "ad4998af3d047aa0f54087bb7449350b59c58240dcbb7ce6523ccc190596a51a",
+      "generated": true
+    },
+    {
+      "path": "tools/json-formatter/src/shared/parse-json.js",
+      "sha256": "8f64c9cdc5519d4db92a595e49f971979c1f1c5f786a767b937e95737d6459ed",
+      "generated": true
+    },
+    {
+      "path": "tools/json-formatter/src/shared/parse-xml.js",
+      "sha256": "300b7e38c5561ccdc8c964887def855505e5426e7b99d29037d91dcef4a3f54d",
+      "generated": true
+    },
+    {
+      "path": "tools/json-formatter/src/shared/parse-yaml.js",
+      "sha256": "cacc7d97cc5fbe66b77a1dd5ed01ca4663c84798840e47bf11f366e09853b21e",
+      "generated": true
     },
     {
       "path": "tools/merge-pdf/README.md",
@@ -720,13 +1382,38 @@
       "generated": false
     },
     {
+      "path": "tools/protect-pdf/README.md",
+      "sha256": "86e58bab0703e06ab0d2434f3087819704c836ec16b967a9dce2f047a703775d",
+      "generated": false
+    },
+    {
+      "path": "tools/protect-pdf/src/password-validation.js",
+      "sha256": "a379dccf2dddb316f614909f430450da62852762a6c6cd4fa98b6267e758829d",
+      "generated": false
+    },
+    {
       "path": "tools/qr-barcode-reader/README.md",
       "sha256": "8b4166adf250b019441d2a6ed062fef3753991a943b0e383d71750a469004c77",
       "generated": false
     },
     {
+      "path": "tools/qr-barcode-reader/src/binarize.js",
+      "sha256": "2c031bad6ace6c379975a5fc06eef0f30e39350beaaacdce78de164c306186cb",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/detect.js",
+      "sha256": "bea87bc8ba27c40fc13acb4a7795c0628cf354e8137bc5f6d7457e6f0eca841e",
+      "generated": false
+    },
+    {
       "path": "tools/qr-barcode-reader/src/linear.js",
       "sha256": "10d2519c193d9546c3ac9037375cf2a30e54b5667c23125417ff89894fc7d84f",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/payload.js",
+      "sha256": "af19da409b120dd7329ce45dd6f0ff3f85f99878f0c7ac9b98b2947923afed8b",
       "generated": false
     },
     {
@@ -737,6 +1424,11 @@
     {
       "path": "tools/qr-barcode-reader/src/reed-solomon.js",
       "sha256": "c778fcca05f14cc16a2ee429c1c05faca790178eaa3837484822d35fba0c7092",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/scan.js",
+      "sha256": "3808752d9351b214db7dd2f09fbb3e71e37652ed47914a486e8d74f5585ad80c",
       "generated": false
     },
     {
@@ -767,6 +1459,91 @@
     {
       "path": "tools/qr-barcode/src/scan-advice.js",
       "sha256": "7a6439a746fc74741f4f86226436db379e3210bce857b3de7ae334977b9f6d15",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/README.md",
+      "sha256": "5365e8142b7feda05d9d5bc09be65632341c793c6ee4ea7d61e54c05780099a5",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/location-currency.js",
+      "sha256": "f71de9efdcd118f67917521724f75cede09c92696018ae879be758501302562c",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/ocr-image.js",
+      "sha256": "82ea152461d7c91913fd7e58c9c94f22bcfcae0898607fe74ff9ae4e9838bc51",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/ocr-results.js",
+      "sha256": "47d4c76ff07a81ff62c77fe3c2c7ffdd36a15d5ae29ab0ef442ac17c5b76c585",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/ocr.js",
+      "sha256": "30fd6578397f64eebe4e5eedd083da55a29fc80409afc40dca37ec2063f7c64a",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/receipt.js",
+      "sha256": "a77d2b964edbfa83d29357d2418883bb9c1073fa4b4598eaab859fc4e86274e2",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/eng-data.js",
+      "sha256": "1c4c271dd752b5591daa5630e6cd734c6536c9f38a16bb45c05409b96aab76f0",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/LICENSE-language-data",
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/LICENSE-tesseract-core",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/LICENSE-tesseract-js.txt",
+      "sha256": "b40930bbcf80744c86c46a12bc9da056641d722716c378f5659b9e555ef833e1",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/ocr-worker.js",
+      "sha256": "9be0277eeb4b55d4e2c8c4e90ec0be2b925ac13a3abb4142786a77519c890ad3",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/README.md",
+      "sha256": "f83ac1ef61f9b68491d36857e4613c98646f0d8cb0305a6ce0fd894cf0a8cfce",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/tesseract-core-lstm.js",
+      "sha256": "48a3ee8e00924cb8c7f0cc0d099b1318fea120af56b3ee8fb3a70dd2311806c2",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/wasm-data.js",
+      "sha256": "201fd1ec8805bd1ebdea9520090eeccd44d46776df96a436280ce94e7cb28d4e",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/worker.min.js",
+      "sha256": "38645599043239c0eb6db08a6504a92dcdc292200535f3e9339cd77c4443b842",
+      "generated": false
+    },
+    {
+      "path": "tools/receipt-invoice-extractor/vendor/worker.min.js.LICENSE.txt",
+      "sha256": "45f54171aeaa1d10c0c1a66f374b7bba1f02472b1487fbe892eec04f840002ac",
       "generated": false
     },
     {
@@ -818,6 +1595,46 @@
       "path": "tools/resize-image/src/shared/phrases.js",
       "sha256": "d77233a07d95379a1e3092fa81c90c1c376a8b59737a0e178de4630deaaa14a1",
       "generated": true
+    },
+    {
+      "path": "tools/rotate-video/README.md",
+      "sha256": "7bf24146c753e6abf666e8e249fa49a2ac138b9ba1da9613452dea9facf890cf",
+      "generated": false
+    },
+    {
+      "path": "tools/rotate-video/src/plan.js",
+      "sha256": "c4bb3709b4eabe9be4e9e83ec853a813d8968000980e452d127918a9ceffa7b8",
+      "generated": false
+    },
+    {
+      "path": "tools/rotate-video/src/rotate.js",
+      "sha256": "48e1aefd2e1ff45299fb764e8aae9e373b423517a6e7f172a3eb2a6e5b36e61b",
+      "generated": false
+    },
+    {
+      "path": "tools/rotate-video/src/shared/copy-tracks.js",
+      "sha256": "da4a5c646685aa2cb876e6277030964a0cb267a3d0373351aaa9487e0126d999",
+      "generated": true
+    },
+    {
+      "path": "tools/rotate-video/src/shared/mp4-writer.js",
+      "sha256": "f4c760d6dede4b2b4d5f760039c1eefa5a0026c8b745c25d29a7d662f6e47bc1",
+      "generated": true
+    },
+    {
+      "path": "tools/rotate-video/src/shared/reencode-sound.js",
+      "sha256": "5e55a3f0ece9bef732c4d3cc5bd206e675286aa2426f5a845037c944609b9989",
+      "generated": true
+    },
+    {
+      "path": "tools/rotate-video/src/shared/reencode-video.js",
+      "sha256": "18cec2eb4796251ced5a69c2fb908e4ecd740669c9d89bc00fa9de4acc8b0315",
+      "generated": true
+    },
+    {
+      "path": "tools/share-text/src/markdown.js",
+      "sha256": "e69f14a18974375da25dcc5de7be8c2bc5a4bfcf3cbad723b1db96cc46b626f9",
+      "generated": false
     },
     {
       "path": "tools/split-gif/README.md",
@@ -900,6 +1717,61 @@
       "generated": false
     },
     {
+      "path": "tools/trim-audio/README.md",
+      "sha256": "a858d62d23c9628d26200330fdf5f9da04022336b7193f7a36ee102f3da85b69",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-audio/src/trim.js",
+      "sha256": "4f6cb02305b88578a3e6bd39770cffe69e2f4447034a1104f6283813bad62a35",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-video/README.md",
+      "sha256": "1ad8fa5a9f9e3f645ccb4300f1ea2d938f15746eb5adb3399285eb10ea42536b",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-video/src/clips.js",
+      "sha256": "13f7a354bf02d1abafd39609644fd43d78e32b9fc76b1498475d4189e7dbe73d",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-video/src/copy.js",
+      "sha256": "5ffd3f1d8463ed3f8a4e9a2c6979c473492be6bec2c210baef37a08a3e1f56e8",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-video/src/ranges.js",
+      "sha256": "8c7702a284e4986f400c80c53cfa0abfdf4cadf9ed51871438ace92379494492",
+      "generated": false
+    },
+    {
+      "path": "tools/trim-video/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/trim-video/src/shared/mp4-writer.js",
+      "sha256": "f4c760d6dede4b2b4d5f760039c1eefa5a0026c8b745c25d29a7d662f6e47bc1",
+      "generated": true
+    },
+    {
+      "path": "tools/unlock-pdf/README.md",
+      "sha256": "fb1a2f4126bd71ce55b3a0d5c0edef2dc03f50014a3f9dcc9fa9fbf436441cdd",
+      "generated": false
+    },
+    {
+      "path": "tools/unlock-pdf/src/document-for-export.js",
+      "sha256": "9b41ea5281b5e181165f4787260ecabe6612cb0db14eec1efddb4bc953cb10ed",
+      "generated": false
+    },
+    {
+      "path": "tools/unlock-pdf/src/shared/pdf-reader.js",
+      "sha256": "040dddba3dd262d103b957816f6104d558b711d66524721c672c05a2d9a7e84b",
+      "generated": true
+    },
+    {
       "path": "tools/watermark-pdf/README.md",
       "sha256": "180443c8825b717edd79a35d83170ffa26153af0fb07ca0143c6dea8dc02f7f2",
       "generated": false
@@ -938,6 +1810,21 @@
       "path": "tools/xml-formatter/README.md",
       "sha256": "7c2459af31f4eaa6a0978942e68b793f67cb5fedc70ca5c439c28bc7efce46fc",
       "generated": false
+    },
+    {
+      "path": "tools/xml-formatter/src/convert.js",
+      "sha256": "f38b4bd14f923f7d715803723213aec7bacc9a7e84ca0ee69902b2f741ee355e",
+      "generated": false
+    },
+    {
+      "path": "tools/xml-formatter/src/shared/parse-json.js",
+      "sha256": "8f64c9cdc5519d4db92a595e49f971979c1f1c5f786a767b937e95737d6459ed",
+      "generated": true
+    },
+    {
+      "path": "tools/xml-formatter/src/shared/parse-xml.js",
+      "sha256": "300b7e38c5561ccdc8c964887def855505e5426e7b99d29037d91dcef4a3f54d",
+      "generated": true
     },
     {
       "path": "tools/yaml-to-json/README.md",

@@ -9,10 +9,16 @@ or remove image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
 
-It also inspects and extracts GIF frames, traces bitmap shapes into SVG,
-stacks aligned images, redacts image regions and generates passwords into local files.
+It also processes GIFs, WAV audio and supported video timelines; straightens
+document photos; prepares custom ID photos and local previews; extracts receipt
+fields with bundled OCR; inspects and renders a restricted DICOM subset; protects
+and unlocks PDFs; redacts image regions; and generates passwords into local files.
 
-This source version provides 31 local file operations and one capabilities tool.
+The v0.9.0 release in preparation targets 55 file operations and one capabilities
+tool. New operations below are unreleased until their tagged downloads and public
+installation are verified.
+See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
+the source engines reused by this adapter and the limits of each route.
 
 The public v0.8.0 Windows download was installed and checked in an isolated
 cache. All 31 operations passed using its included runtime. Public Gemini CLI
@@ -25,12 +31,12 @@ automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image processing, GIF extraction, tracing, stacking, redaction, PDF
-compression and PDF watermark rendering need an installed Edge, Chrome, or
-Chromium. PDF page operations, metadata operations and checksums, GIF inspection,
-password generation, PDF table extraction, structured text, Base64, text comparison
-and data URI encoding do not. QR codes and barcodes default to SVG without a browser;
-PNG output uses the installed local browser.
+commands. Image rendering, GIF creation/extraction, WAV processing, receipt OCR,
+document scans, local previews and new video encoding need an installed Edge,
+Chrome or Chromium. PDF page/security operations, metadata operations, checksums,
+container inspection, video packet copying and text processing run without one.
+QR codes and barcodes default to SVG without a browser; PNG output uses the
+installed local browser. A native H.264 encoder is required for new MP4 encoding.
 
 ## Install in Codex
 
@@ -202,6 +208,60 @@ whether the target was met.
 The six new tools' settings and JSON configuration examples are documented in
 [the shared skill reference](skills/abox-local-files/references/additional-tools.md).
 
+## New source operations
+
+These routes extend the public v0.8.0 operation set. Their full settings, local
+JSON shapes and review requirements are in the shared skill's
+[media and document reference](skills/abox-local-files/references/media-and-documents.md).
+Use `capabilities` to check what your installed release exposes.
+
+| MCP operation | CLI command | Result and important boundary |
+|---|---|---|
+| `abox_code_read` | `read-code-image` | One QR/barcode payload in a new local JSON report; never opens links or returns the payload |
+| `abox_gif_create` | `create-gif` | Ordered still images to GIF with timing, palette and loop controls |
+| `abox_pdf_protect` | `protect-pdf` | AES-256/AES-128 PDF security; exact passwords come from local files; viewer permission flags are advisory |
+| `abox_pdf_unlock` | `unlock-pdf` | Supplied-password decryption to a new PDF; no password guessing |
+| `abox_audio_edit` | `edit-audio` | Reverse, speed/pitch, gain or normalize an admitted PCM16/Float32 WAV |
+| `abox_audio_trim` | `trim-audio` | Ordered kept ranges or cuts in WAV; configurable fades; encoded samples verified |
+| `abox_video_inspect` | `inspect-video` | MP4/MOV sample tables and technical headers without decoding |
+| `abox_video_trim` | `trim-video` | Copy admitted time ranges; hidden boundary packets can remain, so this is not redaction |
+| `abox_video_join` | `join-videos` | Copy compatible MP4/MOV clips into a new MP4 without re-encoding |
+| `abox_video_rotate` | `rotate-video` | Copy video packets with a clockwise display matrix; viewers must honor orientation |
+| `abox_video_remux` | `remux-video` | Copy supported H.264/AAC MP4/MOV packets into MP4; no transcoding fallback |
+| `abox_document_scan` | `scan-document` | Explicit local corner coordinates to cleaned PNG/PDF; no edge detection or OCR |
+| `abox_id_photo` | `make-id-photo` | Custom rules and explicit landmarks to JPEG photo, print sheet and report; no official approval |
+| `abox_business_profile` | `preview-business-profile` | Illustrative local SVG/PNG; does not access or publish a real listing |
+| `abox_height_compare` | `compare-heights` | Locally configured silhouettes, names and measurements to SVG/PNG |
+| `abox_receipt_extract` | `extract-receipt` | Bundled English OCR to local JSON/CSV; every suggested field needs review |
+| `abox_dicom_inspect` | `inspect-dicom` | Technical headers without patient values for flat PS3.10 native/single-frame RLE files |
+| `abox_dicom_render` | `render-dicom` | One technical PNG preview; burned-in identifiers remain possible |
+| `abox_images_to_video` | `images-to-video` | Still images to silent H.264 MP4 with verified frames/timing |
+| `abox_gif_to_mp4` | `gif-to-mp4` | One GIF cycle to silent H.264 MP4, with a solid background for transparency |
+| `abox_exif_edit` | `edit-exif` | Explicit tag changes from local JSON; compressed picture and other metadata retained |
+| `abox_code_format` | `format-code` | Format HTML/CSS/YAML or minify supported HTML/CSS; preserves active markup, not a sanitizer |
+| `abox_xml_json` | `convert-xml-json` | Explicit lossy XML↔JSON mapping; verifies source mapping rather than semantic round-trip |
+| `abox_markdown_html` | `markdown-to-html` | Small Markdown dialect to standalone passive HTML with CSP; links never opened |
+
+The audio routes admit simple mono/stereo PCM16/Float32 WAV rather than arbitrary
+compressed audio. MP4 creation is limited to 60 seconds, 1800 frames and 1080p
+pixels, and needs a supported installed browser encoder. Receipt OCR includes
+its worker, WebAssembly and English data; no processing asset is downloaded.
+These are operation-specific bounds, not a universal process-memory guarantee.
+EXIF edits use a separate local `edits_path` with bounded `set`/`remove`
+instructions; see [metadata editing](skills/abox-local-files/references/metadata-editing.md).
+Editing retains the thumbnail and other metadata and does not anonymize an image.
+See [additional text formatting](skills/abox-local-files/references/text-formatting.md)
+for exact HTML/CSS/YAML options, XML/JSON mapping losses and the passive Markdown
+dialect. Formatting existing HTML keeps its active content; it is distinct from
+the Markdown renderer's escaped, restricted output.
+
+For PDF protection, pass `open_password_file`/`owner_password_file`; for unlocking,
+pass `password_file`. Their exact UTF-8 text, including BOM and final newline,
+is used without trimming. Never put passwords or decoded code contents into a
+tool request or conversation. Document scans and ID photos require dimensions
+and source pixel coordinates from a local JSON file, supplied deliberately by
+the user. The adapter does not infer sensitive regions or face landmarks.
+
 ## Use the CLI
 
 The CLI provides the same operations without MCP. These commands use Node in a
@@ -290,7 +350,7 @@ prints file contents.
   centrally (`cover`); upscaling is disabled by default. Re-encoding can change
   colors and removes source metadata. A no-op resize preserves original bytes.
 - Metadata removal: JPEG, PNG, and WebP containers, including their animation.
-- PDFs: unencrypted input, up to 5,000 pages and 1,000 output files.
+- PDF page operations: unencrypted input, up to 5,000 pages and 1,000 output files.
   Merging accepts 2–32 PDFs, at most 128 MiB combined. Page selection preserves
   the order and repetition of comma-separated terms. Ranges expand ascending:
   `3,1-2,3` produces 3,1,2,3; use explicit terms for reverse order.

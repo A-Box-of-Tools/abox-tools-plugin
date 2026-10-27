@@ -497,6 +497,9 @@ async function processFile(args, options, kind) {
 
 export function convertYamlJson(args, options = {}) { return processFile(args, options, 'yaml'); }
 export function formatXml(args, options = {}) { return processFile(args, options, 'xml'); }
+export { preflightJson as preflightStructuredJson, preflightXml as preflightStructuredXml, preflightYaml as preflightStructuredYaml,
+  inspectTree as inspectStructuredTree, jsonBytes as structuredJsonBytes, yamlUpperBytes as structuredYamlUpperBytes,
+  plainTree as plainStructuredTree, xmlUpperBytes as structuredXmlUpperBytes };
 
 if (!isMainThread && workerData?.kind === 'abox-structured-text') {
   try {

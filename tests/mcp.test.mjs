@@ -82,7 +82,13 @@ test('MCP initializes, advertises all operations, and returns structured local c
   assert.deepEqual(listed.tools.map(tool => tool.name).sort(), [
     'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_gif_inspect', 'abox_gif_split', 'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout',
     'abox_image_redact', 'abox_image_resize', 'abox_image_stack', 'abox_image_to_ico', 'abox_image_trace', 'abox_images_to_pdf', 'abox_json_format', 'abox_password_generate', 'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
-  ]);
+    'abox_code_read', 'abox_gif_create', 'abox_pdf_protect', 'abox_pdf_unlock', 'abox_audio_edit', 'abox_audio_trim',
+    'abox_exif_edit',
+    'abox_video_rotate', 'abox_video_remux',
+    'abox_code_format', 'abox_xml_json', 'abox_markdown_html',
+    'abox_video_inspect', 'abox_video_trim', 'abox_video_join', 'abox_document_scan', 'abox_id_photo', 'abox_business_profile',
+    'abox_height_compare', 'abox_receipt_extract', 'abox_dicom_inspect', 'abox_dicom_render', 'abox_images_to_video', 'abox_gif_to_mp4',
+  ].sort());
   for (const tool of listed.tools) assert.equal(tool.inputSchema.type, 'object');
   const result = await client.callTool({ name: 'abox_capabilities', arguments: {} });
   assert.ok(!result.isError);
@@ -112,7 +118,7 @@ test('CLI capabilities works independently of the caller working directory', { t
   const json = JSON.parse(result.stdout);
   assert.equal(json.ok, true);
   assert.equal(json.processing, 'local');
-  assert.equal(json.operations.length, 31);
+  assert.equal(json.operations.length, 55);
 });
 
 test('CLI processes a JSON request file and exposes machine-readable failure without overwriting files', { timeout: 30_000 }, async t => {

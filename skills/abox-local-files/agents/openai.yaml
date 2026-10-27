@@ -1,4 +1,4 @@
 interface:
   display_name: "abox.tools local files"
-  short_description: "Local image, PDF and file tools by Abox Technologies."
+  short_description: "Local image, PDF, audio, video, text and OCR tools."
   default_prompt: "Use $abox-local-files to process these local files with abox.tools."

@@ -27,7 +27,7 @@ export async function findBrowser() {
   return null;
 }
 
-export async function withBrowser(work, { signal } = {}) {
+export async function withBrowser(work, { signal, wasm = false, workers = false } = {}) {
   const executablePath = await findBrowser();
   if (!executablePath) throw new AdapterError('BROWSER_NOT_FOUND', 'Install Edge, Chrome, or Chromium, or set ABOX_BROWSER_PATH to its absolute executable path.');
   const { chromium } = await import('playwright-core');
@@ -56,7 +56,7 @@ export async function withBrowser(work, { signal } = {}) {
       if (url.pathname === '/') {
         return route.fulfill({
           contentType: 'text/html',
-          headers: { 'content-security-policy': "default-src 'none'; script-src 'self'; img-src blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'" },
+          headers: { 'content-security-policy': `default-src 'none'; script-src 'self'${wasm ? " 'wasm-unsafe-eval'" : ''}; worker-src ${workers ? "'self' blob:" : "'none'"}; img-src blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'` },
           body: '<!doctype html><meta charset="utf-8"><title>abox.tools local adapter</title><input id="input" type="file">',
         });
       }

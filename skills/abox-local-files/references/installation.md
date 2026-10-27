@@ -37,6 +37,8 @@ For an offline setup, the script accepts absolute `--archive <zip>` and
 `--checksum <sha256-file>` paths. `--cache-root <absolute-directory>` selects a
 different cache without changing app configuration; keep the returned paths.
 
-Image operations need an installed Edge, Chrome or Chromium. No processing call
-downloads dependencies. Keep setup separate from the user's file operations;
+Rendering, WAV editing, receipt OCR and new video encoding need an installed
+Edge, Chrome or Chromium. MP4 creation also needs its supported native H.264
+encoder. Text, metadata, PDF security and video packet-copy routes do not need
+the browser. No processing call downloads dependencies. Keep setup separate from the user's file operations;
 when setup is missing, explain the next setup step instead of running npm.

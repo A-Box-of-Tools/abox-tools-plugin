@@ -23,8 +23,8 @@ exec "$root/runtime/$runtime/node" "$root/bin/abox-mcp.mjs" "$@"
 export function universalManifest(version) {
   return {
     manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version,
-    description: 'Local image, GIF, PDF and text tools, passwords, QR/barcodes, encodings and checksums.',
-    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. Adds GIF inspection/frame extraction, bitmap tracing, aligned image stacking, solid image redaction and password/passphrase generation. Secrets remain in new local plaintext files. Image processing, GIF PNG extraction, PDF compression, watermarks and QR/barcode PNG need installed Edge, Chrome or Chromium. Other operations need no browser. PDF extraction performs no OCR and requires review.',
+    description: 'Local images, PDFs, audio, video, OCR, DICOM and file tools.',
+    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. Supports image and EXIF editing, PDF security, WAV editing, MP4 packet copying, GIF and slideshow creation, document scans, custom ID photos, receipt OCR and uncompressed and RLE DICOM previews. Images, audio, OCR and generated video need installed Edge, Chrome or Chromium; video encoding also requires native H.264 support. Receipt fields require review. DICOM previews are not diagnosis or anonymization. Copied video boundaries are not redaction. File contents and passwords stay local.',
     author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
     homepage: 'https://abox.tools/',
     documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',
