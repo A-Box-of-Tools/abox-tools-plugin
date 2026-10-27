@@ -6,13 +6,14 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.7.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0),
-with **Abox Technologies** as publisher. It provides 25 local file operations and
-one capabilities tool. The release workflow checks native and universal packages,
-Gemini CLI installation, skill discovery and offline standalone adapter setup on
-all four platforms before publication.
+Version 0.8.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0),
+with **Abox Technologies** as publisher. It provides 31 local file operations and
+one capabilities tool. The public GitHub Release contains 26 assets. Native and
+universal package checks, packaged Gemini CLI installation, skill discovery and
+offline standalone adapter setup passed on all four platforms. The public
+Registry record and GitHub asset agree on the universal MCPB's SHA-256.
 The public Gemini release installation route and the skill's actual GitHub download
-were verified on Windows for v0.7.0 on 27 October 2026.
+were verified on Windows for v0.8.0 on 27 October 2026.
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is live; Gemini's gallery crawler is enabled, with gallery listing unconfirmed. The initial 0.2.1 universal MCPB
 was installed in Claude Desktop on Windows, where its server reported Running.
@@ -23,19 +24,43 @@ reviewers to the current public MCPB download. OpenAI directory submission remai
 pending the publisher's local-MCP partner approval. Other distribution routes
 are documented in [Platform support and publishing](platforms.md).
 
-The released source is
-[4c1fa98](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/4c1fa9806acbc8c417863bf7625067c2593e6fdd).
-The [v0.7.0 release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
-and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149)
-record the publication checks. Before publication, local validation passed 107
-core checks and 33 browser checks, followed by the final YAML/XML regressions.
-The extracted native package exposed 26 MCP tools, including capabilities and
-all 25 file operations. Local Gemini installation and offline standalone setup
-also passed. One local Gemini CLI process exited with a Windows libuv assertion
+The tagged v0.8.0 source is
+[5d94af5](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/5d94af561ff2806e823d48de72e8a91d061f9bc2).
+The [v0.8.0 release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806884)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806976)
+passed. Source verification covered Ubuntu and Windows; the release workflow
+completed all four native targets, universal assembly, four universal launch
+checks, publication and registration. The release was published on 27 October
+2026. Local validation passed 121 core and 47 browser checks, and the shared-skill validator
+passed. The public skills CLI 1.7.4 installed the v0.8.0 skill's six files and
+passed its offline installer checks in an isolated directory.
+
+The default Python installer fetched the public Windows ZIP and verified its
+SHA-256 as `bf4c2711885ebdeb728ab8b3701249bcb21afa00ef643de60ac66f27ca1804a0`,
+matching GitHub's digest, before installing it in an isolated cache. The release
+smoke checks then exercised that downloaded and extracted bundle with bundled
+Node.js 24.22.1: all 31 file operations and 32 MCP tools passed, together with
+relocation and installation-link checks. No local rebuild supplied that evidence.
+The public Gemini command with `--ref v0.8.0`, using Gemini CLI 0.65.0, also
+passed on Windows with 32 tools, the shared skill, the bundled runtime and a
+local file operation.
+
+Version 0.8.0 adds GIF inspection and extraction, bitmap tracing, image stacking,
+solid image redaction, and password/passphrase generation. Inspection reads GIF
+headers without claiming pixel validation. Extracted PNGs, traced paths, stacked
+images and opaque black redactions are checked before saving. Passwords use
+cryptographic randomness and are written only to a new plaintext file; secret
+values and their hashes are absent from tool results.
+
+Historical v0.7.0 publication checks are recorded in its
+[release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
+and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149).
+Its public Gemini installation and standalone skill download were checked on
+Windows. One local Gemini CLI process exited with a Windows libuv assertion
 after installation; a separate isolated recheck passed without changing security
 settings or weakening any check.
 
-Version 0.7.0 adds YAML/JSON conversion, XML formatting, text comparison, image
+Version 0.7.0 introduced YAML/JSON conversion, XML formatting, text comparison, image
 data URIs, QR codes and barcodes. Structured text and text comparison use bounded
 local workers. Code generation defaults to SVG without a browser; PNG output
 uses the installed local browser. Payloads, patches and encoded image bytes are

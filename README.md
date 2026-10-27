@@ -14,17 +14,22 @@ stacks aligned images, redacts image regions and generates passwords into local 
 
 This source version provides 31 local file operations and one capabilities tool.
 
+The public v0.8.0 Windows download was installed and checked in an isolated
+cache. All 31 operations passed using its included runtime. Public Gemini CLI
+installation and the shared skill were also checked; see [publication evidence](docs/publishing.md).
+
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image processing, PDF compression and PDF watermark rendering need an
-installed Edge, Chrome, or Chromium. PDF page operations, metadata operations and
-checksums, PDF table extraction, structured text, Base64, text comparison and
-data URI encoding do not. QR codes and barcodes default to SVG without a browser;
+commands. Image processing, GIF extraction, tracing, stacking, redaction, PDF
+compression and PDF watermark rendering need an installed Edge, Chrome, or
+Chromium. PDF page operations, metadata operations and checksums, GIF inspection,
+password generation, PDF table extraction, structured text, Base64, text comparison
+and data URI encoding do not. QR codes and barcodes default to SVG without a browser;
 PNG output uses the installed local browser.
 
 ## Install in Codex
@@ -38,8 +43,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.7.0 Windows
-   bundle extracts as `abox-tools-0.7.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.8.0 Windows
+   bundle extracts as `abox-tools-0.8.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then

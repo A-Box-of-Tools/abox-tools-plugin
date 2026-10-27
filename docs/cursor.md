@@ -1,16 +1,22 @@
 # Use abox.tools in Cursor
 
-The v0.7.0 release includes a native ZIP for Windows x64, Linux x64,
+The v0.8.0 release includes a native ZIP for Windows x64, Linux x64,
 macOS Apple silicon and macOS Intel. Download
 the ZIP matching your computer, extract it to a permanent folder, and open
 `START-HERE.html`. Select **Install tools in Cursor** and review Cursor's
 installation prompt. The link
 configures the Node runtime and MCP server inside that extracted folder. Keep
 the folder in place. Node.js, npm, Python and a source build are not required
-for this route. The adapter exposes 25 local file operations and one capabilities
-tool. Image processing, PDF compression and watermark rendering need an installed
-Edge, Chrome or Chromium browser. QR codes and barcodes default to SVG without a
+for this route. The adapter exposes 31 local file operations and one capabilities
+tool. Image processing, GIF extraction, tracing, stacking, redaction, PDF
+compression and watermark rendering need an installed Edge, Chrome or Chromium
+browser. GIF inspection and password generation need no browser. QR codes and barcodes default to SVG without a
 browser; PNG output uses the installed local browser.
+
+The v0.8.0 native bundle's installation links and MCP configuration were checked
+after downloading and installing the public Windows ZIP in an isolated cache.
+The same bundle passed all 31 file operations with its included runtime.
+Installation through Cursor's desktop interface remains unverified.
 
 The Git repository also contains a Cursor plugin manifest at
 `.cursor-plugin/plugin.json`. It explicitly selects `cursor-mcp.json`; the

@@ -18,14 +18,14 @@ Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: 25 local image, PDF, structured-text,
-> comparison, QR, barcode, metadata and checksum tools with a shared agent skill.
+> Abox Technologies publishes abox.tools: 31 local image, GIF, PDF, text, code,
+> password, metadata and checksum tools with a shared agent skill.
 > Runtimes are included. Image processing uses installed Edge, Chrome or Chromium.
 > PDF tables have no OCR. Files stay local. No account required.
 
 Long description:
 
-> Give your agent 25 reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent 31 reusable file tools: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
@@ -39,11 +39,18 @@ Long description:
 > limited subset; XML formatting refuses DTDs and custom entities. Text comparison
 > reports ignore settings separately while its patch always transforms the raw
 > originals. QR and barcode results are independently decoded before writing.
+> Inspect GIF headers or extract verified stored or composited PNG frames. Trace
+> bitmap shapes into a single-color SVG, combine aligned opaque image frames,
+> permanently replace selected image pixels with opaque black, or generate
+> passwords and EFF passphrases directly into a new local plaintext file.
+> Redaction uses explicit full-resolution rectangles and does not find sensitive
+> content. Password values, hashes and samples are excluded from tool results.
 > PDF tables are inferred without OCR and require review against the source.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
-> The release includes Node and the server dependencies. Image processing, PDF compression and watermark rendering need
+> The release includes Node and the server dependencies. Image processing, GIF
+> extraction, tracing, stacking, redaction, PDF compression and watermark rendering need
 > an installed Edge, Chrome, or Chromium. QR codes and barcodes default to SVG
 > without a browser; PNG output uses the installed local browser. Metadata
 > cleaning keeps orientation and color profiles by default. Data URI encoding
@@ -100,6 +107,12 @@ and release smoke checks generate synthetic fixtures and verify outputs.
 | Image data URI | Embed a synthetic SVG as a bare URI and an HTML image. | Decoded bytes equal the original; readable percent encoding is used only for a bare SVG URI and embedding envelopes use Base64. Metadata and markup remain intact. |
 | QR code | Generate an SVG from a local UTF-8 payload file ending in a newline. | Independent decoding retains the exact payload, including the newline. The payload is absent from MCP results and errors. |
 | Barcode | Generate a barcode from a disposable numeric payload file. | Independently decoded output matches the selected format's normalization and check-digit rules; unsupported capacity or verification limits are refused. |
+| GIF inspection | Inspect a synthetic animation with multiple timings and disposal methods. | Paginated header and timing summary without embedded text or palette colors; `verified: false` makes the absence of pixel validation explicit. |
+| GIF extraction | Extract selected composited PNGs from the same animation. | New timing manifest and decoded PNG pixels matching the source compositor; the GIF remains unchanged. |
+| Bitmap tracing | Trace a simple black shape on white into an SVG. | Passive single-color path with checked rendered pixels; the result is an approximation and must be reviewed visually. |
+| Image stacking | Average two already aligned opaque images of equal size. | New PNG matches independently checked stack arithmetic and decoded output pixels; no alignment is attempted. |
+| Solid redaction | Redact user-specified rectangles from a synthetic PNG, using a local JSON file with exact decoded dimensions. | Requested pixels are exactly opaque black, outside alpha is retained, visible outside colors are checked, and source metadata is absent. Review coverage before sharing. |
+| Password generation | Generate two six-word passphrases using a local configuration file. | New private plaintext file, with only path, count and settings returned. No generated value, hash or sample appears in tool replies. |
 
 | Negative case | Request | Expected result |
 | --- | --- | --- |
@@ -114,12 +127,16 @@ installation or replace that recording.
 
 ## Submission status and access
 
-The [version 0.7.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0)
-identifies Abox Technologies as publisher. This release provides 25 local file
-operations and one capabilities tool. Publication checks are recorded in its
-[release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
-and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149)
-for the release from [4c1fa98](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/4c1fa9806acbc8c417863bf7625067c2593e6fdd).
+The active [v0.8.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0)
+identifies Abox Technologies as publisher. This version provides 31 local file operations and one
+capabilities tool. Its
+[release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806884)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806976)
+passed for tagged source
+[5d94af5](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/5d94af561ff2806e823d48de72e8a91d061f9bc2).
+The public release has 26 assets; native and universal packages passed all four
+platform targets, and the public Registry record's universal MCPB hash matches
+the GitHub asset.
 Claude's form confirmed the
 publisher correction and the 0.3.0 review download link; directory review remains
 pending. Its original 0.2.1 attachment cannot be replaced through response
@@ -128,10 +145,16 @@ Version 0.2.1 is installed and Running in Claude Desktop on Windows. OpenAI
 remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Gemini's normal public-release installation was verified for v0.7.0;
-version 0.7.0's four platform archives and offline skill setup are checked in CI.
-The shared skill's real v0.7.0 GitHub release download and integrity verification
-also passed on Windows on 27 October 2026 in an isolated directory.
+is public. The public skills CLI 1.7.4 installed the v0.8.0 skill's six files and
+passed its offline installer checks in an isolated directory on 27 October 2026.
+Gemini's normal public-release installation passed for v0.8.0 using CLI 0.65.0
+on Windows, with 32 tools, the shared skill, bundled runtime and a local file
+operation. Version 0.8.0's four platform archives and offline skill setup passed
+CI. The default Python installer fetched and verified the real v0.8.0 Windows
+ZIP in an isolated cache; all 31 operations and 32 MCP tools then passed against
+that installed bundle using its Node.js 24.22.1 runtime. Relocation and
+installation-link checks also passed. Historical v0.7.0 public installation and
+download checks are recorded in [Publishing](publishing.md).
 A gallery listing is unconfirmed after adding its discovery
 topic. Cursor's native installation link and source launcher are tested. Its
 Marketplace application was submitted on 26 October 2026 for Abox Technologies
