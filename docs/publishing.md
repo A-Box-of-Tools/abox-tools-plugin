@@ -6,12 +6,14 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.6.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0),
-with **Abox Technologies** as publisher. All nineteen operations passed native and
-universal package checks on all four platforms. Gemini CLI installation, skill
-discovery and offline standalone adapter setup also passed on all four platforms.
+Version 0.7.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0),
+with **Abox Technologies** as publisher. It provides 25 local file operations and
+one capabilities tool. The release workflow checks native and universal packages,
+Gemini CLI installation, skill discovery and offline standalone adapter setup on
+all four platforms before publication.
 The public Gemini release installation route and the skill's actual GitHub download
-were verified on Windows for v0.6.0 on 27 October 2026. The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
+were verified on Windows for v0.7.0 on 27 October 2026.
+The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is live; Gemini's gallery crawler is enabled, with gallery listing unconfirmed. The initial 0.2.1 universal MCPB
 was installed in Claude Desktop on Windows, where its server reported Running.
 The Claude desktop extension form confirmed the publisher correction and current
@@ -21,15 +23,25 @@ reviewers to the current public MCPB download. OpenAI directory submission remai
 pending the publisher's local-MCP partner approval. Other distribution routes
 are documented in [Platform support and publishing](platforms.md).
 
-The released source is [bac1981](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/bac19813156d93b18b27b8083f8fe85711889252).
-The [v0.6.0 release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529057381)
-and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529056329)
-record the publication checks. Before publication, local validation passed 75
-core checks and 31 browser checks. The extracted
-native package exposed 20 MCP tools, including capabilities and all 19 file
-operations; local Gemini installation and offline standalone setup also passed.
+The released source is
+[4c1fa98](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/4c1fa9806acbc8c417863bf7625067c2593e6fdd).
+The [v0.7.0 release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149)
+record the publication checks. Before publication, local validation passed 107
+core checks and 33 browser checks, followed by the final YAML/XML regressions.
+The extracted native package exposed 26 MCP tools, including capabilities and
+all 25 file operations. Local Gemini installation and offline standalone setup
+also passed. One local Gemini CLI process exited with a Windows libuv assertion
+after installation; a separate isolated recheck passed without changing security
+settings or weakening any check.
 
-Version 0.6.0 adds the native bundle's VS Code installation link. URI decoding
+Version 0.7.0 adds YAML/JSON conversion, XML formatting, text comparison, image
+data URIs, QR codes and barcodes. Structured text and text comparison use bounded
+local workers. Code generation defaults to SVG without a browser; PNG output
+uses the installed local browser. Payloads, patches and encoded image bytes are
+written to local files, while MCP results contain paths and concise summaries.
+
+Version 0.6.0 introduced the native bundle's VS Code installation link. URI decoding
 and a real MCP connection verify its configuration; installation through VS
 Code's desktop interface remains unverified. On 27 October 2026, AgentSkillsDir did not accept the
 authorized submission attempt because resource submissions were closed.

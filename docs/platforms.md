@@ -2,32 +2,37 @@
 
 Publisher: **Abox Technologies**. Product: **abox.tools**.
 
-The [v0.6.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.6.0)
-is public with 26 assets. All nineteen operations, Gemini installation and
-standalone skill setup passed CI on all four platforms. Directory status is
-recorded separately below. See the [release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529057381)
-and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529056329).
+The [v0.7.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.7.0)
+provides 25 local file operations and one capabilities tool. Tagged releases
+verify the native and universal packages, Gemini installation and standalone
+skill setup on all four platforms before publication. Directory status is
+recorded separately below. Publication checks are recorded in the v0.7.0
+[release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
+and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149).
 
 | Client | Installation route | Runtime requirements |
 | --- | --- | --- |
-| Codex desktop | Extract the matching native `abox-tools-0.6.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
-| Claude Desktop / MCPB hosts | Open `abox-tools-0.6.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
+| Codex desktop | Extract the matching native `abox-tools-0.7.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
+| Claude Desktop / MCPB hosts | Open `abox-tools-0.7.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
 | Cursor | Use the native ZIP's **Install tools in Cursor** button for the local MCP tools. The repository also carries a Cursor plugin and shared skill. | The native link uses the included runtime. A source plugin needs Node.js 22.15+ on PATH and one-time adapter setup. See [Cursor setup](cursor.md). |
 | VS Code | Use the native ZIP's **Install tools in VS Code** button, included from version 0.6.0. | VS Code with its URL handler must be installed. The link selects the bundled runtime and absolute server path; keep the extracted folder. |
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
 | Agents supported by skills.sh | Install `abox-local-files` from this repository, then run its one-time adapter setup. | The current skills CLI needs Node.js 22.20+. Adapter setup uses Python 3 and downloads a verified native ZIP; later file processing uses the cached bundled runtime. |
 
 Image processing, PDF compression and PDF watermark rendering need an
-installed Edge, Chrome or Chromium browser. PDF page operations, hashes and
-metadata removal, PDF table extraction, JSON and Base64 use the local adapter directly. All routes use the same
-processing engines and refuse existing output paths.
+installed Edge, Chrome or Chromium browser. QR codes and barcodes default to
+SVG without a browser; their PNG output uses the installed local browser.
+PDF page operations, hashes, metadata operations, PDF table extraction,
+structured text, Base64, text comparison and data URI encoding use the local
+adapter directly. All routes use the same processing engines and refuse
+existing output paths.
 
 ## Gemini CLI
 
 Install the released extension with:
 
 ```sh
-gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.6.0
+gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.7.0
 ```
 
 The release includes these Gemini-specific assets:
@@ -46,9 +51,9 @@ runtime or installed server dependencies.
 
 The public repository has the root manifest and `gemini-cli-extension` topic
 required for Google's daily gallery crawler. A gallery listing is unconfirmed. The
-public GitHub-release installation route passed for v0.6.0 using Gemini CLI 0.65.0 on Windows,
+public GitHub-release installation route passed for v0.7.0 using Gemini CLI 0.65.0 on Windows,
 including bundled runtime selection, shared skill discovery and a local file
-operation. Version 0.6.0's extracted release archives are installed and checked
+operation. Version 0.7.0's extracted release archives are installed and checked
 in CI on all four platforms. See the official [release and gallery requirements](https://geminicli.com/docs/extensions/releasing/).
 
 ## Shared skill and skills.sh
@@ -73,7 +78,7 @@ its Node.js 22.20+ requirement. Installation telemetry drives the
 was verified public on 25 October 2026, displaying Abox Technologies and the
 standalone setup guide. Installation counts and rankings update separately.
 The public skill installation and its default adapter installer also downloaded
-and verified the real v0.6.0 Windows release on 27 October 2026 in an isolated
+and verified the real v0.7.0 Windows release on 27 October 2026 in an isolated
 directory, without changing the user's agent settings.
 
 ## Publication status and other clients

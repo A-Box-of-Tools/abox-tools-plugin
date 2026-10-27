@@ -18,14 +18,14 @@ Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: local image, PDF, JSON, Base64, metadata
-> and checksum tools with a shared agent skill. Runtimes and dependencies are
-> included. Image processing uses installed Edge, Chrome or Chromium. PDF table
-> extraction has no OCR. Files stay local. No account required.
+> Abox Technologies publishes abox.tools: 25 local image, PDF, structured-text,
+> comparison, QR, barcode, metadata and checksum tools with a shared agent skill.
+> Runtimes are included. Image processing uses installed Edge, Chrome or Chromium.
+> PDF tables have no OCR. Files stay local. No account required.
 
 Long description:
 
-> Give your agent nineteen reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent 25 reusable file tools: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
@@ -33,15 +33,25 @@ Long description:
 > multi-size ICO icons and rasterize self-contained static SVGs. Compose grids or
 > strips from images, extract selectable PDF tables into CSV, format JSON while
 > preserving large numbers and duplicate keys, and encode/decode Base64 files.
+> Convert supported YAML and JSON, format XML, compare text files with a verified
+> unified patch, embed original image bytes as data URIs, and generate QR codes or
+> barcodes from the exact UTF-8 text in a local file. YAML conversion supports a
+> limited subset; XML formatting refuses DTDs and custom entities. Text comparison
+> reports ignore settings separately while its patch always transforms the raw
+> originals. QR and barcode results are independently decoded before writing.
 > PDF tables are inferred without OCR and require review against the source.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
 > The release includes Node and the server dependencies. Image processing, PDF compression and watermark rendering need
-> an installed Edge, Chrome, or Chromium; the other operations do not. Metadata
-> cleaning keeps orientation and color profiles by default. Input files are
-> limited to 128 MiB, except streaming checksums (8 GiB), JSON and Base64 (8 MiB). Native
-> ZIPs and Gemini extensions also include a shared workflow skill. The
+> an installed Edge, Chrome, or Chromium. QR codes and barcodes default to SVG
+> without a browser; PNG output uses the installed local browser. Metadata
+> cleaning keeps orientation and color profiles by default. Data URI encoding
+> preserves original metadata and SVG markup; its signature check does not prove
+> image validity or rendering. Most image and PDF inputs are limited to 128 MiB;
+> text and code-generation tools have lower operation-specific limits, while
+> streaming checksums support 8 GiB. Native ZIPs and Gemini extensions also
+> include a shared workflow skill. The
 > MCPB installs the MCP tools in compatible desktop hosts.
 
 ## Public links and assets
@@ -84,6 +94,12 @@ and release smoke checks generate synthetic fixtures and verify outputs.
 | PDF ranges | Extract `1-2` and `3` as separate PDFs from a three-page input. | Two new PDFs with two and one pages respectively. |
 | Default metadata | Remove image metadata while preserving appearance. | Verified clean copy; orientation and ICC may remain, and the result describes that. |
 | Strict metadata | Remove supported metadata with `keep_orientation: false` and `keep_icc: false`. | New verified copy; supported orientation and ICC fields removed. |
+| YAML / JSON | Convert a YAML configuration with a large integer and duplicate keys to JSON. | Numeric tokens and ordered duplicate keys retained; comments may be removed. Unsupported YAML features are refused. |
+| XML | Format XML containing mixed text, `xml:space`, predefined entities and numeric references. | New XML retains the source engine's mixed-content and preserved-whitespace semantics. DTDs and custom entities are refused. |
+| Text comparison | Compare two UTF-8 files containing changed whitespace and a missing final newline. | New `.diff` or `.patch` is independently replayed to the exact right-hand input; ignore options affect only the comparison summary. |
+| Image data URI | Embed a synthetic SVG as a bare URI and an HTML image. | Decoded bytes equal the original; readable percent encoding is used only for a bare SVG URI and embedding envelopes use Base64. Metadata and markup remain intact. |
+| QR code | Generate an SVG from a local UTF-8 payload file ending in a newline. | Independent decoding retains the exact payload, including the newline. The payload is absent from MCP results and errors. |
+| Barcode | Generate a barcode from a disposable numeric payload file. | Independently decoded output matches the selected format's normalization and check-digit rules; unsupported capacity or verification limits are refused. |
 
 | Negative case | Request | Expected result |
 | --- | --- | --- |
@@ -98,10 +114,12 @@ installation or replace that recording.
 
 ## Submission status and access
 
-Checked 27 October 2026: [version 0.6.0 is active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0),
-identifying Abox Technologies as publisher. The [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529057381)
-and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40529056329)
-record the nineteen-operation release from [bac1981](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/bac19813156d93b18b27b8083f8fe85711889252).
+The [version 0.7.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.7.0)
+identifies Abox Technologies as publisher. This release provides 25 local file
+operations and one capabilities tool. Publication checks are recorded in its
+[release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149)
+for the release from [4c1fa98](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/4c1fa9806acbc8c417863bf7625067c2593e6fdd).
 Claude's form confirmed the
 publisher correction and the 0.3.0 review download link; directory review remains
 pending. Its original 0.2.1 attachment cannot be replaced through response
@@ -110,9 +128,9 @@ Version 0.2.1 is installed and Running in Claude Desktop on Windows. OpenAI
 remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Gemini's normal public-release installation was verified for v0.6.0;
-version 0.6.0's four platform archives and offline skill setup are checked in CI.
-The shared skill's real v0.6.0 GitHub release download and integrity verification
+is public. Gemini's normal public-release installation was verified for v0.7.0;
+version 0.7.0's four platform archives and offline skill setup are checked in CI.
+The shared skill's real v0.7.0 GitHub release download and integrity verification
 also passed on Windows on 27 October 2026 in an isolated directory.
 A gallery listing is unconfirmed after adding its discovery
 topic. Cursor's native installation link and source launcher are tested. Its
