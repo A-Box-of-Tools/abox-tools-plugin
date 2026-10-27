@@ -26,6 +26,10 @@ const seeds = [
   'tools/image-to-ico/src/render.js', 'tools/image-to-ico/src/ico.js', 'tools/image-to-ico/src/sizes.js',
   'tools/svg-to-image/src/svg.js', 'tools/svg-to-image/src/sizing.js',
   'tools/svg-to-image/src/render.js', 'tools/svg-to-image/src/svg-linked-assets.js',
+  'tools/image-layout/src/arrange.js',
+  'tools/pdf-to-csv/src/read.js', 'tools/pdf-to-csv/src/rows.js',
+  'tools/pdf-to-csv/src/check.js', 'tools/pdf-to-csv/src/csv.js',
+  'shared/js/parse-json.js', 'tools/base64/src/encode.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
   'tools/compress-image/README.md', 'tools/resize-image/README.md',
   'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
@@ -33,6 +37,8 @@ const seeds = [
   'tools/images-to-pdf/README.md', 'tools/hash-checksum/README.md',
   'tools/compress-pdf/README.md', 'tools/watermark-pdf/README.md',
   'tools/image-to-ico/README.md', 'tools/svg-to-image/README.md',
+  'tools/image-layout/README.md', 'tools/pdf-to-csv/README.md',
+  'tools/json-formatter/README.md', 'tools/base64/README.md',
   'LICENSE',
 ];
 

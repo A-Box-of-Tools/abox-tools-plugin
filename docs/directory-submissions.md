@@ -12,32 +12,35 @@ Publisher: **Abox Technologies**
 
 Use this registered trade name consistently; abox.tools is the product name.
 
-Short description (29 characters): **Process local images and PDFs**
+Short description: **Process local images, PDFs and files**
 
 Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: process images, PDFs, SVGs and icons;
-> create PDFs from photos; inspect or remove image metadata; and calculate checksums.
-> Files stay local. Runtimes and dependencies are included. Image processing uses
-> installed Edge, Chrome or Chromium. No account required.
+> Abox Technologies publishes abox.tools: local image, PDF, JSON, Base64, metadata
+> and checksum tools with a shared agent skill. Runtimes and dependencies are
+> included. Image processing uses installed Edge, Chrome or Chromium. PDF table
+> extraction has no OCR. Files stay local. No account required.
 
 Long description:
 
-> Give your agent fifteen reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent nineteen reusable file tools: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
 > Additional operations compress PDFs, overlay PDF text watermarks, create
-> multi-size ICO icons and rasterize self-contained static SVGs.
+> multi-size ICO icons and rasterize self-contained static SVGs. Compose grids or
+> strips from images, extract selectable PDF tables into CSV, format JSON while
+> preserving large numbers and duplicate keys, and encode/decode Base64 files.
+> PDF tables are inferred without OCR and require review against the source.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
 > The release includes Node and the server dependencies. Image processing, PDF compression and watermark rendering need
 > an installed Edge, Chrome, or Chromium; the other operations do not. Metadata
 > cleaning keeps orientation and color profiles by default. Input files are
-> limited to 128 MiB, except streaming checksums, which accept up to 8 GiB. Native
+> limited to 128 MiB, except streaming checksums (8 GiB), JSON and Base64 (8 MiB). Native
 > ZIPs and Gemini extensions also include a shared workflow skill. The
 > MCPB installs the MCP tools in compatible desktop hosts.
 

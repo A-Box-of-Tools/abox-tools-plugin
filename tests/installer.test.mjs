@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
-import { cursorServerConfig, installerUrl } from '../scripts/open-installer.mjs';
+import { cursorServerConfig, vscodeServerConfig, installerUrl } from '../scripts/open-installer.mjs';
 
 test('the installer preserves spaces, apostrophes, punctuation, and Unicode in the extracted folder path', () => {
   const root = path.resolve("O'Brien & 100% Québec", 'abox tools');
@@ -29,5 +29,27 @@ test('Cursor links preserve Unicode paths and select the bundled runtime on ever
     assert.deepEqual(config.args, [path.join(root, 'bin', 'abox-mcp.mjs')]);
     assert.ok(!parsed.href.includes("'"));
   }
-  assert.throws(() => installerUrl(root, 'unknown'), /Choose codex or cursor/);
+  assert.throws(() => installerUrl(root, 'unknown'), /Choose codex, cursor, or vscode/);
+});
+
+test('VS Code links carry one encoded server object with absolute bundled paths', () => {
+  const root = path.resolve("O'Brien & 100% Québec #?", 'abox tools');
+  for (const platform of ['win32', 'darwin', 'linux']) {
+    const uri = installerUrl(root, 'vscode', { platform });
+    const parsed = new URL(uri);
+    assert.equal(parsed.protocol, 'vscode:');
+    assert.equal(parsed.host, '');
+    assert.equal(parsed.pathname, 'mcp/install');
+    assert.equal(parsed.hash, '');
+    const config = JSON.parse(decodeURIComponent(parsed.search.slice(1)));
+    assert.deepEqual(config, vscodeServerConfig(root, { platform }));
+    assert.deepEqual(Object.keys(config), ['name', 'type', 'command', 'args']);
+    assert.equal(config.name, 'abox-tools');
+    assert.equal(config.type, 'stdio');
+    assert.equal(config.command, path.join(root, 'runtime', platform === 'win32' ? 'node.exe' : 'node'));
+    assert.deepEqual(config.args, [path.join(root, 'bin', 'abox-mcp.mjs')]);
+    assert.ok(!uri.includes("'"), 'The URL must be safe inside the Windows launcher handoff.');
+  }
+  assert.throws(() => vscodeServerConfig('relative/bundle'), /absolute local bundle path/);
+  assert.throws(() => vscodeServerConfig(root, { platform: 'unsupported' }), /supported platform/);
 });

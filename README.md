@@ -1,8 +1,9 @@
 # abox.tools for agents
 
 Published by **Abox Technologies**. Compress, resize and convert images; create
-ICO icons and rasterize SVGs; compress, watermark, merge, split, reorder and
-rotate PDF pages; turn images into PDFs; inspect or remove
+ICO icons, rasterize SVGs and compose image layouts; compress, watermark, merge,
+split, reorder and rotate PDF pages; extract PDF tables to CSV; turn images into
+PDFs; format JSON; encode or decode Base64 files; inspect or remove
 image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
@@ -16,7 +17,7 @@ Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
 commands. Image processing, PDF compression and PDF watermark rendering need an
 installed Edge, Chrome, or Chromium. PDF page operations, metadata operations and
-checksums do not.
+checksums, PDF table extraction, JSON and Base64 do not.
 
 ## Install in Codex
 
@@ -29,8 +30,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.5.0 Windows
-   bundle extracts as `abox-tools-0.5.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.6.0 Windows
+   bundle extracts as `abox-tools-0.6.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -87,6 +88,15 @@ Keep the extracted folder in place. This adds the MCP tools; the shared skill
 can be installed separately. The repository's Cursor plugin route needs Node
 and a one-time adapter setup; see [Cursor installation](docs/cursor.md).
 
+## Install tools in VS Code
+
+Extract the matching native ZIP, open `START-HERE.html`, and select **Install
+tools in VS Code**. Review the local server configuration in VS Code and keep
+the extracted folder in place. The button uses the bundled runtime; Node, npm
+and a VSIX are not required. This installs MCP tools. Install the shared skill
+separately if your agent supports it. See the
+[official MCP installation-link documentation](https://code.visualstudio.com/api/extension-guides/ai/mcp#create-an-mcp-installation-url).
+
 ## Install the shared skill through skills.sh
 
 For agents supported by the skills CLI (Node 22.20+):
@@ -120,6 +130,10 @@ is public. Gemini release installation is verified; a gallery listing is unconfi
 - “Add a diagonal DRAFT watermark to every PDF page.”
 - “Make an ICO with 16, 32, 48 and 256 pixel versions of this logo.”
 - “Export this SVG as a transparent PNG, 1200 pixels wide.”
+- “Arrange these photos into a two-column grid with transparent gaps.”
+- “Extract the tables on pages 2–4 into a CSV I can review.”
+- “Format this JSON without changing large numbers or key order.”
+- “Decode this Base64 file into a new binary file.”
 
 All input and output paths must be absolute. Existing outputs are never
 overwritten. Image compression accepts an exact byte target; a result reports
@@ -143,6 +157,10 @@ whether the target was met.
 | `abox_pdf_watermark` | `input_path`, `output_path`, `text` | `size`, `color`, `opacity`, `diagonal`, `tiled`, `first_page_only` |
 | `abox_image_to_ico` | `input_path`, `output_path` | `sizes`, `fit`: `pad`, `crop`, `stretch`; `storage`: `auto`, `png`, `bmp`; optional `background` |
 | `abox_svg_to_image` | `input_path`, `output_path` | `format`: `png`, `jpeg`, `webp`; `width`, `height`, `fit`, `quality`, `background` |
+| `abox_image_layout` | ordered `input_paths`, `output_path` | `layout`: `grid`, `horizontal`, `vertical`; `width`, grid `columns`, `ratio`, `gap`, `padding`, `fit`, `format`, `quality`, `background` |
+| `abox_pdf_to_csv` | `input_path`, `output_path` | `pages`, `table_index`, `date_order`: `auto`, `dmy`, `mdy`; `include_headers`, `spreadsheet_safe` |
+| `abox_json_format` | `input_path`, `output_path` | `minify`, `indent`: `2`, `4`, `tab`; `sort_keys` (opt-in natural sorting) |
+| `abox_base64` | `input_path`, `output_path`, `mode` | `encode` or `decode`; `url_safe`; decoding `canonical` |
 
 ## Use the CLI
 
@@ -168,6 +186,10 @@ node bin/abox.mjs compress-pdf --request-file /absolute/path/compress-pdf.json
 node bin/abox.mjs watermark-pdf --request-file /absolute/path/watermark.json
 node bin/abox.mjs image-to-ico --request-file /absolute/path/icon.json
 node bin/abox.mjs svg-to-image --request-file /absolute/path/svg.json
+node bin/abox.mjs image-layout --request-file /absolute/path/layout.json
+node bin/abox.mjs pdf-to-csv --request-file /absolute/path/tables.json
+node bin/abox.mjs format-json --request-file /absolute/path/format.json
+node bin/abox.mjs base64 --request-file /absolute/path/base64.json
 ```
 
 A compression request file contains:
@@ -251,6 +273,33 @@ prints file contents.
   16,384 pixels per side and 80 megapixels. Active content, foreign objects,
   external references, CSS imports/escapes and animations are refused. JPEG
   fills transparency with white by default. Fonts and colors can vary by browser.
+- Image layouts: 2–32 still JPEG, PNG or WebP images, at most 128 MiB combined
+  and 80 megapixels per input. Output is at most 8192 pixels per side and 32
+  megapixels. Grids default to two square columns; horizontal/vertical strips
+  preserve original aspect ratios. Contain retains the full image; cover crops.
+  New pixels are rendered in 8-bit SDR and source metadata is not copied.
+- PDF to CSV: selectable text only, no OCR. Tables, headings, dates and amounts
+  are inferred and can be incomplete or wrong; review the CSV against the PDF.
+  UTF-8 BOM, comma delimiter, CRLF lines. Multiple tables have a blank separator
+  row. Year-bearing dates and inferred amounts are normalized; auto date order
+  falls back to day-first when ambiguous. Formula-like text is escaped with an
+  apostrophe by default. Up to 1000 tables, 64 columns per table, 100000 data
+  rows, one million cells/glyphs and 16 MiB of output. Structural verification
+  does not establish extraction accuracy.
+- PDF table extraction currently accepts unfiltered and Flate streams without
+  predictors. It conservatively refuses legacy LZW/RunLength, ASCII-armoured
+  streams and predictors, even in unused images or xrefs. Blocked PDF names in
+  printed text can also cause refusal. Stream expansion is limited to 16 MiB
+  per Flate stream and 64 MiB cumulatively before buffering decoded data.
+- JSON: UTF-8 input up to 8 MiB, nesting up to 256 levels, output up to 32 MiB.
+  Preserves raw number and string tokens, duplicate keys and object key order.
+  Sorting is opt-in. Both pretty and minified output end with a newline. The
+  parser accepts at most 250000 syntax nodes, including object keys.
+- Base64: arbitrary binary files, including empty files; input up to 8 MiB,
+  output up to 32 MiB. Standard encoding is padded; URL-safe encoding is unpadded.
+  Relaxed decoding accepts whitespace, missing padding and either alphabet.
+  Canonical validation requires the exact requested spelling and zero unused
+  bits. Encoded/decoded bytes are written locally and never returned to the agent.
 - Each other input: at most 128 MiB.
 - Compression: up to 80 megapixels and two minutes per image. `auto` may adjust
   the output extension to match the selected format. Other modes require the
@@ -295,6 +344,8 @@ does not deploy the website or publish a production catalogue endpoint.
 For directory submissions and MCP registration, see [Publishing](docs/publishing.md).
 For Gemini CLI, Vercel skills.sh, Cursor and other distribution options, see
 [Platform support and publishing](docs/platforms.md).
+For additional directories, local distribution and their account or licensing
+requirements, see [Other sharing platforms](docs/distribution-options.md).
 
 ## Developer setup and other MCP hosts
 

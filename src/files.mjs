@@ -18,27 +18,30 @@ export function localPath(value) {
   return path.normalize(value);
 }
 
-export async function readInput(value) {
+export async function readInput(value, { allow_empty = false, max_bytes = MAX_INPUT_BYTES } = {}) {
+  if (typeof allow_empty !== 'boolean' || !Number.isSafeInteger(max_bytes) || max_bytes < 1 || max_bytes > MAX_INPUT_BYTES) {
+    throw new AdapterError('INVALID_ARGUMENTS', 'allow_empty must be a boolean and max_bytes a positive integer no greater than 128 MiB.');
+  }
   const input = localPath(await realpath(localPath(value)));
   if (!(await stat(input)).isFile()) throw new AdapterError('INPUT_NOT_FILE', 'The input must be a regular file.');
   const file = await open(input, 'r');
   try {
     const info = await file.stat();
     if (!info.isFile()) throw new AdapterError('INPUT_NOT_FILE', 'The input must be a regular file.');
-    if (!info.size || info.size > MAX_INPUT_BYTES) {
-      throw new AdapterError('INPUT_SIZE', `Input files must contain 1 to ${MAX_INPUT_BYTES} bytes.`);
+    if ((!allow_empty && !info.size) || info.size > max_bytes) {
+      throw new AdapterError('INPUT_SIZE', `Input files must contain ${allow_empty ? 0 : 1} to ${max_bytes} bytes.`);
     }
     const parts = [];
     let size = 0;
     while (true) {
-      const buffer = Buffer.allocUnsafe(Math.min(1024 * 1024, MAX_INPUT_BYTES + 1 - size));
+      const buffer = Buffer.allocUnsafe(Math.min(1024 * 1024, max_bytes + 1 - size));
       const { bytesRead } = await file.read(buffer);
       if (!bytesRead) break;
       size += bytesRead;
-      if (size > MAX_INPUT_BYTES) throw new AdapterError('INPUT_SIZE', 'The input grew beyond the supported size.');
+      if (size > max_bytes) throw new AdapterError('INPUT_SIZE', 'The input grew beyond the supported size.');
       parts.push(buffer.subarray(0, bytesRead));
     }
-    if (!size) throw new AdapterError('INPUT_SIZE', 'The input became empty while it was being read.');
+    if (!size && !allow_empty) throw new AdapterError('INPUT_SIZE', 'The input became empty while it was being read.');
     const data = Buffer.concat(parts, size);
     return { path: input, data };
   } finally {

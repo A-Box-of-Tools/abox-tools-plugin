@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.5.0",
-  "description": "Process images and PDFs, inspect or remove image metadata, and calculate file checksums locally.",
+  "version": "0.6.0",
+  "description": "Process images, PDFs, JSON and Base64 files, inspect or remove image metadata, and calculate checksums locally.",
   "author": {
     "name": "Abox Technologies",
     "url": "https://abox.tools/"
@@ -16,7 +16,7 @@
       "onboardingSkill": "./skills/setup/SKILL.md",
       "interface": {
         "displayName": "abox.tools",
-        "shortDescription": "Process local images and PDFs",
+        "shortDescription": "Process local images, PDFs and files",
         "developerName": "Abox Technologies",
         "category": "Productivity",
         "capabilities": ["Read", "Write"],

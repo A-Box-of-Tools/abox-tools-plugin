@@ -1,8 +1,8 @@
 # Privacy notice for the abox.tools local plugin
 
-Effective 25 October 2026.
+Effective 27 October 2026.
 
-The abox.tools local plugin processes images, PDFs and file checksums on the computer where its
+The abox.tools local plugin processes images, PDFs, JSON, Base64 and file checksums on the computer where its
 MCP server runs. The adapter has no hosted processing service, analytics,
 telemetry, account system, or API key. It does not upload file contents to
 abox.tools or another processing service.
@@ -23,7 +23,11 @@ separate upload, user database, or processing history.
 Image processing, images to PDF, PDF compression and watermark text rendering
 use an installed browser with an isolated offline context and bundled modules.
 PDF page operations, metadata operations and checksums run in the
-local Node process. Compression does not require visiting the abox.tools site.
+local Node process. PDF table extraction, JSON and Base64 processing run in local
+worker threads so cancellation can stop their work. Extraction returns table
+counts and diagnostics without cell text or headings. JSON errors expose a
+location without source snippets; Base64 contents remain in local output files.
+Compression does not require visiting the abox.tools site.
 The plugin does not download a browser or processing dependencies during an
 operation.
 

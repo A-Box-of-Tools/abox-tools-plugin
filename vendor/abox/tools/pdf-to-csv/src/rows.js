@@ -1,0 +1,320 @@
+/**
+ * A table's lines into its headings and its rows.
+ *
+ * Every line of a table becomes a row. That is the whole rule, and it replaced
+ * a cleverer one: this tool used to keep only the lines that started with a
+ * date, on the theory that a statement is a list of transactions and anything
+ * else on it is furniture. The theory held for one kind of document and made
+ * the tool useless for every other - and useless for that kind too, the first
+ * time a statement printed its dates without a year and no line qualified. A
+ * price list, a timetable, a set of results or the interest rates printed on
+ * the back of a card statement are tables just as much, and what is in a table
+ * is not this tool's to judge. Totals, subtotals and section labels come
+ * through as the rows they are on the page.
+ *
+ * Three things are still worked out rather than copied, because the page's
+ * layout says so rather than because of what the rows mean:
+ *
+ *   - THE HEADINGS. The lines at the top of the table with no data in them -
+ *     no number, no date, no percentage, no phone or account number - down
+ *     to the first line that has some. A heading set on two lines, "TRANSACTION" over "DATE", is stacked
+ *     back into one. A table that is words all the way down takes its first
+ *     line, which is the convention every spreadsheet already follows.
+ *   - HEADINGS REPEATED. A table joined from two blocks - two sections of a
+ *     statement, or one table running on to a second page - prints its
+ *     headings again at the top of the second. Those lines are dropped when
+ *     they say the same as the first.
+ *   - A CELL THAT RAN ONTO A SECOND LINE. A line with one cell in it, set close
+ *     under a row, in a column where the row has text, is that cell continued
+ *     - the rest of a payee's name - and is folded back into it. Otherwise a
+ *     spreadsheet gets a row holding half a name and nothing else.
+ *
+ * And one thing is tidied after the fact: a column with no heading that is
+ * empty on almost every row is a piece of a neighbouring cell that happened to
+ * be drawn apart from it - "DIRECT" printed forty points to the right of the
+ * rest of a payee's name, "CR" set after an amount - and is folded into the
+ * neighbour it sits nearer to.
+ */
+
+import { cellsOf } from './tables.js';
+import { isData, isValue, looksNumeric, parseAmount, parseDate } from './values.js';
+
+/** How close, in line heights, a continued cell sits under its row. */
+const CONTINUED = 1.6;
+
+/** Headings deeper than this are not headings; they are rows of words. */
+const MAX_HEADING_LINES = 3;
+
+/** Below this share of rows filled, an unheaded column is a stray piece. */
+const STRAY = 1 / 3;
+
+/** How much of a column has to parse as money before the column is money and
+ *  not a reference number that happens to be digits. */
+const MOSTLY = 0.6;
+
+/**
+ * @typedef {object} Built
+ * @property {string[]} headers      one per column, '' where there is none
+ * @property {{page: number, cells: string[]}[]} rows
+ * @property {number} dateColumn     -1 when no column is dates with years
+ * @property {number[]} moneyColumns
+ * @property {number} page           where the table starts
+ */
+
+/**
+ * @param {import('./tables.js').Table} table
+ * @param {{order?: 'dmy'|'mdy', mark?: string}} options
+ * @returns {Built}
+ */
+export function buildTable(table, { order = 'dmy', mark = '.' } = {}) {
+  const columns = table.columns.map((column) => ({ ...column }));
+  const blocks = table.blocks.map((block) => block.lines.map((line) => ({
+    page: block.page, line, cells: cellsOf(line, columns),
+  })));
+
+  const everything = blocks.flat();
+  const anyData = everything.some((entry) => entry.cells.some(isData));
+
+  let headers = columns.map(() => '');
+  const rows = [];
+
+  blocks.forEach((entries, index) => {
+    const top = headingLines(entries, anyData);
+    let body = entries;
+
+    if (index === 0) {
+      headers = stack(top, columns.length);
+      body = entries.slice(top.length);
+    } else {
+      // The headings again, at the top of the next section or page - possibly
+      // with a line of their own under them, "Purchases - Card 4000...", that
+      // is a row and must stay. So the longest run of lines that says the same
+      // as the headings is dropped, and nothing after it.
+      for (let count = top.length; count > 0; count -= 1) {
+        if (same(stack(top.slice(0, count), columns.length), headers)) {
+          body = entries.slice(count);
+          break;
+        }
+      }
+    }
+
+    placeRows(body.filter((entry) => !isPageMarker(entry)), rows);
+  });
+
+  foldStrays(headers, rows, columns);
+
+  return {
+    headers,
+    rows,
+    columns,
+    page: table.page,
+    dateColumn: dateColumnOf(rows, headers.length, order),
+    moneyColumns: moneyColumnsOf(rows, headers.length, mark),
+  };
+}
+
+/** The lines at the top of a block that are headings. */
+function headingLines(entries, anyData) {
+  if (!anyData) return entries.length > 1 ? entries.slice(0, 1) : [];
+  const top = [];
+  for (const entry of entries) {
+    if (entry.cells.some(isData)) break;
+    top.push(entry);
+    if (top.length > MAX_HEADING_LINES) return [];
+  }
+  // Nothing but headings means the block is words, not a table with a heading.
+  return top.length === entries.length ? [] : top;
+}
+
+/** Heading lines stacked into one, column by column. */
+function stack(entries, width) {
+  const out = new Array(width).fill('');
+  for (const entry of entries) {
+    entry.cells.forEach((cell, at) => {
+      if (cell) out[at] = out[at] ? `${out[at]} ${cell}` : cell;
+    });
+  }
+  return out;
+}
+
+/**
+ * Lines into rows, with a cell that ran onto a second line folded back in.
+ *
+ * Folded into whichever row it sits nearer, not always the one above. A payee
+ * too long for its column wraps under the transaction it belongs to; a label
+ * too long for a summary box wraps above the line that carries its value -
+ * "From outside Canada or" over "the U.S., call us collect at   905-555-0199".
+ * Line spacing inside a wrapped cell is tighter than the space between rows,
+ * so distance says which of the two it belongs to.
+ */
+function placeRows(entries, rows) {
+  let previous = null;
+  let waiting = [];
+
+  entries.forEach((entry, index) => {
+    if (loose(entry)) {
+      const at = entry.cells.findIndex(Boolean);
+      const up = previous && textAt(previous.row, at) ? spacing(previous.line, entry.line) : Infinity;
+      const next = entries[index + 1];
+      const down = next ? spacing(entry.line, next.line) : Infinity;
+
+      if (up <= CONTINUED && up <= down) {
+        previous.row.cells[at] = `${previous.row.cells[at]} ${entry.cells[at]}`;
+        previous = { row: previous.row, line: entry.line };
+        return;
+      }
+      if (down <= CONTINUED) {
+        waiting.push(entry);
+        return;
+      }
+    }
+
+    const row = { page: entry.page, cells: [...entry.cells] };
+    for (const held of waiting) {
+      const at = held.cells.findIndex(Boolean);
+      if (textAt(row, at) || !row.cells[at]) {
+        row.cells[at] = [held.cells[at], row.cells[at]].filter(Boolean).join(' ');
+      } else {
+        rows.push({ page: held.page, cells: [...held.cells] });
+      }
+    }
+    waiting = [];
+
+    if (!row.cells.some(Boolean)) return;
+    rows.push(row);
+    previous = { row, line: entry.line };
+  });
+
+  for (const held of waiting) rows.push({ page: held.page, cells: [...held.cells] });
+}
+
+/** A line with one cell of words in it - the shape of a cell continued. */
+function loose(entry) {
+  const filled = entry.cells.filter(Boolean);
+  return filled.length === 1 && !isValue(filled[0]);
+}
+
+function textAt(row, at) {
+  return Boolean(row.cells[at]) && !isValue(row.cells[at]);
+}
+
+/** Space between two lines, in line heights. */
+function spacing(upper, lower) {
+  return (upper.y - lower.y) / Math.max(upper.height, lower.height, 1);
+}
+
+function same(a, b) {
+  return a.length === b.length && a.every((cell, at) => cell === b[at]);
+}
+
+/** A line that is nothing but a page number, in the shapes one is printed. */
+function isPageMarker(entry) {
+  const text = entry.cells.filter(Boolean).join(' ').trim();
+  return /^(?:page\s*)?\d+\s*(?:of|\/)\s*\d+$/i.test(text)
+    || /^page\s*\d+$/i.test(text)
+    || /^[-–]\s*\d+\s*[-–]$/.test(text);
+}
+
+/**
+ * Fold away the columns that are really stray pieces of their neighbours.
+ *
+ * Only in a table with headings, where "no heading" means something. In a table
+ * with none, a sparse column is as likely to be a real one that is often blank,
+ * and folding it would move somebody's data into the wrong column.
+ */
+function foldStrays(headers, rows, columns) {
+  if (!headers.some(Boolean) || rows.length < 3) return;
+
+  for (let at = columns.length - 1; at >= 0 && columns.length > 2; at -= 1) {
+    if (headers[at]) continue;
+    const filled = rows.filter((row) => row.cells[at]).length;
+    if (filled / rows.length >= STRAY) continue;
+
+    const into = foldInto(at, rows, columns);
+
+    for (const row of rows) {
+      const piece = row.cells[at];
+      if (!piece) continue;
+      const other = row.cells[into];
+      row.cells[into] = into < at ? [other, piece].filter(Boolean).join(' ')
+        : [piece, other].filter(Boolean).join(' ');
+    }
+    for (const row of rows) row.cells.splice(at, 1);
+    headers.splice(at, 1);
+    columns.splice(at, 1);
+  }
+}
+
+/**
+ * Which neighbour a stray column folds into.
+ *
+ * The nearer one - unless the stray is words and the nearer neighbour is not.
+ * "DIRECT", the tail of a payee's name, sat nearer the amounts on one layout
+ * than the descriptions it belongs to, and folding it there would have turned
+ * an amount into a phrase no spreadsheet can add up. A sign printed apart from
+ * its amount - "CR", "DR" - is the exception that wants the nearer column
+ * whatever it holds, because "177.93 CR" is how that amount is read.
+ */
+function foldInto(at, rows, columns) {
+  const leftGap = at > 0 ? columns[at].x0 - columns[at - 1].x1 : Infinity;
+  const rightGap = at < columns.length - 1 ? columns[at + 1].x0 - columns[at].x1 : Infinity;
+  const nearer = leftGap <= rightGap ? at - 1 : at + 1;
+  const further = nearer === at - 1 ? at + 1 : at - 1;
+
+  const pieces = rows.map((row) => row.cells[at]).filter(Boolean);
+  const words = pieces.some((piece) => !isValue(piece) && !/^(?:CR|DR|[-+])$/i.test(piece));
+  if (!words || further < 0 || further >= columns.length) return nearer;
+
+  const wordy = (column) => {
+    const cells = rows.map((row) => row.cells[column]).filter(Boolean);
+    return cells.length && cells.filter((cell) => !isValue(cell)).length >= cells.length / 2;
+  };
+  return wordy(nearer) || !wordy(further) ? nearer : further;
+}
+
+/** The column that is dates with years in it most often, or -1. */
+function dateColumnOf(rows, width, order) {
+  let best = -1;
+  let bestCount = 0;
+  for (let at = 0; at < width; at += 1) {
+    const count = rows.filter((row) => parseDate(row.cells[at], order) !== null).length;
+    if (count > bestCount) {
+      bestCount = count;
+      best = at;
+    }
+  }
+  return bestCount >= Math.max(2, rows.length * MOSTLY) ? best : -1;
+}
+
+/**
+ * Which columns are money.
+ *
+ * Parsing as a number is not enough, and this is the guard that stops a
+ * reference number being rewritten as a sum of money: an account number, a
+ * cheque number and a sort code all parse. What separates them is that money
+ * is written with its pence - the column is money when most of its values
+ * parse *and* most of those were written with a fraction.
+ */
+function moneyColumnsOf(rows, width, mark) {
+  const columns = [];
+  const fraction = new RegExp(`\\${mark}\\d{1,2}(?!\\d)`);
+
+  for (let at = 0; at < width; at += 1) {
+    let filled = 0;
+    let parsed = 0;
+    let fractional = 0;
+
+    for (const row of rows) {
+      const cell = row.cells[at];
+      if (!cell) continue;
+      filled += 1;
+      if (!looksNumeric(cell) || parseAmount(cell, mark) === null) continue;
+      parsed += 1;
+      if (fraction.test(cell)) fractional += 1;
+    }
+
+    if (filled && parsed >= filled * MOSTLY && fractional >= parsed * MOSTLY) columns.push(at);
+  }
+
+  return columns;
+}

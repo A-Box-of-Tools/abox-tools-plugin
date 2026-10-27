@@ -14,13 +14,14 @@ import { examplePdfFile } from '../vendor/abox/shared/js/example-pdf.js';
 import { decodeStream } from '../vendor/abox/shared/js/pdf-filters.js';
 import { PdfDocument } from '../vendor/abox/shared/js/pdf-reader.js';
 import { readSource } from '../vendor/abox/tools/merge-pdf/src/assemble.js';
+import { PdfWriter } from '../vendor/abox/shared/js/pdf-page-writer.js';
 
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
-  'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
-  'abox_image_compress', 'abox_image_convert', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf',
-  'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_watermark', 'abox_svg_to_image',
+  'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
+  'abox_image_compress', 'abox_image_convert', 'abox_image_layout', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf', 'abox_json_format',
+  'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_svg_to_image',
 ];
 const expectedPublisher = 'Abox Technologies';
 
@@ -176,6 +177,30 @@ async function pdfPageFingerprints(bytes) {
   }));
 }
 
+async function tablePdfBytes() {
+  const rows = [
+    ['Date', '@Description', 'Amount', 'Balance'],
+    ['03/04/2026', 'Opening', '0.00', '1000.00'],
+    ['04/04/2026', 'Coffee, cafe', '-10.00', '990.00'],
+    ['05/04/2026', 'Refund', '20.00', '1010.00'],
+    ['06/04/2026', '=SUM(1,2)', '-5.00', '1005.00'],
+    ['07/04/2026', 'Final', '1.00', '1006.00'],
+  ];
+  const writer = new PdfWriter();
+  const catalog = writer.reserve(), tree = writer.reserve(), font = writer.reserve();
+  const page = writer.reserve(), content = writer.reserve();
+  const x = [40, 150, 340, 450];
+  const literal = value => value.replace(/[\\()]/g, char => `\\${char}`);
+  const drawing = rows.map((row, index) => row.map((cell, column) =>
+    `BT /F1 10 Tf 1 0 0 1 ${x[column]} ${720 - index * 18} Tm (${literal(cell)}) Tj ET`).join('\n')).join('\n');
+  writer.object(font, '<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>');
+  writer.stream(content, '', new TextEncoder().encode(drawing));
+  writer.object(page, `<< /Type /Page /Parent ${tree} 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 ${font} 0 R >> >> /Contents ${content} 0 R >>`);
+  writer.object(tree, `<< /Type /Pages /Count 1 /Kids [${page} 0 R] >>`);
+  writer.object(catalog, `<< /Type /Catalog /Pages ${tree} 0 R >>`);
+  return Buffer.from(await writer.finish({ root: catalog }).arrayBuffer());
+}
+
 async function call(client, name, args) {
   const response = await client.callTool({ name, arguments: args });
   const block = response.content?.find(item => item.type === 'text');
@@ -305,7 +330,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
     if (!universal) {
       const { chromium } = await import('playwright-core');
       const installerBrowser = await chromium.launch({ executablePath: capabilities.browser.path, headless: true, chromiumSandbox: true });
-      let cursorConfig;
+      let cursorConfig, vscodeConfig;
       try {
         const page = await installerBrowser.newPage();
         await page.goto(pathToFileURL(path.join(bundle, 'START-HERE.html')).href);
@@ -324,18 +349,30 @@ export async function smokeRelease(config, { universal = false } = {}) {
         assert.equal(cursorConfig.type, 'stdio');
         assert.equal(path.normalize(cursorConfig.command), runtime);
         assert.deepEqual(cursorConfig.args.map(argument => path.normalize(argument)), [entry]);
+        const vscode = new URL(await page.locator('#install-vscode').getAttribute('href'));
+        assert.equal(vscode.protocol, 'vscode:');
+        assert.equal(vscode.pathname, 'mcp/install');
+        assert.equal(vscode.hash, '');
+        vscodeConfig = JSON.parse(decodeURIComponent(vscode.search.slice(1)));
+        assert.deepEqual(Object.keys(vscodeConfig).sort(), ['args', 'command', 'name', 'type']);
+        assert.equal(vscodeConfig.name, 'abox-tools');
+        assert.equal(vscodeConfig.type, 'stdio');
+        assert.equal(path.normalize(vscodeConfig.command), runtime);
+        assert.deepEqual(vscodeConfig.args.map(argument => path.normalize(argument)), [entry]);
       } finally {
         await installerBrowser.close();
       }
-      const cursorClient = new Client({ name: 'abox-cursor-release-smoke', version: expectedVersion });
-      try {
-        await cursorClient.connect(new StdioClientTransport({ command: cursorConfig.command, args: cursorConfig.args, cwd: workspace, env, stderr: 'pipe' }));
-        const cursorCapabilities = await call(cursorClient, 'abox_capabilities', {});
-        assert.equal(cursorCapabilities.version, expectedVersion);
-        assert.equal(cursorCapabilities.publisher, expectedPublisher);
-        assert.deepEqual(cursorCapabilities.operations.map(operation => operation.name).sort(), expectedTools.filter(name => name !== 'abox_capabilities'));
-      } finally {
-        await cursorClient.close();
+      for (const [label, installed] of [['cursor', cursorConfig], ['vscode', vscodeConfig]]) {
+        const installedClient = new Client({ name: `abox-${label}-release-smoke`, version: expectedVersion });
+        try {
+          await installedClient.connect(new StdioClientTransport({ command: installed.command, args: installed.args, cwd: workspace, env, stderr: 'pipe' }));
+          const installedCapabilities = await call(installedClient, 'abox_capabilities', {});
+          assert.equal(installedCapabilities.version, expectedVersion);
+          assert.equal(installedCapabilities.publisher, expectedPublisher);
+          assert.deepEqual(installedCapabilities.operations.map(operation => operation.name).sort(), expectedTools.filter(name => name !== 'abox_capabilities'));
+        } finally {
+          await installedClient.close();
+        }
       }
     }
 
@@ -594,6 +631,51 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.equal(vectorHeader.readUInt32BE(0), 80);
     assert.equal(vectorHeader.readUInt32BE(4), 40);
     assert.equal(hash(await readFile(svgPath)), hash(svgBytes));
+
+    const layoutPath = path.join(workspace, 'combined local images.png');
+    const layout = await call(client, 'abox_image_layout', {
+      input_paths: [imageInput, imageResized], output_path: layoutPath,
+      layout: 'grid', columns: 2, width: 200, gap: 0, padding: 0,
+    });
+    assert.equal(layout.verified, true);
+    assert.equal(layout.image_count, 2);
+    assert.equal(layout.width, 200);
+    assert.equal(layout.height, 100);
+    const layoutHeader = pngChunks(await readFile(layoutPath)).find(chunk => chunk.type === 'IHDR').data;
+    assert.equal(layoutHeader.readUInt32BE(0), 200);
+    assert.equal(layoutHeader.readUInt32BE(4), 100);
+
+    const tableInput = path.join(workspace, 'selectable table.pdf');
+    const tableBytes = await tablePdfBytes();
+    await writeFile(tableInput, tableBytes);
+    const csvPath = path.join(workspace, 'extracted table.csv');
+    const csv = await call(client, 'abox_pdf_to_csv', { input_path: tableInput, output_path: csvPath, date_order: 'dmy' });
+    assert.equal(csv.verified, true);
+    assert.equal(csv.csv_structure_verified, true);
+    assert.equal(csv.table_count, 1);
+    assert.equal(csv.row_count, 5);
+    assert.equal(await readFile(csvPath, 'utf8'), '\ufeffDate,"\'@Description",Amount,Balance\r\n'
+      + '2026-04-03,Opening,0.00,1000.00\r\n2026-04-04,"Coffee, cafe",-10.00,990.00\r\n'
+      + '2026-04-05,Refund,20.00,1010.00\r\n2026-04-06,"\'=SUM(1,2)",-5.00,1005.00\r\n2026-04-07,Final,1.00,1006.00\r\n');
+    assert.ok(!JSON.stringify(csv).includes('Coffee'));
+    assert.equal(hash(await readFile(tableInput)), hash(tableBytes));
+
+    const jsonInput = path.join(workspace, 'precise source.json');
+    const jsonBytes = Buffer.from('{"10":123456789012345678901,"2":1e999,"same":1,"same":2}');
+    await writeFile(jsonInput, jsonBytes);
+    const jsonOutput = path.join(workspace, 'formatted.json');
+    const formatted = await call(client, 'abox_json_format', { input_path: jsonInput, output_path: jsonOutput });
+    assert.equal(formatted.verified, true);
+    assert.equal(await readFile(jsonOutput, 'utf8'), '{\n  "10": 123456789012345678901,\n  "2": 1e999,\n  "same": 1,\n  "same": 2\n}\n');
+    assert.equal(hash(await readFile(jsonInput)), hash(jsonBytes));
+    const base64Path = path.join(workspace, 'encoded binary.base64');
+    const encoded = await call(client, 'abox_base64', { input_path: imageInput, output_path: base64Path, mode: 'encode', url_safe: true });
+    assert.equal(encoded.verified, true);
+    assert.equal(await readFile(base64Path, 'ascii'), png.toString('base64url'));
+    const decodedPath = path.join(workspace, 'decoded binary.png');
+    const decodedFile = await call(client, 'abox_base64', { input_path: base64Path, output_path: decodedPath, mode: 'decode', url_safe: true, canonical: true });
+    assert.equal(decodedFile.verified, true);
+    assert.deepEqual(await readFile(decodedPath), png);
     assert.equal(hash(await readFile(imageInput)), hash(png));
     assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));

@@ -23,8 +23,8 @@ exec "$root/runtime/$runtime/node" "$root/bin/abox-mcp.mjs" "$@"
 export function universalManifest(version) {
   return {
     manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version,
-    description: 'Resize, convert and compress images; merge, select and split PDFs; remove image metadata locally.',
-    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. File bytes stay local. Image processing, PDF compression and PDF watermark rendering need installed Edge, Chrome or Chromium; PDF page operations, metadata operations and checksums need no browser.',
+    description: 'Local image, PDF, JSON and Base64 tools, metadata inspection/removal and file checksums.',
+    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. File bytes stay local. Image processing, PDF compression and watermark rendering need installed Edge, Chrome or Chromium; PDF page operations, table extraction, metadata, checksums, JSON and Base64 need no browser. PDF table extraction performs no OCR and requires review.',
     author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
     homepage: 'https://abox.tools/',
     documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

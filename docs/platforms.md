@@ -12,12 +12,13 @@ recorded separately below.
 | Codex desktop | Extract the matching native `abox-tools-0.5.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
 | Claude Desktop / MCPB hosts | Open `abox-tools-0.5.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
 | Cursor | Use the native ZIP's **Install tools in Cursor** button for the local MCP tools. The repository also carries a Cursor plugin and shared skill. | The native link uses the included runtime. A source plugin needs Node.js 22.15+ on PATH and one-time adapter setup. See [Cursor setup](cursor.md). |
+| VS Code | From version 0.6.0, use the native ZIP's **Install tools in VS Code** button. | VS Code with its URL handler must be installed. The link selects the bundled runtime and absolute server path; keep the extracted folder. |
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
 | Agents supported by skills.sh | Install `abox-local-files` from this repository, then run its one-time adapter setup. | The current skills CLI needs Node.js 22.20+. Adapter setup uses Python 3 and downloads a verified native ZIP; later file processing uses the cached bundled runtime. |
 
 Image processing, PDF compression and PDF watermark rendering need an
 installed Edge, Chrome or Chromium browser. PDF page operations, hashes and
-metadata removal use the local adapter directly. All routes use the same
+metadata removal, PDF table extraction, JSON and Base64 use the local adapter directly. All routes use the same
 processing engines and refuse existing output paths.
 
 ## Gemini CLI
@@ -84,9 +85,12 @@ See [directory submission materials](directory-submissions.md) and
 [publishing](publishing.md) for the release and submission evidence recorded
 for other destinations.
 
-VS Code and Copilot can connect local stdio servers, but this repository does
-not yet provide a separately validated VS Code Marketplace package. Glama
-indexing and other directories also need their own publication checks.
+VS Code's native-bundle installation link is validated by URI decoding and a
+real MCP connection using its extracted configuration. Desktop installation
+through VS Code's own interface remains unverified; no VSIX or Marketplace
+submission is needed for this route. Glama already indexes the public repository.
+See [additional distribution routes](distribution-options.md) for Smithery,
+AgentSkillsDir, SkillsMP, ClawHub and other current options and limitations.
 
 The website's development catalogue endpoint is a separate service. These
 local-file packages do not deploy or publish that endpoint.

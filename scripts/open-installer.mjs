@@ -4,9 +4,9 @@ import { spawn } from 'node:child_process';
 import { stat } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 
-export function cursorServerConfig(root, { platform = process.platform } = {}) {
+function localServerConfig(root, { platform = process.platform } = {}, client) {
   if (!path.isAbsolute(root) || !['win32', 'darwin', 'linux'].includes(platform)) {
-    throw new Error('Cursor installation requires an absolute local bundle path on a supported platform.');
+    throw new Error(`${client} installation requires an absolute local bundle path on a supported platform.`);
   }
   return {
     type: 'stdio',
@@ -15,20 +15,32 @@ export function cursorServerConfig(root, { platform = process.platform } = {}) {
   };
 }
 
+export function cursorServerConfig(root, options = {}) {
+  return localServerConfig(root, options, 'Cursor');
+}
+
+export function vscodeServerConfig(root, options = {}) {
+  return { name: 'abox-tools', ...localServerConfig(root, options, 'VS Code') };
+}
+
 export function installerUrl(root, client = 'codex', options = {}) {
   if (client === 'cursor') {
     const config = Buffer.from(JSON.stringify(cursorServerConfig(root, options)), 'utf8').toString('base64');
     return `cursor://anysphere.cursor-deeplink/mcp/install?name=abox-tools&config=${encodeURIComponent(config)}`;
   }
-  if (client !== 'codex') throw new Error('Choose codex or cursor as the installation client.');
+  if (client === 'vscode') {
+    const config = encodeURIComponent(JSON.stringify(vscodeServerConfig(root, options))).replaceAll("'", '%27');
+    return `vscode:mcp/install?${config}`;
+  }
+  if (client !== 'codex') throw new Error('Choose codex, cursor, or vscode as the installation client.');
   return `codex://plugins/abox-tools?marketplacePath=${encodeURIComponent(path.join(root, '.agents', 'plugins', 'marketplace.json')).replaceAll("'", '%27')}`;
 }
 
 export async function openInstaller(root, client = 'codex') {
   const uri = installerUrl(root, client);
-  const required = client === 'cursor'
-    ? [cursorServerConfig(root).command, path.join(root, 'bin', 'abox-mcp.mjs')]
-    : [path.join(root, '.agents', 'plugins', 'marketplace.json')];
+  const required = client === 'codex'
+    ? [path.join(root, '.agents', 'plugins', 'marketplace.json')]
+    : [localServerConfig(root, {}, client === 'vscode' ? 'VS Code' : 'Cursor').command, path.join(root, 'bin', 'abox-mcp.mjs')];
   for (const filename of required) {
     if (!(await stat(filename)).isFile()) throw new Error('Extract the complete download before opening the installer.');
   }
@@ -47,7 +59,8 @@ export async function openInstaller(root, client = 'codex') {
   await new Promise((resolve, reject) => {
     const child = spawn(command, args, { windowsHide: true, stdio: 'ignore' });
     child.once('error', reject);
-    child.once('exit', code => code === 0 ? resolve() : reject(new Error(`Could not open ${client === 'cursor' ? 'Cursor' : 'Codex'}. Install or open the desktop app, then try again.`)));
+    const app = { codex: 'Codex', cursor: 'Cursor', vscode: 'VS Code' }[client];
+    child.once('exit', code => code === 0 ? resolve() : reject(new Error(`Could not open ${app}. Install or open the desktop app, then try again.`)));
   });
 }
 

@@ -22,6 +22,13 @@
     "tools/svg-to-image/src/sizing.js",
     "tools/svg-to-image/src/render.js",
     "tools/svg-to-image/src/svg-linked-assets.js",
+    "tools/image-layout/src/arrange.js",
+    "tools/pdf-to-csv/src/read.js",
+    "tools/pdf-to-csv/src/rows.js",
+    "tools/pdf-to-csv/src/check.js",
+    "tools/pdf-to-csv/src/csv.js",
+    "shared/js/parse-json.js",
+    "tools/base64/src/encode.js",
     "shared/js/pdf-reader.js",
     "shared/js/pdf-writer.js",
     "shared/js/example-pdf.js"
@@ -73,13 +80,48 @@
       "generated": false
     },
     {
+      "path": "shared/js/image-input.js",
+      "sha256": "d96adeb9ce3e19f079df3fcf8fe5eb092b72c138d9b40305321372917d66f842",
+      "generated": false
+    },
+    {
+      "path": "shared/js/image-list.js",
+      "sha256": "03e0a650ba6696ac03458fe962e60c75149886b05f3437b70d23d2a878d65ee1",
+      "generated": false
+    },
+    {
       "path": "shared/js/md5.js",
       "sha256": "bdb222fd767e137ec59367792029e107dccfa6bae9760d44a0923b9fb7359fd7",
       "generated": false
     },
     {
+      "path": "shared/js/parse-errors.js",
+      "sha256": "00017aa5b0c8763968529a9b77dca87c07c8557e12bb70464ead2aaec4c90970",
+      "generated": false
+    },
+    {
+      "path": "shared/js/parse-json.js",
+      "sha256": "5968c60ceb26bfdbf54c893efab632ea1381f942163097a74e60e7626a4f340f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-base14.js",
+      "sha256": "a8b06aede690f2200cd04fdc6392e3d65207c4b8d95bfbd14c58a9fbec2b77da",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-content.js",
+      "sha256": "3aacba2c2f0da0cd5416da1ebeac5c3999f12e5cd183c8eaa5068afee7ef2b10",
+      "generated": false
+    },
+    {
       "path": "shared/js/pdf-filters.js",
       "sha256": "59b28ff58fa8c87dde8cf9bf30129950abdf3c6b41d73ed64eb9c50d1026d53b",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-fonts.js",
+      "sha256": "9ded31ff6c57e6674d6a0d28e2c2a44aa540c6a1803681cfcc7ed94e31457b2b",
       "generated": false
     },
     {
@@ -103,6 +145,16 @@
       "generated": false
     },
     {
+      "path": "shared/js/pdf-strings.js",
+      "sha256": "61dccdda79466932360e32e798467ff725fd8c4ca3be217733cb4db1f42fa4fc",
+      "generated": false
+    },
+    {
+      "path": "shared/js/pdf-text.js",
+      "sha256": "60b1880ffeb42be2444a270202ead9a5869b161cbe802dd95bfe48cd30388924",
+      "generated": false
+    },
+    {
       "path": "shared/js/pdf-writer.js",
       "sha256": "e53e5a7f88400f55a50780e02f66d5e98e130352e4a9f3ba37af63be6768850e",
       "generated": false
@@ -115,6 +167,16 @@
     {
       "path": "shared/js/svg-text.js",
       "sha256": "9393cea6a3bc833a19992460ce8418199629776b599af908862d9512c2f7cac1",
+      "generated": false
+    },
+    {
+      "path": "tools/base64/README.md",
+      "sha256": "c6433dec27d9c35889ae22a86ca4763fb265096c96132bc832390ffccdad12c3",
+      "generated": false
+    },
+    {
+      "path": "tools/base64/src/encode.js",
+      "sha256": "bebb9bbf81d32575b707aa18137f26474759b789f77b71a070a0513ee4a1809c",
       "generated": false
     },
     {
@@ -293,6 +355,26 @@
       "generated": true
     },
     {
+      "path": "tools/image-layout/README.md",
+      "sha256": "5ac97e43e43a7f001cc5daf277a3fe11b8fdaa0818a1fd5674253d52e14589fe",
+      "generated": false
+    },
+    {
+      "path": "tools/image-layout/src/arrange.js",
+      "sha256": "1ddca0a82e02e7fd0a968ac87a387fc4da6cc54dbb89ab44a490bdad59f83469",
+      "generated": false
+    },
+    {
+      "path": "tools/image-layout/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/image-layout/src/shared/image-list.js",
+      "sha256": "41bc7b866fde4d2cfbec16ad14336060b5939d96821d882c3eb8c1ce738dcce7",
+      "generated": true
+    },
+    {
       "path": "tools/image-to-ico/README.md",
       "sha256": "7afd69ff70f7688040f70b5de3507a4dc49dee0fc741a7d32e4c7953ed816339",
       "generated": false
@@ -348,6 +430,11 @@
       "generated": true
     },
     {
+      "path": "tools/json-formatter/README.md",
+      "sha256": "b0069e00ad4b14e13e2e71e6a57e6abb065dce526673b9123847469fa79905ef",
+      "generated": false
+    },
+    {
       "path": "tools/merge-pdf/README.md",
       "sha256": "68d68f5296df3a10baa71d215bd6113e4e1819c480fb51746e68c433e07ea447",
       "generated": false
@@ -391,6 +478,56 @@
       "path": "tools/merge-pdf/src/shared/pdf-pages.js",
       "sha256": "f9035288281a6a042fdc40b4c09a415ec1aa44c07451dfd697c898ee37d3db03",
       "generated": true
+    },
+    {
+      "path": "tools/pdf-to-csv/README.md",
+      "sha256": "d7f87abc185148bb2c4b1ed284221d9a673eecfdf84ff7173500ee7f6b54c5c3",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/check.js",
+      "sha256": "ca46e89c621d549ad98386b1cef633305f56774808e8558b549aba8aabd92c15",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/csv.js",
+      "sha256": "a9de17d961a009482b5fdff15851c02bc0dde5943e05d435824b804151a501dd",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/layout.js",
+      "sha256": "b4f8ca2b5e759d1153afad3a4aecec93f0e079f0eb90c0d894ae22d289f3cf05",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/read.js",
+      "sha256": "5a990e2fe005d97cc05aaaa1219995e059e1d7cd86bdd245c1c9da69978e5a3e",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/rows.js",
+      "sha256": "a81637c6baa8e11621407f45692876986b9a894a4bafc13083e1cb05a742e642",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/shared/pdf-reader.js",
+      "sha256": "040dddba3dd262d103b957816f6104d558b711d66524721c672c05a2d9a7e84b",
+      "generated": true
+    },
+    {
+      "path": "tools/pdf-to-csv/src/shared/pdf-text.js",
+      "sha256": "7d0bbeff9006e5703608238bb1f4d086a941ca0902a38fdce1a60bdf4742fa1b",
+      "generated": true
+    },
+    {
+      "path": "tools/pdf-to-csv/src/tables.js",
+      "sha256": "658865bcfea27cf1d4859306ba3b8615345d81fc9d20979679dd9f77d261d10a",
+      "generated": false
+    },
+    {
+      "path": "tools/pdf-to-csv/src/values.js",
+      "sha256": "a4b5664ac27e30e29a5a78d279fa79947c1ca980878426e90cd3a6cc82b00806",
+      "generated": false
     },
     {
       "path": "tools/png-to-webp/README.md",
