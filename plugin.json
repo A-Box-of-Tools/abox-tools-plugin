@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.6.0",
-  "description": "Process images, PDFs, JSON and Base64 files, inspect or remove image metadata, and calculate checksums locally.",
+  "version": "0.7.0",
+  "description": "Local image, PDF, QR/barcode and structured-text tools, file comparisons, encodings and checksums.",
   "author": {
     "name": "Abox Technologies",
     "url": "https://abox.tools/"

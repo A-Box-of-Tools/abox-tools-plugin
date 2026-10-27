@@ -1,6 +1,6 @@
 {
   "name": "abox-tools-plugin",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "Local image, PDF and file tools published by Abox Technologies, using existing abox.tools engines.",
   "author": { "name": "Abox Technologies", "url": "https://abox.tools/" },
   "type": "module",
@@ -11,8 +11,8 @@
   "scripts": {
     "start": "node bin/abox-mcp.mjs",
     "doctor": "node bin/abox.mjs doctor",
-    "test": "node --test tests/adapter.test.mjs tests/pdf-extra.test.mjs tests/pdf-rotate.test.mjs tests/pdf-compress.test.mjs tests/pdf-csv.test.mjs tests/text.test.mjs tests/hash.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs tests/cursor.test.mjs tests/static-imports.test.mjs",
-    "test:browser": "node --test tests/browser.test.mjs tests/image.test.mjs tests/images-pdf.test.mjs tests/pdf-compress-browser.test.mjs tests/pdf-watermark.test.mjs tests/icon-svg.test.mjs tests/image-layout.test.mjs",
+    "test": "node --test tests/adapter.test.mjs tests/pdf-extra.test.mjs tests/pdf-rotate.test.mjs tests/pdf-compress.test.mjs tests/pdf-csv.test.mjs tests/text.test.mjs tests/structured-text.test.mjs tests/text-diff.test.mjs tests/data-uri.test.mjs tests/codes.test.mjs tests/hash.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs tests/cursor.test.mjs tests/static-imports.test.mjs",
+    "test:browser": "node --test tests/browser.test.mjs tests/image.test.mjs tests/images-pdf.test.mjs tests/pdf-compress-browser.test.mjs tests/pdf-watermark.test.mjs tests/icon-svg.test.mjs tests/image-layout.test.mjs tests/codes-browser.test.mjs",
     "sync-upstream": "node scripts/sync-upstream.mjs",
     "verify-vendor": "node scripts/verify-vendor.mjs",
     "package:release": "node scripts/package-release.mjs",

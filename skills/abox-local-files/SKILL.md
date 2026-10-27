@@ -1,6 +1,6 @@
 ---
 name: abox-local-files
-description: Compress, resize, convert or combine images; create ICO icons; rasterize SVGs; compress, watermark, merge, split, reorder or rotate PDFs; extract PDF tables to CSV; create PDFs from images; format JSON; encode or decode Base64 files; inspect or remove image metadata; and calculate checksums locally with abox.tools.
+description: Process images and PDFs; extract PDF tables; format JSON or XML; convert YAML and JSON; compare text files; encode Base64 or image data URIs; generate QR codes and barcodes; inspect or remove image metadata; and calculate checksums locally with abox.tools.
 ---
 
 # abox.tools local files
@@ -9,6 +9,10 @@ Use the installed abox.tools adapter. Pass absolute local paths; never read file
 bytes into the conversation or upload them to a website. Base64 operations write
 local files; never put their encoded or decoded contents into the conversation.
 The publisher is Abox Technologies.
+
+QR and barcode payloads come from local UTF-8 files. Pass those paths directly;
+do not read secrets into the conversation, echo completed digits, or add or trim
+a final newline. Data URIs and unified patches also stay in local output files.
 
 If MCP and the CLI are absent, follow [local adapter installation](references/installation.md).
 The self-contained skill includes a Python 3.9+ installer for a verified release;
@@ -142,18 +146,75 @@ file operation unless setup was requested or already authorized.
   decoding accepts whitespace, missing padding and either alphabet; canonical
   validation requires the selected exact spelling. Handles arbitrary binary
   and empty files. Return the output link and byte counts, never file contents.
+- `abox_image_data_uri`: `input_path`, `output_path`; optional `shape` (`uri`,
+  `css-rule`, `css-var`, `html`, `markdown`; default `uri`), `svg_encoding`
+  (`auto` or `base64`), and simple CSS `identifier` up to 64 characters.
+  Extensions are `.txt`, `.css`, `.css`, `.html`, `.md`, respectively. Original
+  bytes and metadata are preserved. Auto uses readable percent encoding only
+  for exact UTF-8 SVG in a standalone URI; SVG embedding envelopes use Base64
+  to avoid HTML/CSS/Markdown escaping changes. Signature-based MIME recognition
+  does not prove validity or rendering; SVG markup is not sanitized. Use metadata
+  removal first only when the user requests it. Link the file, never its URI.
+- `abox_yaml_json`: `input_path`, `output_path`, `direction` (`yaml-to-json` or
+  `json-to-yaml`); optional `indent` (`2` or `4`, default `2`) and YAML-to-JSON
+  `sort_keys` (default `false`). Output must end in `.json` or `.yaml`/`.yml`
+  for the selected direction. This supports a YAML subset: no anchors, aliases,
+  custom tags or multiple documents. Values, duplicate keys and large number
+  tokens are retained, while comments, formatting and string escape spelling
+  can change. Do not describe it as a lossless text conversion.
+  The source printer refuses root multiline scalars and some four-space lists
+  of mappings when verification fails. Prefer default indent `2`; if an explicit
+  four-space request fails, explain the limitation before changing that setting.
+- `abox_xml_format`: `input_path`, `.xml` `output_path`; optional `minify`
+  (default `false`) and `indent` (`2`, `4`, `tab`; default `2`). UTF-8 only.
+  DTDs and custom entities are refused; no external references are fetched.
+  Normal predefined entities and valid numeric references remain supported.
+  Check verification and warnings about insignificant whitespace, mixed content,
+  `xml:space`, comments and CDATA rather than promising byte-identical markup.
+- `abox_qr_generate`: UTF-8 payload `input_path`, `output_path`; optional
+  `format` (`svg` default, or `png`), `level` (`L`, `M`, `Q`, `H`; default `M`),
+  `quiet` (4–32 modules, default 4), `scale` (1–32, default 4), `foreground`
+  (default black) and `background` (default white), both six-digit hex colors.
+  Reads the exact payload file, including any final newline. No hosted redirect
+  or QR service is involved. SVG needs no browser; PNG uses the local browser.
+  Check verification and scan warnings; do not return the encoded payload.
+- `abox_barcode_generate`: UTF-8 payload `input_path`, `output_path`; optional
+  `symbology` (`code128` default, `ean13`, `upca`, `ean8`, `itf14`, `itf`,
+  `code39`), `format` (`svg` default or `png`), `scale` (1–32), `height`
+  (16–4096, default 100), `text` (labels, default `true`), `code39_check`
+  (default `false`, Code 39 only), and hex colors. Inputs are not trimmed;
+  a newline can make a numeric payload invalid. Retail check digits are computed
+  or validated, and Code 39 can uppercase text. Check `check_digit_added`,
+  `text_normalized`, verification and warnings without echoing digits. Reader
+  verification capacity can reject otherwise encodable long barcodes. Test the
+  saved code with its intended scanner; verification is not a print guarantee.
+- `abox_text_diff`: `left_path`, `right_path`, `.diff` or `.patch` `output_path`;
+  optional `context_lines` (0–100, default 3), `ignore_whitespace`, `ignore_case`
+  and `ignore_blank_lines` (all default `false`). The saved unified patch always
+  compares the original text and line endings. Ignore settings affect only
+  `comparison_stats`; primary counts retain raw content and ending differences.
+  Check `patch_application_verified`, `ending_changes`, and
+  `coarse_rewrite_detected`. The bounded engine does not guarantee a minimal
+  edit script. The patch uses fixed `a`/`b` headers and is not applied to inputs.
 
 ## Limits and privacy
 
 Compression, resizing and conversion support JPEG, PNG, and static WebP. Metadata removal edits JPEG,
 PNG, and WebP containers without flattening animation. PDFs must be unencrypted.
-Each input is limited to 128 MiB, except streaming checksums (8 GiB), JSON and
-Base64 (8 MiB). JSON output is at most 32 MiB and 256 nesting levels. Images to
+Each input is limited to 128 MiB, except streaming checksums (8 GiB), JSON,
+Base64 and data URIs (8 MiB), YAML/XML (2 MiB), QR payloads (4 KiB) and barcode
+payloads (256 bytes). JSON output is at most 32 MiB and 256 nesting levels. Images to
 PDF and image layouts accept at most 128 MiB of combined inputs. PDFs are limited to 5,000 pages and 1,000 split output
 files. Image processing, PDF compression and PDF watermark rendering need a locally installed Edge, Chrome, or Chromium;
 `ABOX_BROWSER_PATH` can select its executable.
 PDF-to-CSV output is limited to 16 MiB, 1000 tables, 64 columns per table,
 100000 data rows and one million cells/glyphs; it performs no OCR.
+YAML/XML output is limited to 16 MiB, 128 nesting levels and 100000 syntax nodes.
+Data URI output is at most 32 MiB. Text diff inputs total at most 4 MiB and
+20000 lines, with at most 8 MiB of patch output. Code output is at most 8192 per
+side, 32 megapixels and 16 MiB; payload capacity can be lower than the input cap.
+Barcode verification allows at most 400 alternating runs and plain ITF 4–40
+digits. QR/barcode SVG output requires no browser; PNG output requires one.
 
 The adapter processes file bytes locally without outbound network requests.
 The agent still receives paths, settings, and result summaries. Metadata removal
@@ -174,7 +235,9 @@ Node or npm. For a source checkout, use its installed `node`. Run:
 Operations are `compress-image`, `resize-image`, `convert-image`, `split-pdf`,
 `merge-pdf`, `select-pdf-pages`, `rotate-pdf`, `images-to-pdf`, `inspect-exif`,
 `remove-exif`, `hash-file`, `compress-pdf`, `watermark-pdf`, `image-to-ico`, and
-`svg-to-image`, `image-layout`, `pdf-to-csv`, `format-json`, and `base64`. Quote paths that contain
+`svg-to-image`, `image-layout`, `pdf-to-csv`, `format-json`, `base64`,
+`image-to-data-uri`, `convert-yaml-json`, `format-xml`, `generate-qr`,
+`generate-barcode`, and `diff-text`. Quote paths that contain
 spaces. `<node-executable> <plugin-root>/bin/abox.mjs capabilities` lists support;
 `<node-executable> <plugin-root>/bin/abox.mjs doctor` checks local setup. The CLI returns JSON
 summaries rather than file bytes. Do not install dependencies during an operation

@@ -2,7 +2,8 @@
 
 Effective 27 October 2026.
 
-The abox.tools local plugin processes images, PDFs, JSON, Base64 and file checksums on the computer where its
+The abox.tools local plugin processes images, PDFs, QR/barcodes, structured text,
+file comparisons, encodings and checksums on the computer where its
 MCP server runs. The adapter has no hosted processing service, analytics,
 telemetry, account system, or API key. It does not upload file contents to
 abox.tools or another processing service.
@@ -27,6 +28,11 @@ local Node process. PDF table extraction, JSON and Base64 processing run in loca
 worker threads so cancellation can stop their work. Extraction returns table
 counts and diagnostics without cell text or headings. JSON errors expose a
 location without source snippets; Base64 contents remain in local output files.
+QR and barcode payloads come from local UTF-8 files; their contents, completed
+check-digit values and labels are not returned to the agent. The generated images
+contain that payload. Unified text patches and image embeddings are written only
+to local output files. Image data URIs preserve source bytes and metadata, including
+SVG markup; encoding does not sanitize or anonymize the embedded image.
 Compression does not require visiting the abox.tools site.
 The plugin does not download a browser or processing dependencies during an
 operation.

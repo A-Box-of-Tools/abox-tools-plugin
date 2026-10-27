@@ -98,8 +98,8 @@ const bundledPackage = { ...project, scripts: { start: project.scripts.start, do
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(bundledPackage, null, 2)}\n`);
 const mcpb = {
   manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version: project.version,
-  description: 'Local image, PDF, JSON and Base64 tools, metadata inspection/removal and file checksums.',
-  long_description: 'Published by Abox Technologies. Reuses abox.tools engines on explicit local file paths, with Node and dependencies included. Image processing, PDF compression and watermark rendering use installed Edge, Chrome or Chromium. PDF page operations, table extraction, metadata, checksums, JSON and Base64 need no browser. PDF table extraction performs no OCR and requires review. File bytes stay local.',
+  description: 'Local image, PDF, QR/barcode and structured-text tools, file diffs, encodings and checksums.',
+  long_description: 'Published by Abox Technologies. Reuses abox.tools engines on local paths, with Node and dependencies included. Image processing, PDF compression, watermark rendering and QR/barcode PNG use installed Edge, Chrome or Chromium. SVG codes, structured text, file comparisons, data URIs, PDF pages/table extraction, metadata and checksums need no browser. PDF extraction performs no OCR and requires review. File contents stay local.',
   author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
   homepage: 'https://abox.tools/',
   documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

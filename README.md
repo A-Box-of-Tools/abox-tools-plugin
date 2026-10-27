@@ -3,10 +3,13 @@
 Published by **Abox Technologies**. Compress, resize and convert images; create
 ICO icons, rasterize SVGs and compose image layouts; compress, watermark, merge,
 split, reorder and rotate PDF pages; extract PDF tables to CSV; turn images into
-PDFs; format JSON; encode or decode Base64 files; inspect or remove
-image metadata; and calculate file checksums with the existing
+PDFs; format JSON and XML; convert YAML and JSON; compare text files; encode or
+decode Base64; embed images as data URIs; generate QR codes and barcodes; inspect
+or remove image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
+
+This source version provides 25 local file operations and one capabilities tool.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
 Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.6.0)
@@ -17,7 +20,9 @@ Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
 commands. Image processing, PDF compression and PDF watermark rendering need an
 installed Edge, Chrome, or Chromium. PDF page operations, metadata operations and
-checksums, PDF table extraction, JSON and Base64 do not.
+checksums, PDF table extraction, structured text, Base64, text comparison and
+data URI encoding do not. QR codes and barcodes default to SVG without a browser;
+PNG output uses the installed local browser.
 
 ## Install in Codex
 
@@ -134,6 +139,12 @@ is public. Gemini release installation is verified; a gallery listing is unconfi
 - “Extract the tables on pages 2–4 into a CSV I can review.”
 - “Format this JSON without changing large numbers or key order.”
 - “Decode this Base64 file into a new binary file.”
+- “Convert this YAML configuration into JSON.”
+- “Format this XML while preserving mixed text.”
+- “Compare these two files and save a unified patch.”
+- “Generate a QR code from the exact text in this local payload file.”
+- “Make a Code 128 barcode from this local payload file.”
+- “Embed this image as a CSS custom property without changing its bytes.”
 
 All input and output paths must be absolute. Existing outputs are never
 overwritten. Image compression accepts an exact byte target; a result reports
@@ -161,6 +172,12 @@ whether the target was met.
 | `abox_pdf_to_csv` | `input_path`, `output_path` | `pages`, `table_index`, `date_order`: `auto`, `dmy`, `mdy`; `include_headers`, `spreadsheet_safe` |
 | `abox_json_format` | `input_path`, `output_path` | `minify`, `indent`: `2`, `4`, `tab`; `sort_keys` (opt-in natural sorting) |
 | `abox_base64` | `input_path`, `output_path`, `mode` | `encode` or `decode`; `url_safe`; decoding `canonical` |
+| `abox_image_data_uri` | `input_path`, `output_path` | `shape`: `uri`, `css-rule`, `css-var`, `html`, `markdown`; `svg_encoding`: `auto` or `base64`; optional CSS `identifier` |
+| `abox_yaml_json` | `input_path`, `output_path`, `direction` | `yaml-to-json` or `json-to-yaml`; `indent`: `2` or `4`; YAML-to-JSON `sort_keys` |
+| `abox_xml_format` | `input_path`, `output_path` | `minify`; `indent`: `2`, `4`, `tab` |
+| `abox_qr_generate` | UTF-8 payload `input_path`, `output_path` | `format`: `svg` (default) or `png`; `level`: `L`, `M`, `Q`, `H`; `quiet`, `scale`, `foreground`, `background` |
+| `abox_barcode_generate` | UTF-8 payload `input_path`, `output_path` | `symbology`: `code128`, `ean13`, `upca`, `ean8`, `itf14`, `itf`, `code39`; `format`, `scale`, `height`, `text`, `code39_check`, colors |
+| `abox_text_diff` | `left_path`, `right_path`, `output_path` | `context_lines` (0–100, default 3); `ignore_whitespace`, `ignore_case`, `ignore_blank_lines` affect comparison summaries only |
 
 ## Use the CLI
 
@@ -190,6 +207,12 @@ node bin/abox.mjs image-layout --request-file /absolute/path/layout.json
 node bin/abox.mjs pdf-to-csv --request-file /absolute/path/tables.json
 node bin/abox.mjs format-json --request-file /absolute/path/format.json
 node bin/abox.mjs base64 --request-file /absolute/path/base64.json
+node bin/abox.mjs image-to-data-uri --request-file /absolute/path/embedding.json
+node bin/abox.mjs convert-yaml-json --request-file /absolute/path/conversion.json
+node bin/abox.mjs format-xml --request-file /absolute/path/xml.json
+node bin/abox.mjs generate-qr --request-file /absolute/path/qr.json
+node bin/abox.mjs generate-barcode --request-file /absolute/path/barcode.json
+node bin/abox.mjs diff-text --request-file /absolute/path/diff.json
 ```
 
 A compression request file contains:
@@ -300,6 +323,46 @@ prints file contents.
   Relaxed decoding accepts whitespace, missing padding and either alphabet.
   Canonical validation requires the exact requested spelling and zero unused
   bits. Encoded/decoded bytes are written locally and never returned to the agent.
+- Image data URIs: input up to 8 MiB and output up to 32 MiB. Signature-based
+  MIME recognition does not prove image validity or rendering. Original bytes,
+  metadata and SVG markup are preserved; this is not a sanitizer. The five
+  output shapes use `.txt` for `uri`, `.css` for `css-rule`/`css-var`, `.html`
+  for `html`, and `.md` for `markdown`. Auto encoding uses readable percent
+  encoding only for exact UTF-8 SVG in a standalone URI. SVG embedding envelopes
+  use Base64 to avoid HTML, CSS or Markdown changing the URI's spelling.
+- YAML/JSON conversion: UTF-8 input up to 2 MiB, output up to 16 MiB, 128 nesting
+  levels and 100000 syntax nodes. Supports the website's YAML subset, not every
+  YAML feature. Anchors, aliases, custom tags and multiple documents are refused.
+  Ordered values, duplicate keys and large numeric tokens are retained;
+  comments, formatting and string escape spelling can be lost. Optional natural
+  key sorting applies only when converting YAML to JSON.
+  Output must round-trip before it is written. The source printer cannot handle
+  root multiline strings or some four-space lists of mappings; those requests
+  are refused. Use the default two-space indentation for lists of mappings.
+- XML formatting: the same 2 MiB input, 16 MiB output, 128 nesting levels and
+  100000-node limits. UTF-8 only; DTDs and custom entities are refused, without
+  fetching external resources. Predefined entities and valid numeric references
+  are supported. Mixed content and `xml:space` follow the source engine's
+  preservation rules; formatting may change insignificant whitespace and quotes.
+- QR codes and barcodes: read payloads directly from UTF-8 files, including any
+  final newline. Payloads and completed barcode digits are not returned to the
+  agent. QR input is at most 4 KiB; barcode input at most 256 bytes. Actual
+  encoder and verification capacity can be smaller. Retail check digits are
+  computed or validated; invalid supplied digits fail. Code 39 can uppercase
+  text and optionally add its checksum. SVG is the default and needs no browser;
+  PNG uses the installed browser. Output is at most 8192 per side, 32 megapixels
+  and 16 MiB. Barcode verification permits at most 400 alternating runs; plain
+  ITF is limited to 4–40 digits. Check warnings and test the saved code with the
+  intended scanner before printing or relying on it.
+- Text comparison: two UTF-8 files, including empty files, at most 4 MiB and
+  20000 logical lines combined; NUL-containing binary inputs are refused.
+  Writes a new `.diff` or `.patch` up to 8 MiB. The patch always describes the
+  original strings, including BOMs, line endings and final newline differences;
+  ignore options affect `comparison_stats` only. Primary counts describe line
+  content, with terminator changes reported separately. The adapter verifies
+  that patch replay reconstructs the right input from the left. Header labels
+  are fixed `a` and `b`. Large differences can produce coarse rewrite hunks;
+  minimality is not guaranteed. Neither source is modified or patched.
 - Each other input: at most 128 MiB.
 - Compression: up to 80 megapixels and two minutes per image. `auto` may adjust
   the output extension to match the selected format. Other modes require the

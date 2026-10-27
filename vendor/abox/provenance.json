@@ -29,6 +29,19 @@
     "tools/pdf-to-csv/src/csv.js",
     "shared/js/parse-json.js",
     "tools/base64/src/encode.js",
+    "tools/yaml-to-json/src/convert.js",
+    "shared/js/parse-xml.js",
+    "tools/text-diff/src/diff.js",
+    "shared/js/qr.js",
+    "tools/qr-barcode/src/barcode.js",
+    "tools/qr-barcode/src/render.js",
+    "tools/qr-barcode/src/scan-advice.js",
+    "tools/qr-barcode-reader/src/qr-decode.js",
+    "tools/qr-barcode-reader/src/linear.js",
+    "tools/image-to-data-uri/src/sniff.js",
+    "tools/image-to-data-uri/src/encode.js",
+    "tools/image-to-data-uri/src/shapes.js",
+    "tools/image-to-data-uri/src/metadata.js",
     "shared/js/pdf-reader.js",
     "shared/js/pdf-writer.js",
     "shared/js/example-pdf.js"
@@ -62,6 +75,11 @@
     {
       "path": "shared/js/format.js",
       "sha256": "e20650f3295a7e05b5d82746a7ccf4e2e2c828c7aa1506f4d7aded0e9bbfc08c",
+      "generated": false
+    },
+    {
+      "path": "shared/js/gf256.js",
+      "sha256": "2e676935c8bd3a5025271ed186a3c95bbe265f689e90cd2ab76b043d21764034",
       "generated": false
     },
     {
@@ -102,6 +120,16 @@
     {
       "path": "shared/js/parse-json.js",
       "sha256": "5968c60ceb26bfdbf54c893efab632ea1381f942163097a74e60e7626a4f340f",
+      "generated": false
+    },
+    {
+      "path": "shared/js/parse-xml.js",
+      "sha256": "29c583ebfe48a97c51cb11328b78233ca4ef5e0e8acc927fad936833014fb9d5",
+      "generated": false
+    },
+    {
+      "path": "shared/js/parse-yaml.js",
+      "sha256": "ca4969edf9a046d24d153dc216b4d179d62e9ccd0aa9aadf96d4c5616fce7e54",
       "generated": false
     },
     {
@@ -162,6 +190,21 @@
     {
       "path": "shared/js/phrases.js",
       "sha256": "7b6938c6491f48c206d1baf78d3f8697af68e77dfc899d015365a43cc12deee3",
+      "generated": false
+    },
+    {
+      "path": "shared/js/qr-encode.js",
+      "sha256": "d208a9147d0601ba084d4d7d972dacabf8c3d7cb722d08aa8e5b0f6507da4795",
+      "generated": false
+    },
+    {
+      "path": "shared/js/qr-tables.js",
+      "sha256": "1e65a7fe9e73013aa5ed460c832d160d7f6ecad88d6992ef2504621f25b6f304",
+      "generated": false
+    },
+    {
+      "path": "shared/js/qr.js",
+      "sha256": "418cf3f1cb29494d83f20fd67fdf107f1598f0dfe337154b9de08f0c8ddb16c6",
       "generated": false
     },
     {
@@ -375,6 +418,41 @@
       "generated": true
     },
     {
+      "path": "tools/image-to-data-uri/README.md",
+      "sha256": "5eadca3be2ce8f8b8219fb0847fee1afb82c13372b7c982a6fb6186adb68ef42",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-data-uri/src/encode.js",
+      "sha256": "3cbe0b7b1af015f5ba9c0b37e528a8888876e6f8c21f6caa5e96fa895692f959",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-data-uri/src/metadata.js",
+      "sha256": "5e9251d3bc9aaf1e6b87a6ecc0f3428d5043c86e628f59387dee7fdb197aa116",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-data-uri/src/shapes.js",
+      "sha256": "6c1e617a6b6f83b1047b3b86ef292549d1de2446fbaf9feec9577d1275b618f8",
+      "generated": false
+    },
+    {
+      "path": "tools/image-to-data-uri/src/shared/image-convert.js",
+      "sha256": "929407b3fe6c3212fdefa82d797adaf9e1e50217396c3ab31ac193e8f22b00bb",
+      "generated": true
+    },
+    {
+      "path": "tools/image-to-data-uri/src/shared/svg-text.js",
+      "sha256": "7fa8e86cc3fcecd0bb0d7e21067dc2a0e8fe91e8d08846c597e125bcd16e618a",
+      "generated": true
+    },
+    {
+      "path": "tools/image-to-data-uri/src/sniff.js",
+      "sha256": "5970dbd66955eab35b49a4a719dc6c4f859c2fe17140cab4a887847a9ea5216f",
+      "generated": false
+    },
+    {
       "path": "tools/image-to-ico/README.md",
       "sha256": "7afd69ff70f7688040f70b5de3507a4dc49dee0fc741a7d32e4c7953ed816339",
       "generated": false
@@ -535,6 +613,56 @@
       "generated": false
     },
     {
+      "path": "tools/qr-barcode-reader/README.md",
+      "sha256": "8b4166adf250b019441d2a6ed062fef3753991a943b0e383d71750a469004c77",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/linear.js",
+      "sha256": "10d2519c193d9546c3ac9037375cf2a30e54b5667c23125417ff89894fc7d84f",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/qr-decode.js",
+      "sha256": "59fd5b990791c6355f9103f85e5b16d15d0286df90aacdd68de02e8fb1564800",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/reed-solomon.js",
+      "sha256": "c778fcca05f14cc16a2ee429c1c05faca790178eaa3837484822d35fba0c7092",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode-reader/src/shared/qr-tables.js",
+      "sha256": "07ec5bc59c2778c7529457e7a533e603ba715dd2de0308dd16be727b1cd4272d",
+      "generated": true
+    },
+    {
+      "path": "tools/qr-barcode/README.md",
+      "sha256": "93bf2b264da1318f35545111e5c1c7df385b4f43ba566d0e7177591c562764bf",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode/src/barcode.js",
+      "sha256": "479b88f7bbddc535b781ecb5e3d842796b21fffcc0968ba57d3d2aa7798c9c59",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode/src/code128.js",
+      "sha256": "b51153b3443fb5664ec83e8ff63c5f886487855da11a1fcf18ad446b9538549a",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode/src/render.js",
+      "sha256": "23be96c564067d4eb82155b0de14bdf08551ae0417bd0ba2330a8e76d620936e",
+      "generated": false
+    },
+    {
+      "path": "tools/qr-barcode/src/scan-advice.js",
+      "sha256": "7a6439a746fc74741f4f86226436db379e3210bce857b3de7ae334977b9f6d15",
+      "generated": false
+    },
+    {
       "path": "tools/resize-image/README.md",
       "sha256": "cfcb4a03023e110bc77a1c217eed3d0ac181e5700c70f81f431fb2327fffdd26",
       "generated": false
@@ -600,6 +728,16 @@
       "generated": false
     },
     {
+      "path": "tools/text-diff/README.md",
+      "sha256": "ccf754639c9ce31c8f0438f4705f839b6142a61062126da86033c7f658f11c71",
+      "generated": false
+    },
+    {
+      "path": "tools/text-diff/src/diff.js",
+      "sha256": "c91a0827788a6002c9d9736f17a070659c9452e4e556e41ab3360eaeda8a16cf",
+      "generated": false
+    },
+    {
       "path": "tools/watermark-pdf/README.md",
       "sha256": "180443c8825b717edd79a35d83170ffa26153af0fb07ca0143c6dea8dc02f7f2",
       "generated": false
@@ -633,6 +771,31 @@
       "path": "tools/webp-to-jpg/README.md",
       "sha256": "d580605b8265d271130bc2d4ce86064a1a8e9126b812bd6a30ed5593bbcfe0c0",
       "generated": false
+    },
+    {
+      "path": "tools/xml-formatter/README.md",
+      "sha256": "7c2459af31f4eaa6a0978942e68b793f67cb5fedc70ca5c439c28bc7efce46fc",
+      "generated": false
+    },
+    {
+      "path": "tools/yaml-to-json/README.md",
+      "sha256": "aa285f313d7a7df7c9093ce289e934eafee1b90b0a51024070b69a601a2907fc",
+      "generated": false
+    },
+    {
+      "path": "tools/yaml-to-json/src/convert.js",
+      "sha256": "608e09950f38ad33c0069ff3837105309aad35120846709920537c97020ddfdb",
+      "generated": false
+    },
+    {
+      "path": "tools/yaml-to-json/src/shared/parse-json.js",
+      "sha256": "8f64c9cdc5519d4db92a595e49f971979c1f1c5f786a767b937e95737d6459ed",
+      "generated": true
+    },
+    {
+      "path": "tools/yaml-to-json/src/shared/parse-yaml.js",
+      "sha256": "cacc7d97cc5fbe66b77a1dd5ed01ca4663c84798840e47bf11f366e09853b21e",
+      "generated": true
     }
   ],
   "assets": [

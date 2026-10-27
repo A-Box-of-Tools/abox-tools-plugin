@@ -13,7 +13,7 @@ try {
   });
   const [command, ...extra] = positionals;
   if (values.help || !command) {
-    console.log('abox capabilities | doctor | compress-image | resize-image | convert-image | split-pdf | merge-pdf | select-pdf-pages | rotate-pdf | images-to-pdf | inspect-exif | remove-exif | hash-file | compress-pdf | watermark-pdf | image-to-ico | svg-to-image | image-layout | pdf-to-csv | format-json | base64\nOperations accept --request <JSON> or --request-file <absolute path>.');
+    console.log('abox capabilities | doctor | compress-image | resize-image | convert-image | split-pdf | merge-pdf | select-pdf-pages | rotate-pdf | images-to-pdf | inspect-exif | remove-exif | hash-file | compress-pdf | watermark-pdf | image-to-ico | svg-to-image | image-layout | pdf-to-csv | format-json | base64 | image-to-data-uri | convert-yaml-json | format-xml | generate-qr | generate-barcode | diff-text\nOperations accept --request <JSON> or --request-file <absolute path>.');
   } else {
     if (extra.length) throw new AdapterError('INVALID_ARGUMENTS', 'Provide exactly one operation.');
     if (values.request && values['request-file']) throw new AdapterError('INVALID_ARGUMENTS', 'Choose request or request-file, not both.');
@@ -37,6 +37,9 @@ try {
         'image-to-ico': 'abox_image_to_ico', 'svg-to-image': 'abox_svg_to_image',
         'image-layout': 'abox_image_layout', 'pdf-to-csv': 'abox_pdf_to_csv',
         'format-json': 'abox_json_format', 'base64': 'abox_base64',
+        'image-to-data-uri': 'abox_image_data_uri', 'convert-yaml-json': 'abox_yaml_json',
+        'format-xml': 'abox_xml_format', 'generate-qr': 'abox_qr_generate',
+        'generate-barcode': 'abox_barcode_generate', 'diff-text': 'abox_text_diff',
       }[command];
       if (!name) throw new AdapterError('UNKNOWN_TOOL', `Unknown command: ${command}`);
       const json = values['request-file'] ? await readFile(localPath(values['request-file']), 'utf8') : values.request;

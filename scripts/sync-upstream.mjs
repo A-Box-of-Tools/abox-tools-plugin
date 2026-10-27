@@ -30,6 +30,13 @@ const seeds = [
   'tools/pdf-to-csv/src/read.js', 'tools/pdf-to-csv/src/rows.js',
   'tools/pdf-to-csv/src/check.js', 'tools/pdf-to-csv/src/csv.js',
   'shared/js/parse-json.js', 'tools/base64/src/encode.js',
+  'tools/yaml-to-json/src/convert.js', 'shared/js/parse-xml.js',
+  'tools/text-diff/src/diff.js',
+  'shared/js/qr.js', 'tools/qr-barcode/src/barcode.js', 'tools/qr-barcode/src/render.js',
+  'tools/qr-barcode/src/scan-advice.js',
+  'tools/qr-barcode-reader/src/qr-decode.js', 'tools/qr-barcode-reader/src/linear.js',
+  'tools/image-to-data-uri/src/sniff.js', 'tools/image-to-data-uri/src/encode.js',
+  'tools/image-to-data-uri/src/shapes.js', 'tools/image-to-data-uri/src/metadata.js',
   'shared/js/pdf-reader.js', 'shared/js/pdf-writer.js', 'shared/js/example-pdf.js',
   'tools/compress-image/README.md', 'tools/resize-image/README.md',
   'tools/png-to-webp/README.md', 'tools/webp-to-jpg/README.md',
@@ -39,6 +46,8 @@ const seeds = [
   'tools/image-to-ico/README.md', 'tools/svg-to-image/README.md',
   'tools/image-layout/README.md', 'tools/pdf-to-csv/README.md',
   'tools/json-formatter/README.md', 'tools/base64/README.md',
+  'tools/yaml-to-json/README.md', 'tools/xml-formatter/README.md', 'tools/text-diff/README.md',
+  'tools/qr-barcode/README.md', 'tools/qr-barcode-reader/README.md', 'tools/image-to-data-uri/README.md',
   'LICENSE',
 ];
 

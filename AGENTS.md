@@ -1,6 +1,6 @@
 # Working on the local adapter
 
-This repository packages nineteen abox.tools operations for local agents. Runtime
+This repository packages twenty-five abox.tools operations for local agents. Runtime
 processing must accept filesystem paths and write local files without a hosted
 service, analytics, API key, or dependency download. Dependency installation is
 a separate setup step. Existing outputs are never overwritten.

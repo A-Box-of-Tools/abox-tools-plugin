@@ -1,0 +1,176 @@
+# Text Diff
+
+*Compare two texts, side by side — on your own machine.*  ·  lives at `/text-diff/`  ·  [all tools](../)  ·  [how the site is built](../../README.md)
+
+This page, [`json-formatter`](../json-formatter/) and [`base64`](../base64/)
+used to be one tool at `/text-tools/`, four jobs behind four tabs. The
+comparison was the only tab with a second box, which made it the odd one out
+in the shared layout as well as in the search results — so the split gave it
+a page shaped for two texts and an address of its own. `src/diff.js` moved
+here unchanged.
+
+That address was `/compare-text/` first, and is `/text-diff/` now: "text diff"
+is the phrase, it is what the tool has been called since the split, and the
+German and Dutch slugs were already built that way round. The old address
+redirects.
+
+The things people compare are contracts, config files and unreleased code, in
+pairs — pasting them into somebody else's diff checker is giving both versions
+away at once. There is no such step here, and no code path that could add one.
+
+---
+
+## The comparison
+
+Myers' algorithm — the one `git diff` uses. Walk a grid whose axes are the two
+texts, where a diagonal step is a line both sides have; the shortest path is the
+smallest edit script. Smallest is what makes a diff readable: a line inserted in
+the middle should show as one insertion, not as every line after it having
+changed.
+
+It is O(ND), which is fast when the two are similar and quadratic when they are
+not. Three things keep the pathological case out of the page:
+
+1. **The common prefix and suffix are trimmed first.** Two 20,000-line files
+   differing in one place become a diff of two one-line files.
+2. **The number of steps is capped**, because the walk keeps one row per step
+   so the path can be retraced — about `8 × steps²` bytes, which is 32 MB at
+   the ceiling set here.
+3. **A floor on the answer is computed before the walk starts.** The best
+   possible edit script keeps every line the two sides have in common, so
+   `n + m - 2 × common` is a lower bound on the number of steps, and counting
+   that is O(n + m). When the floor is already over the ceiling there is no
+   point walking at all: two files with nothing in common go from being the
+   most expensive case to the cheapest, and the answer is the same one the walk
+   would have reached.
+
+The same routine runs a second time inside each changed line, over words rather
+than lines, which is what marks the word that changed instead of the paragraph
+around it. Punctuation is its own token, so a changed argument in a line of code
+shows up as one word.
+
+What comes out is a unified diff — the `@@ -3,5 +3,5 @@` format that
+`git apply`, `patch` and every review tool read. What is on screen is a view of
+it, and only a view: the rows are collapsed to a count where nothing changed,
+and past a few thousand rows the page stops drawing and points at the download,
+because nobody reads the eight thousandth row of a diff.
+
+The view can ignore whitespace, case and blank lines; the exported patch
+always compares the original strings. Otherwise its context would describe a
+filtered file rather than the one somebody wants to patch. Line terminators
+stay in that comparison: CRLF is preserved, empty files have zero lines, and
+an unterminated last line carries the standard missing-newline marker. Files
+loaded into the boxes retain their original strings until the visitor edits
+them, because a textarea itself normalises carriage returns to LF.
+
+## The view
+
+One CSS grid for the whole comparison rather than a table per row, so the line
+number columns line up down the whole page — which is the only reason to read
+a diff side by side at all. Each row is `display: contents`, making its cells
+the grid's children rather than a box of their own.
+
+Long lines wrap rather than scrolling the view sideways: a diff that has to be
+scrolled in two directions is one nobody reads, and a wrapped line is still
+obviously one line, because it has a line number and its continuation does not.
+A phone starts on the one-column view — side by side needs two columns of text
+and a phone has room for about one — as a starting position rather than a
+lock.
+
+## What is deliberately not here
+
+| Left out | Why |
+|---|---|
+| Comparing two files by bytes | A binary diff is a different job with a different output, and the answer people actually want — "are these identical?" — is a checksum, which is [`hash-checksum`](../hash-checksum/) |
+| Three-way merge | It needs a common ancestor and a way to edit the result, which is an editor's job; the page would be pretending |
+| Formatting before comparing | [`json-formatter`](../json-formatter/) is one tab away, and doing it silently here would mean the diff shown is not the diff of what was pasted |
+| Applying the patch | `git apply` and `patch` exist, know about context drift, and have flags for when it does not apply cleanly |
+
+## Where the words are
+
+Not in `src/`. Every sentence the page says about a comparison &mdash; the count
+under each box, the line over the diff, the two words the Copy button cycles
+through &mdash; is a `data-phrase` span in the `#phrases` block at the foot of
+`body.html`, read back with `phrase()` from `shared/js/phrases.js`. `src/` is
+copied byte for byte into every language, so a sentence written there is English
+on fourteen of the tool's fifteen addresses; `body.html` is translated once per
+language, so a sentence held there is not.
+
+Two things follow from that and are worth knowing before adding a sentence.
+Plurals are two keys, never one with an `s` appended, because the plural of a
+noun is not a suffix in every language. And a note that is sometimes absent goes
+in as a blank the caller fills with `''` rather than being concatenated on,
+because the space that would join the two sentences is not a space in Japanese.
+
+## The files
+
+```
+body.html            the two boxes, the options, the diff view, the phrases
+styles.css           the two-pane layout and the diff grid
+src/main.js          the wiring: two inputs, options, drawing the comparison
+src/diff.js          Myers, the word diff, and the unified output
+src/samples.js       the example behind "Try an example"
+```
+
+## The tests
+
+```bash
+node --test "tests/js/text-diff.test.js"
+```
+
+That the deletions rebuild the left-hand text and the insertions rebuild the
+right-hand one, which is what "correct" means for a diff, plus the two
+performance cases: 20,000 lines with one change, and two files with nothing in
+common.
+
+Nothing here needs a browser, because nothing here needs a canvas, a codec or a
+file: it is all strings in and strings out, which is the same reason the whole
+tool can promise that nothing leaves the machine.
+
+## Edited input and result actions
+
+The editable boxes carry `data-language-text`: the language switch saves their
+current contents instead of replaying the file they were imported from. A
+cleared box therefore stays clear, and edits are not overwritten by an
+asynchronous file read after navigation. Copy and Download are invalidated as
+soon as typing starts, before the debounced calculation runs; a pending
+clipboard write may only update feedback for the result it actually copied.
+
+The `abox:language-text` snapshot supplies `sourceText()` rather than the
+textarea's normalized value. The restoration input event carries that exact
+string back, so untouched CRLF files retain their bytes, while an edited box
+keeps the line endings of the text the visitor actually entered.
+
+File reads on this page use the shared `text-import` owner. Typing, Clear and
+an example retire a pending read immediately; a newer file choice replaces it.
+The old read may still finish in the browser, but its text and errors cannot
+replace the current editor or clear a newer import's reading label. Swap retires
+it too. The destination for one file is chosen before reading, and original
+line endings are retained until that box is edited.
+
+## Line endings and change navigation
+
+Line content is still matched after normalizing CRLF, LF and CR for the view.
+Exact terminators stay beside matched lines with ending differences, so a change
+appears as a marked row with its original and changed endings, including an
+absent final newline. The summary counts those matched-line terminator changes
+separately from added or removed line content. Input facts describe the
+preserved source string and use the same logical line model as the comparison;
+a final terminator does not invent an extra line. Ignore whitespace and Ignore
+case affect content matching; Ignore blank lines removes blank content, while
+matched blank-line terminator changes stay visible between the same nonblank
+anchors. None of these controls discards ending differences from the patch.
+
+Previous change and Next change move between contiguous changed blocks in the
+rendered comparison, including ending-only edits. Navigation changes focus and
+scroll only after the visitor presses a button. It does not recompute, filter
+or replace the patch. The row ceiling still applies: when the view is
+truncated, its navigation says how many of the total change blocks it can
+reach, and Download continues to contain the whole patch. A block itself may
+continue beyond the visible ceiling.
+
+Targets belong to the current rendering and are retired as soon as an input
+or option changes. The clipboard fallback also retires them when it replaces
+the comparison with selectable patch text. Imported raw source strings and
+language restoration keep their existing behavior; asynchronous import
+ownership is handled by the shared `text-import` part.

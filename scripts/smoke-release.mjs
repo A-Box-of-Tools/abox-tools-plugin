@@ -19,9 +19,9 @@ import { PdfWriter } from '../vendor/abox/shared/js/pdf-page-writer.js';
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
-  'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
-  'abox_image_compress', 'abox_image_convert', 'abox_image_layout', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf', 'abox_json_format',
-  'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_svg_to_image',
+  'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash',
+  'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_resize', 'abox_image_to_ico', 'abox_images_to_pdf', 'abox_json_format',
+  'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
 ];
 const expectedPublisher = 'Abox Technologies';
 
@@ -676,6 +676,78 @@ export async function smokeRelease(config, { universal = false } = {}) {
     const decodedFile = await call(client, 'abox_base64', { input_path: base64Path, output_path: decodedPath, mode: 'decode', url_safe: true, canonical: true });
     assert.equal(decodedFile.verified, true);
     assert.deepEqual(await readFile(decodedPath), png);
+
+    const uriPath = path.join(workspace, 'local image.css');
+    const uri = await call(client, 'abox_image_data_uri', { input_path: imageInput, output_path: uriPath, shape: 'css-var', identifier: 'smoke-image' });
+    assert.equal(uri.verified, true);
+    assert.equal(uri.bytes_preserved, true);
+    assert.equal(uri.image_decode_verified, false);
+    const embedded = /url\("data:image\/png;base64,([A-Za-z0-9+/=]+)"\)/.exec(await readFile(uriPath, 'utf8'));
+    assert.ok(embedded);
+    assert.deepEqual(Buffer.from(embedded[1], 'base64'), png);
+    assert.ok(!JSON.stringify(uri).includes(png.toString('base64')));
+
+    const yamlInput = path.join(workspace, 'local config.yaml');
+    const yamlBytes = Buffer.from('# local fixture\none: 1\nflag: true\n');
+    await writeFile(yamlInput, yamlBytes);
+    const yamlJsonPath = path.join(workspace, 'converted config.json');
+    const yamlJson = await call(client, 'abox_yaml_json', { input_path: yamlInput, output_path: yamlJsonPath, direction: 'yaml-to-json' });
+    assert.equal(yamlJson.verified, true);
+    assert.deepEqual(JSON.parse(await readFile(yamlJsonPath, 'utf8')), { one: 1, flag: true });
+    const yamlBackPath = path.join(workspace, 'round trip config.yml');
+    const yamlBack = await call(client, 'abox_yaml_json', { input_path: yamlJsonPath, output_path: yamlBackPath, direction: 'json-to-yaml' });
+    assert.equal(yamlBack.verified, true);
+    assert.equal(await readFile(yamlBackPath, 'utf8'), 'one: 1\nflag: true\n');
+    assert.deepEqual(await readFile(yamlInput), yamlBytes);
+
+    const xmlInput = path.join(workspace, 'local document.xml');
+    const xmlBytes = Buffer.from('<root><a>value &amp; more</a><b/></root>');
+    await writeFile(xmlInput, xmlBytes);
+    const xmlPath = path.join(workspace, 'formatted document.xml');
+    const xml = await call(client, 'abox_xml_format', { input_path: xmlInput, output_path: xmlPath });
+    assert.equal(xml.verified, true);
+    const xmlText = await readFile(xmlPath, 'utf8');
+    assert.match(xmlText, /^<root>\n/);
+    assert.ok(xmlText.includes('<a>value &amp; more</a>'));
+    assert.ok(xmlText.endsWith('</root>\n'));
+    assert.deepEqual(await readFile(xmlInput), xmlBytes);
+
+    const qrInput = path.join(workspace, 'qr payload.txt');
+    const qrPayload = Buffer.from('https://abox.tools/'); await writeFile(qrInput, qrPayload);
+    const qrPath = path.join(workspace, 'generated qr.png');
+    const qr = await call(client, 'abox_qr_generate', { input_path: qrInput, output_path: qrPath, format: 'png' });
+    assert.equal(qr.verified, true);
+    assert.equal(qr.verification.payload_decoded, true);
+    assert.ok(qr.verification.png_pixel_samples > 0);
+    const qrHeader = pngChunks(await readFile(qrPath)).find(chunk => chunk.type === 'IHDR').data;
+    assert.equal(qrHeader.readUInt32BE(0), qr.width);
+    assert.equal(qrHeader.readUInt32BE(4), qr.height);
+    assert.ok(!JSON.stringify(qr).includes(qrPayload.toString('utf8')));
+    assert.deepEqual(await readFile(qrInput), qrPayload);
+
+    const barcodeInput = path.join(workspace, 'barcode payload.txt');
+    const barcodePayload = Buffer.from('400638133393'); await writeFile(barcodeInput, barcodePayload);
+    const barcodePath = path.join(workspace, 'generated retail barcode.svg');
+    const barcode = await call(client, 'abox_barcode_generate', { input_path: barcodeInput, output_path: barcodePath, symbology: 'ean13' });
+    assert.equal(barcode.verified, true);
+    assert.equal(barcode.verification.payload_decoded, true);
+    assert.equal(barcode.check_digit_added, true);
+    assert.ok((await readFile(barcodePath, 'utf8')).includes('<svg '));
+    assert.ok(!JSON.stringify(barcode).includes(barcodePayload.toString('utf8')));
+    assert.deepEqual(await readFile(barcodeInput), barcodePayload);
+
+    const leftPath = path.join(workspace, 'left text.txt'), rightPath = path.join(workspace, 'right text.txt');
+    const leftBytes = Buffer.from('alpha\r\nold'), rightBytes = Buffer.from('alpha\r\nnew\n');
+    await writeFile(leftPath, leftBytes); await writeFile(rightPath, rightBytes);
+    const patchPath = path.join(workspace, 'verified change.diff');
+    const diff = await call(client, 'abox_text_diff', { left_path: leftPath, right_path: rightPath, output_path: patchPath });
+    assert.equal(diff.verified, true);
+    assert.equal(diff.source_reconstruction_verified, true);
+    assert.equal(diff.patch_application_verified, true);
+    const patch = await readFile(patchPath, 'utf8');
+    assert.ok(patch.startsWith('--- a\n+++ b\n'));
+    assert.ok(patch.includes('-old\n\\ No newline at end of file\n+new\n'));
+    assert.deepEqual(await readFile(leftPath), leftBytes); assert.deepEqual(await readFile(rightPath), rightBytes);
     assert.equal(hash(await readFile(imageInput)), hash(png));
     assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));

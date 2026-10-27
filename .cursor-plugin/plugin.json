@@ -1,8 +1,8 @@
 {
   "name": "abox-tools",
   "displayName": "abox.tools",
-  "version": "0.6.0",
-  "description": "Process local images, PDFs, JSON and Base64 with reusable abox.tools engines. Source installs need Node.js and one-time adapter setup.",
+  "version": "0.7.0",
+  "description": "Local image, PDF, QR/barcode, structured-text and file tools. Source installs need Node.js and one-time adapter setup.",
   "author": { "name": "Abox Technologies" },
   "publisher": "Abox Technologies",
   "homepage": "https://abox.tools/",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "logo": "assets/icon.png",
   "category": "Productivity",
-  "keywords": ["local-files", "images", "pdf", "mcp"],
+  "keywords": ["local-files", "images", "pdf", "qr", "barcode", "yaml", "xml", "diff", "mcp"],
   "skills": "./skills/",
   "mcpServers": "./cursor-mcp.json"
 }

@@ -13,6 +13,10 @@ import { svgToImage } from './svg.mjs';
 import { layoutImages, MAX_LAYOUT_IMAGES, MAX_LAYOUT_SIDE, MAX_LAYOUT_PIXELS } from './image-layout.mjs';
 import { pdfToCsv, MAX_CSV_DECOMPRESSED_STREAM_BYTES, MAX_CSV_DECOMPRESSED_BYTES, UNSUPPORTED_CSV_PDF_NAMES } from './pdf-csv.mjs';
 import { formatJson, base64File, MAX_TEXT_INPUT_BYTES, MAX_TEXT_OUTPUT_BYTES, MAX_JSON_NODES } from './text.mjs';
+import { imageToDataUri, MAX_DATA_URI_INPUT_BYTES, MAX_DATA_URI_OUTPUT_BYTES } from './data-uri.mjs';
+import { convertYamlJson, formatXml, MAX_STRUCTURED_INPUT_BYTES, MAX_STRUCTURED_OUTPUT_BYTES, MAX_STRUCTURED_DEPTH, MAX_STRUCTURED_NODES } from './structured-text.mjs';
+import { generateQr, generateBarcode, MAX_CODE_SIDE, MAX_CODE_PIXELS, MAX_QR_INPUT_BYTES, MAX_BARCODE_INPUT_BYTES } from './codes.mjs';
+import { diffText, MAX_DIFF_INPUT_BYTES, MAX_DIFF_LINES, MAX_DIFF_OUTPUT_BYTES } from './text-diff.mjs';
 import { resizeImage, convertImage } from './image.mjs';
 import { splitPdf, mergePdf, selectPdfPages, rotatePdf, MAX_PAGES, MAX_OUTPUTS, MAX_PAGE_SELECTION_LENGTH } from './pdf.mjs';
 import { MAX_INPUT_BYTES } from './files.mjs';
@@ -158,6 +162,43 @@ const base64 = z.object({
 }).strict().refine(args => args.mode === 'decode' || !args.canonical, {
   message: 'Canonical validation applies only when decoding.',
 });
+const dataUri = z.object({
+  input_path: filename, output_path: filename,
+  shape: z.enum(['uri', 'css-rule', 'css-var', 'html', 'markdown']).default('uri'),
+  svg_encoding: z.enum(['auto', 'base64']).default('auto'),
+  identifier: z.string().regex(/^[a-zA-Z_][a-zA-Z0-9_-]{0,63}$/).optional(),
+}).strict();
+const yamlJson = z.object({
+  input_path: filename, output_path: filename,
+  direction: z.enum(['yaml-to-json', 'json-to-yaml']), indent: z.enum(['2', '4']).default('2'),
+  sort_keys: z.boolean().default(false),
+}).strict().refine(args => args.direction === 'yaml-to-json' || !args.sort_keys, {
+  message: 'Key sorting is supported only for YAML to JSON conversion.',
+});
+const xml = z.object({
+  input_path: filename, output_path: filename, minify: z.boolean().default(false),
+  indent: z.enum(['2', '4', 'tab']).default('2'),
+}).strict();
+const codeStyle = {
+  input_path: filename.describe('Absolute path of the UTF-8 payload file. Text is kept exact, including any final newline.'),
+  output_path: filename, format: z.enum(['svg', 'png']).default('svg'),
+  scale: z.number().int().min(1).max(32).default(4),
+  foreground: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#000000'),
+  background: imageOptions.background,
+};
+const qr = z.object({ ...codeStyle,
+  level: z.enum(['L', 'M', 'Q', 'H']).default('M'), quiet: z.number().int().min(4).max(32).default(4),
+}).strict();
+const barcode = z.object({ ...codeStyle,
+  symbology: z.enum(['code128', 'ean13', 'upca', 'ean8', 'itf14', 'itf', 'code39']).default('code128'),
+  height: z.number().int().min(16).max(4096).default(100),
+  text: z.boolean().default(true), code39_check: z.boolean().default(false),
+}).strict();
+const diff = z.object({
+  left_path: filename, right_path: filename, output_path: filename,
+  ignore_whitespace: z.boolean().default(false), ignore_case: z.boolean().default(false),
+  ignore_blank_lines: z.boolean().default(false), context_lines: z.number().int().min(0).max(100).default(3),
+}).strict();
 
 export const tools = [
   { name: 'abox_capabilities', title: 'abox.tools local capabilities', description: 'List supported local operations, limits, and installed browser availability. Does not read user files.', schema: z.object({}).strict(), run: capabilities, readOnly: true },
@@ -180,6 +221,12 @@ export const tools = [
   { name: 'abox_pdf_to_csv', title: 'Extract local PDF tables to CSV', description: 'Infer selectable-text tables in an unencrypted local PDF. Writes UTF-8 BOM CSV, comma delimiter, CRLF, blank rows between tables. No OCR. Dates and amounts may be normalized; ambiguous auto dates use day/month/year. Formula-like text is escaped by default. Review the CSV; structural verification does not prove accuracy. Conservative filter preflight accepts unfiltered/Flate without predictors and can also refuse blocked PDF names printed in text.', schema: csv, run: pdfToCsv },
   { name: 'abox_json_format', title: 'Format a local JSON file', description: 'Pretty-print or minify UTF-8 JSON using the existing abox.tools parser. Preserves numeric spellings, large integers, duplicate keys, escaped string tokens and object key order. Optional natural key sorting. Writes a new JSON file with a final newline and verifies tokens and structure. Input up to 8 MiB and 256 nesting levels; output up to 32 MiB. File contents are not returned.', schema: json, run: formatJson },
   { name: 'abox_base64', title: 'Encode or decode a local Base64 file', description: 'Encode arbitrary local file bytes as Base64 text or decode Base64 into a new binary file using the existing abox.tools byte codec. Supports standard padded or URL-safe unpadded encoding. Relaxed decoding accepts whitespace, either alphabet and missing padding; canonical decoding requires the requested exact spelling and zero unused bits. Supports empty files, verifies a byte round trip, and never returns file contents.', schema: base64, run: base64File },
+  { name: 'abox_image_data_uri', title: 'Embed a local image as a data URI', description: 'Encode original image bytes into a new local .txt data URI, .css rule/custom property, .html image tag or .md image. Uses signature-based type detection and verifies byte preservation. Standalone UTF-8 SVG URIs can use percent encoding; SVG embedding shapes use Base64 to preserve bytes through their syntax. Keeps source metadata and SVG markup; does not verify rendering or sanitize SVG. Returns paths, sizes and metadata counts.', schema: dataUri, run: imageToDataUri },
+  { name: 'abox_yaml_json', title: 'Convert local YAML and JSON files', description: 'Convert a local UTF-8 file between the website-supported YAML subset and JSON. Preserves ordered values, duplicate keys and large number tokens; formatting, string escapes and comments may change. YAML anchors, aliases, custom tags and multiple documents are unsupported. Optional natural key sorting on YAML to JSON. Writes and verifies a new .json or .yaml/.yml file; no contents returned.', schema: yamlJson, run: convertYamlJson },
+  { name: 'abox_xml_format', title: 'Format a local XML file', description: 'Pretty-print or minify local UTF-8 XML using the existing website parser and printer. Preserves mixed content and xml:space behavior. Rejects DTDs and custom entities; no external resource resolution. Writes a new .xml file and verifies document structure and text. Formatting can change insignificant whitespace and quote spelling.', schema: xml, run: formatXml },
+  { name: 'abox_qr_generate', title: 'Create a local QR code', description: 'Read exact UTF-8 payload text from a local file and generate a new SVG or PNG QR code using the website encoder. No redirect or hosted QR service. Verify by decoding the generated modules; PNG also verifies rendered pixels. SVG requires no browser; PNG uses the installed local browser. Payload contents never enter the tool result. Includes a minimum four-module quiet zone.', schema: qr, run: generateQr },
+  { name: 'abox_barcode_generate', title: 'Create a local barcode', description: 'Read exact payload text from a local file and create a verified SVG or PNG Code 128, EAN-13, UPC-A, EAN-8, ITF-14, ITF or Code 39 barcode. Retail check digits are computed or validated; invalid supplied digits are refused. Source-defined quiet zones and optional human-readable labels. Verification capacity can limit long inputs. PNG requires a local browser. Payload and completed digits are not returned.', schema: barcode, run: generateBarcode },
+  { name: 'abox_text_diff', title: 'Compare local text files', description: 'Compare two UTF-8 files and write a new unified .diff/.patch using the website bounded Myers engine. Verify that applying the patch to the left file exactly reconstructs the right, including line endings and final newlines. Ignore options affect comparison summaries only; the exported patch always describes the original files. Large rewrites can use coarse hunks. Returns counts and paths without source lines.', schema: diff, run: diffText },
 ];
 
 export async function capabilities() {
@@ -208,6 +255,12 @@ export async function capabilities() {
       { name: 'abox_pdf_to_csv', encrypted: false, ocr: false, max_pages: MAX_PAGES, max_tables: 1000, max_output_bytes: 16 * 1024 * 1024, max_decompressed_stream_bytes: MAX_CSV_DECOMPRESSED_STREAM_BYTES, max_cumulative_decompressed_bytes: MAX_CSV_DECOMPRESSED_BYTES, refused_pdf_names: UNSUPPORTED_CSV_PDF_NAMES, conservative_filter_preflight: true, delimiter: ',', encoding: 'utf-8-bom', date_orders: ['auto', 'dmy', 'mdy'], defaults: { spreadsheet_safe: true, include_headers: true } },
       { name: 'abox_json_format', input_format: 'utf-8-json', max_input_bytes: MAX_TEXT_INPUT_BYTES, max_output_bytes: MAX_TEXT_OUTPUT_BYTES, max_depth: 256, max_syntax_nodes: MAX_JSON_NODES, preserves_numeric_tokens: true, preserves_duplicate_keys: true, requires_browser: false },
       { name: 'abox_base64', modes: ['encode', 'decode'], max_input_bytes: MAX_TEXT_INPUT_BYTES, max_output_bytes: MAX_TEXT_OUTPUT_BYTES, binary: true, empty_files: true, requires_browser: false },
+      { name: 'abox_image_data_uri', max_input_bytes: MAX_DATA_URI_INPUT_BYTES, max_output_bytes: MAX_DATA_URI_OUTPUT_BYTES, shapes: ['uri', 'css-rule', 'css-var', 'html', 'markdown'], bytes_preserved: true, rendering_verified: false, requires_browser: false },
+      { name: 'abox_yaml_json', directions: ['yaml-to-json', 'json-to-yaml'], max_input_bytes: MAX_STRUCTURED_INPUT_BYTES, max_output_bytes: MAX_STRUCTURED_OUTPUT_BYTES, max_depth: MAX_STRUCTURED_DEPTH, max_nodes: MAX_STRUCTURED_NODES, requires_browser: false },
+      { name: 'abox_xml_format', max_input_bytes: MAX_STRUCTURED_INPUT_BYTES, max_output_bytes: MAX_STRUCTURED_OUTPUT_BYTES, max_depth: MAX_STRUCTURED_DEPTH, max_nodes: MAX_STRUCTURED_NODES, dtd: false, external_entities: false, requires_browser: false },
+      { name: 'abox_qr_generate', max_input_bytes: MAX_QR_INPUT_BYTES, formats: ['svg', 'png'], levels: ['L', 'M', 'Q', 'H'], minimum_quiet_modules: 4, max_side: MAX_CODE_SIDE, max_pixels: MAX_CODE_PIXELS, requires_browser_for: ['png'] },
+      { name: 'abox_barcode_generate', max_input_bytes: MAX_BARCODE_INPUT_BYTES, formats: ['svg', 'png'], symbologies: ['code128', 'ean13', 'upca', 'ean8', 'itf14', 'itf', 'code39'], max_side: MAX_CODE_SIDE, max_pixels: MAX_CODE_PIXELS, verification_capacity_limits: true, requires_browser_for: ['png'] },
+      { name: 'abox_text_diff', max_total_input_bytes: MAX_DIFF_INPUT_BYTES, max_total_lines: MAX_DIFF_LINES, max_output_bytes: MAX_DIFF_OUTPUT_BYTES, formats: ['diff', 'patch'], ignore_settings_affect_patch: false, minimality_guaranteed: false, requires_browser: false },
     ],
   };
 }
