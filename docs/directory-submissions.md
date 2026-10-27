@@ -12,20 +12,20 @@ Publisher: **Abox Technologies**
 
 Use this registered trade name consistently; abox.tools is the product name.
 
-Short description: **Process local images, PDFs and files**
+Short description: **Local image, PDF, audio, video and text tools**
 
 Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: 31 local image, GIF, PDF, text, code,
-> password, metadata and checksum tools with a shared agent skill.
-> Runtimes are included. Image processing uses installed Edge, Chrome or Chromium.
-> PDF tables have no OCR. Files stay local. No account required.
+> Abox Technologies publishes abox.tools: 55 local image, GIF, PDF, audio, video,
+> text, OCR, metadata and checksum operations with a shared agent skill.
+> Runtimes and English OCR data are included. Rendering needs an installed browser.
+> Files stay local. Extraction requires review. No account required.
 
 Long description:
 
-> Give your agent 31 reusable file tools: compress JPEG, PNG, and static WebP
+> Give your agent 55 reusable file operations: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
@@ -46,12 +46,27 @@ Long description:
 > Redaction uses explicit full-resolution rectangles and does not find sensitive
 > content. Password values, hashes and samples are excluded from tool results.
 > PDF tables are inferred without OCR and require review against the source.
+> Read QR/barcode payloads only into a local report, create GIFs, protect or unlock
+> PDFs using separate local password files, edit/trim admitted WAV audio, inspect
+> or copy supported MP4/MOV timelines, and encode bounded silent H.264 videos from
+> still images or one GIF cycle. Explicit local corner/landmark settings support
+> document scans and custom ID photos without face detection or official approval.
+> Generate local business-profile or height previews without publishing accounts.
+> Bundled English receipt OCR writes suggested fields into a local report for
+> review. Technical DICOM inspection/rendering supports admitted native or strict
+> single-frame RLE images; it is not diagnosis or anonymization. Edit explicit
+> EXIF tags, format supported HTML/CSS/YAML, map XML and JSON with documented
+> losses, or render the small Markdown dialect into passive HTML. HTML formatting
+> retains active markup and is not sanitization; video cuts can retain boundary
+> packets and are not redaction.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
 > The release includes Node and the server dependencies. Image processing, GIF
-> extraction, tracing, stacking, redaction, PDF compression and watermark rendering need
-> an installed Edge, Chrome, or Chromium. QR codes and barcodes default to SVG
+> creation/extraction, WAV processing, scans, previews, OCR and new MP4 encoding need
+> an installed Edge, Chrome, or Chromium. New MP4 encoding also needs its native
+> H.264 encoder; no encoder or OCR model is downloaded during processing.
+> QR codes and barcodes default to SVG
 > without a browser; PNG output uses the installed local browser. Metadata
 > cleaning keeps orientation and color profiles by default. Data URI encoding
 > preserves original metadata and SVG markup; its signature check does not prove
@@ -127,13 +142,13 @@ installation or replace that recording.
 
 ## Submission status and access
 
-The active [v0.8.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0)
-identifies Abox Technologies as publisher. This version provides 31 local file operations and one
+The active/latest [v0.9.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0)
+identifies Abox Technologies as publisher. This version provides 55 local file operations and one
 capabilities tool. Its
-[release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806884)
-and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40564806976)
+[release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40578848781)
+and [source verification workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40578847970)
 passed for tagged source
-[5d94af5](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/5d94af561ff2806e823d48de72e8a91d061f9bc2).
+[9f06812](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/9f068120f51e0bba3ea91f3dd024ff9a312c7f9b).
 The public release has 26 assets; native and universal packages passed all four
 platform targets, and the public Registry record's universal MCPB hash matches
 the GitHub asset.
@@ -145,7 +160,20 @@ Version 0.2.1 is installed and Running in Claude Desktop on Windows. OpenAI
 remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. The public skills CLI 1.7.4 installed the v0.8.0 skill's six files and
+is public. Version 0.9.0 passed packaged Gemini and offline skill checks on all
+four CI targets; its copied skill contains ten files. The default Python installer
+downloaded and verified the actual public Windows ZIP in an isolated cache.
+That bundle passed all 55 file operations and 56 MCP tools with Node.js 24.22.1,
+including relocation, installation links and launch without system Node; no
+local rebuild supplied the proof. Public v0.9.0 Gemini and skills installation
+checks also passed on 27 October 2026: Gemini CLI 0.65.0 installed
+`--ref v0.9.0` with 56 tools, the shared skill, bundled runtime and a local file
+operation. Skills CLI 1.7.4 copied ten skill files with adapter version 0.9.0
+into an isolated project/home and checked the installer contract offline.
+That skill-only check did not install an adapter offline; the separate public
+Python download and 55-operation smoke above verify actual adapter installation.
+
+Historical public skills CLI 1.7.4 installed the v0.8.0 skill's six files and
 passed its offline installer checks in an isolated directory on 27 October 2026.
 Gemini's normal public-release installation passed for v0.8.0 using CLI 0.65.0
 on Windows, with 32 tools, the shared skill, bundled runtime and a local file

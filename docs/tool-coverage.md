@@ -1,8 +1,8 @@
 # Local tool coverage
 
-The v0.9.0 source targets 55 file operations plus `abox_capabilities`. This is
-source coverage, not a claim that v0.9.0 downloads have been published or checked.
-The README retains the separate verified public-release evidence.
+The v0.9.0 adapter provides 55 file operations plus `abox_capabilities`.
+[Publication evidence](publishing.md) records the release checks and installation
+of the actual public downloads.
 
 The adapter reuses the website's processing modules unchanged. Its new code
 admits supported local inputs, bounds work, supplies noninteractive settings,

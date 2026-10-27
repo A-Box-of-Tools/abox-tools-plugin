@@ -14,18 +14,18 @@ document photos; prepares custom ID photos and local previews; extracts receipt
 fields with bundled OCR; inspects and renders a restricted DICOM subset; protects
 and unlocks PDFs; redacts image regions; and generates passwords into local files.
 
-The v0.9.0 release in preparation targets 55 file operations and one capabilities
-tool. New operations below are unreleased until their tagged downloads and public
-installation are verified.
+The public v0.9.0 release provides 55 file operations and one capabilities tool.
+Native and universal packages passed checks on all four target platforms.
 See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
 the source engines reused by this adapter and the limits of each route.
 
-The public v0.8.0 Windows download was installed and checked in an isolated
-cache. All 31 operations passed using its included runtime. Public Gemini CLI
-installation and the shared skill were also checked; see [publication evidence](docs/publishing.md).
+The public v0.9.0 Windows download passed all 55 file operations and 56 MCP tools
+using its bundled runtime. Public Gemini CLI installation and the shared skill's
+ten-file installation were also checked. See [publication evidence](docs/publishing.md),
+including the historical v0.8.0 receipts.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 
@@ -49,8 +49,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.8.0 Windows
-   bundle extracts as `abox-tools-0.8.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.9.0 Windows
+   bundle extracts as `abox-tools-0.9.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -129,7 +129,8 @@ a Python 3.9+ setup script that downloads the matching packaged release, verifie
 its checksum and installs the bundled runtime. It does not require cloning or
 building this project. See [standalone setup](skills/abox-local-files/references/installation.md).
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Gemini release installation is verified; a gallery listing is unconfirmed.
+is public. Public v0.9.0 Gemini installation and skill copying were verified;
+a Gemini gallery listing is unconfirmed.
 
 ## Ask the agent
 
@@ -208,9 +209,9 @@ whether the target was met.
 The six new tools' settings and JSON configuration examples are documented in
 [the shared skill reference](skills/abox-local-files/references/additional-tools.md).
 
-## New source operations
+## Operations added in v0.9.0
 
-These routes extend the public v0.8.0 operation set. Their full settings, local
+These routes extend the earlier v0.8.0 operation set. Their full settings, local
 JSON shapes and review requirements are in the shared skill's
 [media and document reference](skills/abox-local-files/references/media-and-documents.md).
 Use `capabilities` to check what your installed release exposes.

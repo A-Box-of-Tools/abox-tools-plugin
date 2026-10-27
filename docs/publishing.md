@@ -6,14 +6,15 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.8.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.8.0),
-with **Abox Technologies** as publisher. It provides 31 local file operations and
+Version 0.9.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0),
+with **Abox Technologies** as publisher. It provides 55 local file operations and
 one capabilities tool. The public GitHub Release contains 26 assets. Native and
 universal package checks, packaged Gemini CLI installation, skill discovery and
 offline standalone adapter setup passed on all four platforms. The public
-Registry record and GitHub asset agree on the universal MCPB's SHA-256.
-The public Gemini release installation route and the skill's actual GitHub download
-were verified on Windows for v0.8.0 on 27 October 2026.
+Registry record is active/latest and agrees with the universal MCPB's SHA-256.
+The public v0.9.0 Windows download passed all 55 operations/56 MCP tools; public
+Gemini installation and the ten-file skill installation also passed. Earlier
+v0.8.0 receipts are retained below as history.
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 is live; Gemini's gallery crawler is enabled, with gallery listing unconfirmed. The initial 0.2.1 universal MCPB
 was installed in Claude Desktop on Windows, where its server reported Running.
@@ -23,6 +24,50 @@ the original attachment when a response is edited, so the response directs
 reviewers to the current public MCPB download. OpenAI directory submission remains
 pending the publisher's local-MCP partner approval. Other distribution routes
 are documented in [Platform support and publishing](platforms.md).
+
+The tagged v0.9.0 source is
+[9f06812](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/9f068120f51e0bba3ea91f3dd024ff9a312c7f9b).
+Its [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40578848781)
+and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40578847970)
+passed. Source verification covered Ubuntu and Windows. Release checks completed
+four native targets, universal assembly, four universal launch checks,
+publication and registration. The 26-asset release became public on
+27 October 2026 at 20:41 UTC.
+
+The public universal MCPB is 173934646 bytes with SHA-256
+`5cf3ae701b5aa0e84d21ab7c40cca4de7d280272e9038338c9d6f1943ddef595`;
+the active/latest Registry readback matches that asset. The public Windows ZIP
+is 49920618 bytes and its published SHA-256 is
+`4706f217fe1f67994d0c732b9d3d28555ce2817a5a48b388919578d92cab7b1d`.
+The default Python installer downloaded that public Windows ZIP into an isolated
+cache and verified the exact digest. Its bundle metadata matches tagged source
+`9f068120f51e0bba3ea91f3dd024ff9a312c7f9b` with `dirty_source:false`.
+Full release smoke checks against that downloaded cache passed all 55 operations,
+56 MCP tools and 24 new routes without encoder absences, using bundled
+Node.js 24.22.1. Relocation, installation links and launch without system Node
+also passed. No local rebuild supplied this public-download evidence.
+
+Local validation passed 198 core and 83 browser checks. All 55 file operations
+and 56 MCP tools passed against an extracted native package using bundled
+Node.js 24.19.0, without capability absences. All four native CI jobs passed
+packaged Gemini installation and offline standalone-skill setup. The Linux CI
+log confirms 56 MCP tools, 24 new operations, no encoder absences and the
+ten-file skill installed through skills CLI 1.7.4. These are packaged CI/local
+checks. The public Windows receipt is recorded above; public Gemini and skills
+installation receipts are recorded below.
+
+On 27 October 2026, Gemini CLI 0.65.0 installed the public repository release
+with `--ref v0.9.0` and reported version 0.9.0. Its check passed with 56 tools,
+the shared skill, bundled runtime selection and a local file operation.
+Public skills CLI 1.7.4 separately copied the `abox-local-files` skill from
+`A-Box-of-Tools/abox-tools-plugin`: adapter version 0.9.0 and ten files, installed
+at project scope with an isolated home using the CLI defaults.
+Its offline installer-contract check passed without installing an adapter
+offline. The separate default Python public download and full 55-operation smoke
+above establish actual adapter installation; the skill-only check is not used
+as a substitute for that evidence.
+
+## Historical v0.8.0 evidence
 
 The tagged v0.8.0 source is
 [5d94af5](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/5d94af561ff2806e823d48de72e8a91d061f9bc2).
@@ -52,7 +97,9 @@ images and opaque black redactions are checked before saving. Passwords use
 cryptographic randomness and are written only to a new plaintext file; secret
 values and their hashes are absent from tool results.
 
-Historical v0.7.0 publication checks are recorded in its
+## Historical v0.7.0 evidence
+
+Version 0.7.0 publication checks are recorded in its
 [release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454288)
 and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40555454149).
 Its public Gemini installation and standalone skill download were checked on
@@ -71,6 +118,8 @@ and a real MCP connection verify its configuration; installation through VS
 Code's desktop interface remains unverified. On 27 October 2026, AgentSkillsDir did not accept the
 authorized submission attempt because resource submissions were closed.
 Smithery remains a follow-up for the publisher.
+
+## Public installation checks
 
 After publication, `npm run smoke:gemini -- --from-release` verifies the exact
 public Gemini installation route in a disposable profile. `npm run smoke:skills`

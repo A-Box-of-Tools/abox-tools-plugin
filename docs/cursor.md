@@ -1,19 +1,25 @@
 # Use abox.tools in Cursor
 
-The v0.8.0 release includes a native ZIP for Windows x64, Linux x64,
+The v0.9.0 release includes a native ZIP for Windows x64, Linux x64,
 macOS Apple silicon and macOS Intel. Download
 the ZIP matching your computer, extract it to a permanent folder, and open
 `START-HERE.html`. Select **Install tools in Cursor** and review Cursor's
 installation prompt. The link
 configures the Node runtime and MCP server inside that extracted folder. Keep
 the folder in place. Node.js, npm, Python and a source build are not required
-for this route. The adapter exposes 31 local file operations and one capabilities
-tool. Image processing, GIF extraction, tracing, stacking, redaction, PDF
-compression and watermark rendering need an installed Edge, Chrome or Chromium
-browser. GIF inspection and password generation need no browser. QR codes and barcodes default to SVG without a
-browser; PNG output uses the installed local browser.
+for this route. The adapter exposes 55 local file operations and one capabilities
+tool. Image rendering, GIF creation/extraction, WAV processing, receipt OCR,
+document scans, previews and new MP4 encoding need an installed Edge, Chrome or
+Chromium. MP4 encoding also needs its native H.264 encoder. PDF security, video
+packet copying, text, metadata, inspection and password generation need no
+browser. QR/barcodes default to SVG without one; PNG output uses the browser.
 
-The v0.8.0 native bundle's installation links and MCP configuration were checked
+Version 0.9.0 native and universal package checks passed on all four targets.
+The default Python installer then downloaded and verified the public Windows
+ZIP in an isolated cache; that actual bundle passed all 55 operations/56 MCP
+tools, relocation, installation links and launch without system Node using its
+Node.js 24.22.1 runtime. No local rebuild was used. Historically, v0.8.0
+installation links and MCP configuration were checked
 after downloading and installing the public Windows ZIP in an isolated cache.
 The same bundle passed all 31 file operations with its included runtime.
 Installation through Cursor's desktop interface remains unverified.
