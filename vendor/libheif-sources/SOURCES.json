@@ -1,0 +1,26 @@
+[
+  {
+    "path": "vendor/libheif-sources/libheif.tar.gz",
+    "url": "https://codeload.github.com/strukturag/libheif/tar.gz/5e9deb19fe6b3768af0bb8e9e5e8438b15171bf3",
+    "bytes": 1690707,
+    "sha256": "d73dfba9f023a49b6a47486265669fc0fca861fccb8df8c717fcc908853df866"
+  },
+  {
+    "path": "vendor/libheif-sources/libde265-1.0.15.tar.gz",
+    "url": "https://github.com/strukturag/libde265/releases/download/v1.0.15/libde265-1.0.15.tar.gz",
+    "bytes": 846016,
+    "sha256": "00251986c29d34d3af7117ed05874950c875dd9292d016be29d3b3762666511d"
+  },
+  {
+    "path": "vendor/libheif-sources/libheif-emscripten.tar.gz",
+    "url": "https://codeload.github.com/catdad-experiments/libheif-emscripten/tar.gz/refs/tags/v1.19.8",
+    "bytes": 3063,
+    "sha256": "f2a90f5fc1442c9ad6a488a0dc61afc4daee3cea26d3571c33873992a060a656"
+  },
+  {
+    "path": "vendor/libheif-sources/libheif-js.tar.gz",
+    "url": "https://codeload.github.com/catdad-experiments/libheif-js/tar.gz/refs/tags/1.19.8",
+    "bytes": 10219,
+    "sha256": "d736b0590cf356012c0e278d0a45c94fa97671751a4c4e4a467aae14b3a46003"
+  }
+]

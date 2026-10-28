@@ -168,6 +168,8 @@ test('capabilities describes local operations and the input bound', async () => 
     'abox_exif_edit',
     'abox_video_rotate', 'abox_video_remux',
     'abox_code_format', 'abox_xml_json', 'abox_markdown_html',
+    'abox_heic_convert', 'abox_avif_convert', 'abox_pdf_redact', 'abox_audio_extract',
+    'abox_video_compress', 'abox_video_crop', 'abox_video_frame', 'abox_video_reverse', 'abox_video_timelapse', 'abox_video_to_gif', 'abox_video_rotate_bake',
     'abox_video_inspect', 'abox_video_trim', 'abox_video_join', 'abox_document_scan', 'abox_id_photo', 'abox_business_profile',
     'abox_height_compare', 'abox_receipt_extract', 'abox_dicom_inspect', 'abox_dicom_render', 'abox_images_to_video', 'abox_gif_to_mp4',
   ].sort());

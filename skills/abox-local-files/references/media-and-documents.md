@@ -61,7 +61,7 @@ These routes need no browser and do not redact PDF content.
 
 ## Audio and video
 
-`abox_audio_edit` / `edit-audio`: WAV `input_path`, `.wav` `output_path`;
+`abox_audio_edit` / `edit-audio`: admitted audio `input_path`, `.wav` `output_path`;
 optional `reverse` (false), `speed` (0.25–4, default 1), `keep_pitch` (true),
 `volume_mode` (`gain` default or `normalize`), gain-only `gain_db` (-60–24,
 default 0), normalize-only `normalize_db` (-60–0, default -1), and `bits` (16
@@ -76,14 +76,13 @@ the supplied order, overlaps and duplicates. Cut mode merges ranges and emits
 the ascending complement; the source omits leftover gaps of at most 1 ms. Set
 `fade_ms:0` when no fade is wanted.
 
-Both audio routes require a local browser and admit only simple little-endian
-PCM16 or Float32 RIFF WAV, mono/stereo, 8–96 kHz, at most 600 seconds,
-12 million frames, 24 million channel-samples and 64 MiB input. Output is at
-most 128 MiB. Metadata and
-unsupported WAV layouts are refused; compressed audio and video-audio extraction
-are unavailable. Every encoded output sample is checked; input samples remain
-local. PCM16 encoding quantizes/clips and native input decoding can differ by
-one Float32 rounding step across platforms.
+Both audio routes require a local browser. The simple PCM16/Float32 WAV subset
+is joined by bounded MP3 Layer III, AAC-LC ADTS and ordinary MP4/M4A/MOV AAC-LC
+inputs. `abox_audio_extract` / `extract-audio` can write decoded WAV or copy an
+admitted MP4 AAC track to M4A without decoding. See [audio codecs and extraction](audio-codecs.md)
+for exact settings, priming behavior, native codec requirements and bounds.
+Every encoded WAV sample is checked; input samples remain local. PCM16 encoding
+quantizes/clips and native input decoding can differ across platforms.
 
 `abox_video_inspect` / `inspect-video`: `input_path`. Inspects MP4/M4V/MOV
 containers, tracks, timing and sample tables without decoding or returning
@@ -250,7 +249,7 @@ ledger accuracy. Ask the user to review every field against the source.
 `abox_dicom_inspect` / `inspect-dicom`: `input_path`. Returns technical shape,
 pixel layout and counts, without patient names, dates, private values or instance
 identifiers. Does not modify the file and requires no browser.
-It does not decode pixels or prove image validity. An admitted RLE stream can
+It does not decode pixels or prove image validity. An admitted RLE/JPEG stream can
 have `compressed_stream_verified:true` while inspection still reports
 `verified:false` and `decoded_pixels:false`.
 
@@ -262,14 +261,25 @@ monochrome and unsigned 8-bit RGB; verifies every output pixel using the source
 renderer. Requires a local browser.
 
 Admits flat PS3.10 files in known uncompressed implicit/explicit little-endian
-or explicit big-endian transfer syntaxes, plus a strict RLE Lossless subset.
-RLE requires exactly one frame, one fragment and an empty Basic Offset Table.
-Segment counts/offsets and every PackBits run must produce the exact declared
+or explicit big-endian transfer syntaxes, plus strict RLE Lossless and
+JPEG Lossless Process 14 subsets. Compressed inputs require exactly one frame,
+one fragment and an empty Basic Offset Table.
+RLE segment counts/offsets and every PackBits run must produce the exact declared
 byte planes; incomplete data, overrun clipping and silent zero-fill are refused.
 Rendering independently checks decoded stored samples and final output pixels.
 
+JPEG Lossless accepts transfer syntaxes ending `.57` or `.70`, SOF3 monochrome
+in 8/16-bit allocated containers or RGB 8-bit, matching outer geometry and
+BitsStored precision, 1×1 components and one complete
+interleaved scan. Restart markers, multiscan layouts and other JPEG families are
+refused. Process `.70` uses predictor 1; `.57` accepts predictors 1–7 with the
+admitted point transform. A complete bounded entropy/EOI walk precedes the source
+decoder, then every decoded stored sample is independently compared. A source
+decoder disagreement fails closed, including the known 12-bit predictor-7 wrap
+case. Structural admission is separate from proving clinical interpretation.
+
 Other sequences/undefined lengths, other compressed pixels, guessed syntax and
 unsupported LUT/presentation transforms are refused. Input 64 MiB, 4096 pixels
-per side, 4 MP per frame, 128 native frames (RLE only 1), 10000 tags; PNG
+per side, 4 MP per frame, 128 native frames (compressed only 1), 10000 tags; PNG
 32 MiB. Rendering is not anonymization: burned-in identifiers can remain in the
 picture. Do not infer a diagnosis from the technical preview.

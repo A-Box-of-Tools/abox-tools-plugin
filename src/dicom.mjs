@@ -7,6 +7,7 @@ import { fullRange, render } from '../vendor/abox/tools/dicom-viewer/src/window.
 import { readInput, newOutput, writeNew } from './files.mjs';
 import { withBrowser } from './browser.mjs';
 import { AdapterError } from './errors.mjs';
+import { admitLosslessJpeg, verifyLosslessJpeg, invalidLosslessJpeg } from './dicom-jpeg-proof.mjs';
 
 export const MAX_DICOM_INPUT_BYTES = 64 * 2 ** 20;
 export const MAX_DICOM_OUTPUT_BYTES = 32 * 2 ** 20;
@@ -17,17 +18,21 @@ export const MAX_DICOM_TAGS = 10_000;
 export const MAX_DICOM_SEQUENCE_DEPTH = 0;
 export const MAX_DICOM_RLE_FRAMES = 1;
 export const MAX_DICOM_RLE_FRAGMENTS = 1;
+export const MAX_DICOM_JPEG_FRAMES = 1;
+export const MAX_DICOM_JPEG_FRAGMENTS = 1;
 const TIMEOUT_MS = 120_000;
 const SYNTAXES = Object.freeze({ '1.2.840.10008.1.2': { explicit: false, little: true },
   '1.2.840.10008.1.2.1': { explicit: true, little: true }, '1.2.840.10008.1.2.2': { explicit: true, little: false },
-  '1.2.840.10008.1.2.5': { explicit: true, little: true, rle: true } });
+  '1.2.840.10008.1.2.5': { explicit: true, little: true, rle: true },
+  '1.2.840.10008.1.2.4.57': { explicit: true, little: true, lossless: true },
+  '1.2.840.10008.1.2.4.70': { explicit: true, little: true, lossless: true } });
 const LONG = new Set(['OB', 'OD', 'OF', 'OL', 'OV', 'OW', 'SQ', 'UC', 'UN', 'UR', 'UT']);
 const VRS = new Set(['AE', 'AS', 'AT', 'CS', 'DA', 'DS', 'DT', 'FL', 'FD', 'IS', 'LO', 'LT', 'OB', 'OD', 'OF', 'OL', 'OV', 'OW',
   'PN', 'SH', 'SL', 'SQ', 'SS', 'ST', 'TM', 'UC', 'UI', 'UL', 'UN', 'UR', 'US', 'UT']);
 const decoder = new TextDecoder('utf-8');
 const integer = (value, low, high) => Number.isSafeInteger(value) && value >= low && value <= high;
 const invalid = () => { throw new AdapterError('INVALID_DICOM', 'The DICOM wrapper or flat dataset is incomplete, ambiguous or malformed. No output was written.'); };
-const unsupported = () => { throw new AdapterError('DICOM_UNSUPPORTED', 'This bounded adapter supports flat PS3.10 native integer data or the admitted single-frame RLE subset. Sequences, other undefined lengths, guessed encodings and other compressed pixels are unsupported.'); };
+const unsupported = () => { throw new AdapterError('DICOM_UNSUPPORTED', 'This bounded adapter supports flat PS3.10 native integer data or admitted single-frame RLE/JPEG-lossless subsets. Sequences, other undefined lengths, guessed encodings and other compressed pixels are unsupported.'); };
 const imageUnsupported = () => { throw new AdapterError('DICOM_IMAGE_UNSUPPORTED', 'Preview supports complete 8/16-bit MONOCHROME1/2 integer data or unsigned 8-bit RGB, without unsupported palette, LUT, enhanced-frame or presentation transforms.'); };
 const invalidRle = () => { throw new AdapterError('DICOM_RLE_UNSUPPORTED', 'RLE requires one complete frame in one fragment with an empty offset table, exact byte planes and complete bounded PackBits runs. No output was written.'); };
 
@@ -35,17 +40,17 @@ function ascii(bytes) {
   if (bytes.some(value => value > 127)) invalid(); return Buffer.from(bytes).toString('latin1').replace(/[\0 ]+$/, '');
 }
 
-function encapsulatedAdmission(bytes, at) {
+function encapsulatedAdmission(bytes, at, refuse = invalidRle) {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const item = (offset, tag) => {
-    if (offset + 8 > bytes.length || view.getUint16(offset, true) !== 0xfffe || view.getUint16(offset + 2, true) !== tag) invalidRle();
+    if (offset + 8 > bytes.length || view.getUint16(offset, true) !== 0xfffe || view.getUint16(offset + 2, true) !== tag) refuse();
     return view.getUint32(offset + 4, true);
   };
-  if (item(at, 0xe000) !== 0) invalidRle(); at += 8;
+  if (item(at, 0xe000) !== 0) refuse(); at += 8;
   const length = item(at, 0xe000), offset = at + 8;
-  if (length < 64 || length % 2 || offset + length > bytes.length) invalidRle();
+  if (length < (refuse === invalidRle ? 64 : 2) || length % 2 || offset + length > bytes.length) refuse();
   const end = offset + length;
-  if (item(end, 0xe0dd) !== 0) invalidRle();
+  if (item(end, 0xe0dd) !== 0) refuse();
   return { end: end + 8, fragment: { offset, length } };
 }
 
@@ -70,8 +75,8 @@ function flat(bytes, start, end, syntax, meta = false) {
     } else { vr = describe(tag).vr; header = 8; length = view.getUint32(at + 4, syntax.little); }
     if (vr === 'SQ') unsupported();
     if (length === 0xffffffff) {
-      if (!syntax.rle || tag !== PIXEL_DATA || vr !== 'OB') unsupported();
-      at = encapsulatedAdmission(bytes, at + header).end; continue;
+      if (!(syntax.rle || syntax.lossless) || tag !== PIXEL_DATA || vr !== 'OB') unsupported();
+      at = encapsulatedAdmission(bytes, at + header, syntax.lossless ? invalidLosslessJpeg : invalidRle).end; continue;
     }
     if (length % 2 || at + header + length > end) invalid();
     at += header + length;
@@ -91,7 +96,7 @@ function admission(bytes) {
   const wrapped = parseFile(bytes);
   if (!wrapped.hasPreamble || wrapped.datasetStart !== end || wrapped.warnings.length
       || !Object.hasOwn(SYNTAXES, wrapped.syntax.uid) || wrapped.syntax.deflated
-      || wrapped.syntax.encapsulated && !SYNTAXES[wrapped.syntax.uid].rle) unsupported();
+      || wrapped.syntax.encapsulated && !(SYNTAXES[wrapped.syntax.uid].rle || SYNTAXES[wrapped.syntax.uid].lossless)) unsupported();
   const body = flat(bytes, end, bytes.length, SYNTAXES[wrapped.syntax.uid]);
   if (meta.count + body.count > MAX_DICOM_TAGS) throw new AdapterError('DICOM_LIMIT', 'The DICOM file exceeds 10000 flat elements.');
   return { wrapped, tags: meta.count + body.count, private_tags: body.private_tags };
@@ -167,18 +172,19 @@ function imagePlan(bytes, dataset, syntax) {
   if (!(slope > 0 && slope <= 1e9) || Math.abs(intercept) > 1e12 || rgb && (slope !== 1 || intercept !== 0)) imageUnsupported();
   const padding = dataset.byTag.get('00280120');
   if (padding && (!['US', 'SS'].includes(padding.vr) || padding.value?.length !== 2)) imageUnsupported();
-  const rle = syntax.pixels === 'rle'; let fragment = null;
-  if (rle) {
-    if (frames !== 1 || pixel.vr !== 'OB' || pixel.length !== 0xffffffff || pixel.fragments?.length !== 1 || pixel.offsetTable?.length !== 0) invalidRle();
-    const admitted = encapsulatedAdmission(bytes, pixel.offset), source = pixel.fragments[0];
-    if (source.offset !== admitted.fragment.offset || source.length !== admitted.fragment.length) invalidRle();
+  const rle = syntax.pixels === 'rle', jpeg = syntax.pixels === 'lossless', compressed = rle || jpeg; let fragment = null;
+  if (compressed) {
+    const refuse = jpeg ? invalidLosslessJpeg : invalidRle;
+    if (frames !== 1 || pixel.vr !== 'OB' || pixel.length !== 0xffffffff || pixel.fragments?.length !== 1 || pixel.offsetTable?.length !== 0) refuse();
+    const admitted = encapsulatedAdmission(bytes, pixel.offset, refuse), source = pixel.fragments[0];
+    if (source.offset !== admitted.fragment.offset || source.length !== admitted.fragment.length) refuse();
     fragment = bytes.subarray(source.offset, source.offset + source.length);
   } else if (!['OB', 'OW'].includes(pixel.vr) || allocated === 16 && pixel.vr !== 'OW' || pixel.fragments || pixel.length === 0xffffffff) imageUnsupported();
   // The source byte decoder does not swap pairs for 8-bit OW data in the
   // retired big-endian syntax. Refuse that ambiguous route; OB is byte ordered.
   if (!syntax.little && allocated === 8 && pixel.vr === 'OW') imageUnsupported();
   const expected = rows * columns * samples * allocated / 8 * frames, padded = expected + expected % 2;
-  if (!rle && (!Number.isSafeInteger(expected) || pixel.length !== padded || pixel.offset + pixel.length > bytes.length
+  if (!compressed && (!Number.isSafeInteger(expected) || pixel.length !== padded || pixel.offset + pixel.length > bytes.length
       || padded !== expected && bytes[pixel.offset + expected] !== 0)) {
     throw new AdapterError('DICOM_PIXEL_LENGTH', 'Pixel Data must contain every declared frame exactly, with only the required final even-byte padding. Truncated frames are never padded by this adapter.');
   }
@@ -188,8 +194,9 @@ function imagePlan(bytes, dataset, syntax) {
   const low = representation ? -(2 ** (stored - 1)) : 0, highValue = representation ? 2 ** (stored - 1) - 1 : 2 ** stored - 1;
   if (info.padding !== null && (!Number.isSafeInteger(info.padding) || info.padding < low || info.padding > highValue)) imageUnsupported();
   if (rle) walkRle(fragment, info);
-  return { pixel, info, fragment, summary: { width: columns, height: rows, frame_count: frames, samples_per_pixel: samples,
-    compression: rle ? 'rle-lossless' : 'native', compressed_stream_verified: rle,
+  const jpegPlan = jpeg ? admitLosslessJpeg(fragment, info, syntax.uid) : null;
+  return { pixel, info, fragment, jpegPlan, summary: { width: columns, height: rows, frame_count: frames, samples_per_pixel: samples,
+    compression: jpeg ? 'jpeg-lossless' : rle ? 'rle-lossless' : 'native', compressed_stream_verified: compressed,
     bits_allocated: allocated, bits_stored: stored, signed: representation === 1, planar: planar === 1, photometric: photo } };
 }
 
@@ -208,6 +215,7 @@ function requestSettings(args) {
 function verifyStored(bytes, plan, frame, index, syntax) {
   const { info, pixel } = plan, count = info.rows * info.columns, channels = info.samplesPerPixel;
   if (frame.width !== info.columns || frame.height !== info.rows || frame.samples !== channels || frame.values.length !== count * channels) imageUnsupported();
+  if (plan.jpegPlan) return verifyLosslessJpeg(plan.jpegPlan, frame);
   if (plan.fragment) {
     const perSample = info.bitsAllocated / 8, low = info.signed ? -(2 ** (info.bitsStored - 1)) : 0,
       high = info.signed ? 2 ** (info.bitsStored - 1) - 1 : 2 ** info.bitsStored - 1;

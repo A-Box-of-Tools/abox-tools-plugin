@@ -9,6 +9,11 @@ export async function verifyVendor() {
     ...manifest.files.map(file => ({ ...file, url: new URL(`../vendor/abox/${file.path}`, import.meta.url) })),
     ...manifest.assets.map(file => ({ ...file, url: new URL(`../${file.path}`, import.meta.url) })),
   ];
+  const heifSources = JSON.parse(await readFile(new URL('../vendor/libheif-sources/SOURCES.json', import.meta.url), 'utf8'));
+  for (const file of heifSources) {
+    if (!/^vendor\/libheif-sources\/[a-zA-Z0-9_.-]+\.tar\.gz$/.test(file.path)) throw new Error('Invalid codec source archive path.');
+    entries.push({ ...file, url: new URL(`../${file.path}`, import.meta.url) });
+  }
   for (const file of entries) {
     try {
       const data = await readFile(file.url);

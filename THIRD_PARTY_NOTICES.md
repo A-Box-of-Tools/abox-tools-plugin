@@ -3,7 +3,7 @@
 The processing engines under `vendor/abox/` come from
 [A Box of Tools](https://github.com/A-Box-of-Tools/website), Copyright (c) 2026
 A Box of Tools, under the MIT license included at `vendor/abox/LICENSE`, except
-for the separately licensed wordlists, artwork and OCR components described below.
+for the separately licensed wordlists, artwork, OCR and HEIC components described below.
 `vendor/abox/provenance.json` records the exact source commit and SHA-256 of
 every copied file. The source modules are unchanged. Small generated re-export
 modules resolve the website build's `./shared/` imports to one shared copy.
@@ -34,6 +34,20 @@ Apache 2.0. Exact source archives, hashes, the website's offline binary/model
 wrappers, licenses and component notices are preserved under
 `vendor/abox/tools/receipt-invoice-extractor/vendor/`. No engine or language
 data is downloaded while a receipt is processed.
+
+HEIC conversion includes unchanged libheif-js 1.19.8 with libheif and libde265,
+under LGPL-3.0 and the component licenses in its complete corresponding source.
+The binary and license are at `vendor/abox/tools/heic-to-jpg/vendor/`. Exact
+source archives, build and replacement instructions, hashes and license locations
+ship at `vendor/libheif-sources/`. They are included in every release archive;
+the adapter never downloads a decoder while processing a photo. Recipients may
+modify and replace this library, including for debugging those modifications.
+
+PDF rasterization uses Mozilla PDF.js, Apache-2.0, pinned to pdfjs-dist 6.4.299.
+Its unchanged JavaScript modules, bundled fonts, CMaps, license and notices ship
+with the production dependency. It runs in the isolated offline browser; its
+optional Node canvas bindings are not used or bundled. Redaction writes a fresh
+lossless image-only PDF rather than preserving the input's object graph.
 
 The adapter uses the official Model Context Protocol TypeScript SDK, Zod, and
 Playwright Core. Their licenses and exact versions travel with installed npm

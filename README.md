@@ -9,15 +9,21 @@ or remove image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
 output paths and short JSON results. File bytes stay on your computer.
 
-It also processes GIFs, WAV audio and supported video timelines; straightens
+It also processes GIFs, admitted audio and supported video timelines; straightens
 document photos; prepares custom ID photos and local previews; extracts receipt
 fields with bundled OCR; inspects and renders a restricted DICOM subset; protects
-and unlocks PDFs; redacts image regions; and generates passwords into local files.
+and unlocks PDFs; redacts explicit image/PDF regions; and generates passwords into
+local files. Codec and rendering operations expose documented subsets.
 
 The public v0.9.0 release provides 55 file operations and one capabilities tool.
 Native and universal packages passed checks on all four target platforms.
 See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
 the source engines reused by this adapter and the limits of each route.
+
+The upcoming v0.10.0 source targets 66 file operations and 67 MCP tools, adding
+HEIC/AVIF, flattened PDF redaction, sound extraction and admitted H.264 video
+processing. It also expands audio and DICOM codec support. These source changes
+are separate from the public v0.9.0 installation receipts below.
 
 The public v0.9.0 Windows download passed all 55 file operations and 56 MCP tools
 using its bundled runtime. Public Gemini CLI installation and the shared skill's
@@ -31,10 +37,11 @@ automatically after their downloads pass verification.
 
 Release bundles include Node.js, production dependencies, pinned processing
 code, and the shared skill. You do not need to install Node or npm, or type setup
-commands. Image rendering, GIF creation/extraction, WAV processing, receipt OCR,
-document scans, local previews and new video encoding need an installed Edge,
-Chrome or Chromium. PDF page/security operations, metadata operations, checksums,
-container inspection, video packet copying and text processing run without one.
+commands. Image rendering/conversion, GIF creation/extraction, decoded audio,
+receipt OCR, document scans, local previews, PDF raster redaction and video
+decoding/encoding need an installed Edge, Chrome or Chromium. PDF page/security
+operations, metadata operations, checksums, container inspection, audio/video
+packet copying and text processing run without one.
 QR codes and barcodes default to SVG without a browser; PNG output uses the
 installed local browser. A native H.264 encoder is required for new MP4 encoding.
 
@@ -243,9 +250,10 @@ Use `capabilities` to check what your installed release exposes.
 | `abox_xml_json` | `convert-xml-json` | Explicit lossy XML↔JSON mapping; verifies source mapping rather than semantic round-trip |
 | `abox_markdown_html` | `markdown-to-html` | Small Markdown dialect to standalone passive HTML with CSP; links never opened |
 
-The audio routes admit simple mono/stereo PCM16/Float32 WAV rather than arbitrary
-compressed audio. MP4 creation is limited to 60 seconds, 1800 frames and 1080p
-pixels, and needs a supported installed browser encoder. Receipt OCR includes
+In v0.9.0, audio inputs are simple mono/stereo PCM16/Float32 WAV. The upcoming
+source expands the admitted codecs as described below. MP4 creation is limited
+to 60 seconds, 1800 frames and a 2,073,600-pixel output, and needs a supported
+installed browser encoder. Receipt OCR includes
 its worker, WebAssembly and English data; no processing asset is downloaded.
 These are operation-specific bounds, not a universal process-memory guarantee.
 EXIF edits use a separate local `edits_path` with bounded `set`/`remove`
@@ -255,6 +263,52 @@ See [additional text formatting](skills/abox-local-files/references/text-formatt
 for exact HTML/CSS/YAML options, XML/JSON mapping losses and the passive Markdown
 dialect. Formatting existing HTML keeps its active content; it is distinct from
 the Markdown renderer's escaped, restricted output.
+
+## Source additions for v0.10.0
+
+These additions are implemented in the source tree; public package and Registry
+receipts above still describe v0.9.0 until a new release is verified. Always check
+the installed adapter's `capabilities` before choosing a new operation.
+
+| MCP operation | CLI command | Result and important boundary |
+|---|---|---|
+| `abox_heic_convert` | `convert-heic` | Admitted HEVC still photos/grids to a new image directory; bundled offline codec and predecode coded/reference budgets |
+| `abox_avif_convert` | `convert-avif` | One reduced-header AV1 still photo to JPEG/PNG/WebP; animation and unsupported geometry refused |
+| `abox_pdf_redact` | `redact-pdf` | Explicit local point-coordinate masks to a fresh lossless image-only PDF; all pages flattened, no source objects copied |
+| `abox_audio_extract` | `extract-audio` | Admitted sound to WAV, or exact AAC packet extraction from MP4/M4A/MOV to M4A without decoding video |
+| `abox_video_compress` | `compress-video` | Re-encode admitted H.264 toward a byte target; report `fitted` honestly |
+| `abox_video_crop` | `crop-video` | Exact displayed-image coordinates from local JSON to a re-encoded MP4 |
+| `abox_video_frame` | `grab-video-frame` | Frame at or before the requested time to a lossless PNG; every output pixel checked |
+| `abox_video_reverse` | `reverse-video` | Re-encode reversed frames; silent by default, optional bounded AAC reversal/re-encoding |
+| `abox_video_timelapse` | `timelapse-video` | Faster silent MP4 with explicit frame selection, rate and size |
+| `abox_video_to_gif` | `video-to-gif` | Sampled video range to a bounded palette GIF; sound omitted |
+| `abox_video_rotate_bake` | `bake-video-rotation` | Apply source orientation and an additional quarter turn to re-encoded pixels; identity output display matrix |
+
+Audio editing/trimming also accepts bounded MP3 Layer III, AAC-LC ADTS and an
+ordinary unedited MP4/M4A/MOV AAC-LC track. Compressed WAV output needs a native
+packet decoder; the adapter never falls back to unbounded whole-file decoding.
+Check actual decoded duration because priming/padding can reduce sample counts.
+See [audio codecs and extraction](skills/abox-local-files/references/audio-codecs.md).
+
+DICOM now also admits a strict single-frame JPEG Lossless Process 14 subset,
+with complete entropy admission and independent stored-sample checks. It remains
+a technical preview and can retain burned-in identifiers. See
+[DICOM details](skills/abox-local-files/references/media-and-documents.md#dicom).
+
+Use exact user-provided geometry for
+[PDF redaction](skills/abox-local-files/references/pdf-redaction.md); the adapter
+does not find sensitive regions or erase the original. Searchable text,
+signatures and interactive PDF features are lost. For image conversion, read
+[HEIC/AVIF limits](skills/abox-local-files/references/heic-avif.md), including
+8-bit SDR output and metadata omission. No route downloads a codec while
+processing a file.
+
+The seven new [video processing routes](skills/abox-local-files/references/video-processing.md)
+admit stable progressive 8-bit 4:2:0 H.264 before native decoding; this is not
+arbitrary codec support. Generated MP4 frames are decoded and checked for shape,
+timing and count, while copied AAC packets are compared exactly. Lossy encoding,
+color conversion and final-frame timing can change. Matrix-only video rotation
+remains available separately without decoding or re-encoding.
 
 For PDF protection, pass `open_password_file`/`owner_password_file`; for unlocking,
 pass `password_file`. Their exact UTF-8 text, including BOM and final newline,

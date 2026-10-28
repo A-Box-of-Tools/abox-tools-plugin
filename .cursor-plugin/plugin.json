@@ -1,7 +1,7 @@
 {
   "name": "abox-tools",
   "displayName": "abox.tools",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "Local image, PDF, audio, video, OCR and file tools. Source installs need Node.js and one-time adapter setup.",
   "author": { "name": "Abox Technologies" },
   "publisher": "Abox Technologies",

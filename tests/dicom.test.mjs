@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import { inspectDicom, renderDicom, MAX_DICOM_INPUT_BYTES, MAX_DICOM_TAGS } from '../src/dicom.mjs';
+import { losslessJpeg, evenJpeg, encapsulatedDicom } from './fixtures/dicom-lossless.mjs';
 
 async function workspace(t) {
   const directory = await realpath(await mkdtemp(path.join(tmpdir(), 'abox-dicom-')));
@@ -181,6 +182,48 @@ test('RLE preflight refuses ambiguous encapsulation, byte-plane counts, truncate
     await assert.rejects(stat(output), { code: 'ENOENT' }); assert.equal(digest(await readFile(input)), digest(source));
   }
   for (const uid of ['1.2.840.10008.1.2.4.57', '1.2.840.10008.1.2.4.70']) {
-    await writeFile(input, rleFile(base, { uid })); await assert.rejects(inspectDicom({ input_path: input }), { code: 'DICOM_UNSUPPORTED' });
+    await writeFile(input, rleFile(base, { uid })); await assert.rejects(inspectDicom({ input_path: input }), { code: 'DICOM_JPEG_UNSUPPORTED' });
   }
+});
+
+test('JPEG-lossless admission proves exact entropy completion and actual geometry before the source decoder can allocate a frame', async t => {
+  const directory = await workspace(t), input = path.join(directory, 'lossless.dcm'), values = [0, 100, 200, 300];
+  for (const uid of ['1.2.840.10008.1.2.4.57', '1.2.840.10008.1.2.4.70']) {
+    const source = encapsulatedDicom(fixture({ uid, pixels: values }), losslessJpeg(values)); await writeFile(input, source);
+    const result = await inspectDicom({ input_path: input }); assert.equal(result.compression, 'jpeg-lossless');
+    assert.equal(result.compressed_stream_verified, true); assert.equal(result.render_supported, true); assert.equal(result.verified, false);
+    assert.equal(result.verification.decoded_pixels, false); assert.ok(!JSON.stringify(result).includes('PRIVATE'));
+    assert.equal(digest(await readFile(input)), digest(source));
+  }
+});
+
+test('JPEG-lossless preflight refuses missing/end markers, incomplete/extra entropy, bad padding, huge SOF and ambiguous Huffman/sampling/scan headers', async t => {
+  const directory = await workspace(t), input = path.join(directory, 'bad-lossless.dcm'), base = losslessJpeg([0, 100, 200, 300]),
+    end = base.lastIndexOf(Buffer.from([255, 217])), frame = base.indexOf(Buffer.from([255, 195])), huff = base.indexOf(Buffer.from([255, 196])), scan = base.indexOf(Buffer.from([255, 218]));
+  const strip = base.subarray(0, end + 2), cases = [strip.subarray(0, -2), Buffer.concat([strip.subarray(0, end - 1), strip.subarray(end)]),
+    Buffer.concat([strip.subarray(0, end), Buffer.from([0]), strip.subarray(end)])];
+  const padding = Buffer.from(strip); padding[end - 1] &= 254; cases.push(padding);
+  const huge = Buffer.from(strip); huge.writeUInt16BE(65535, frame + 7); cases.push(huge);
+  const precision = Buffer.from(strip); precision[frame + 4] = 12; cases.push(precision);
+  const sampling = Buffer.from(strip); sampling[frame + 11] = 0x22; cases.push(sampling);
+  const ac = Buffer.from(strip); ac[huff + 4] = 0x10; cases.push(ac);
+  const oversubscribed = Buffer.from(strip); oversubscribed[huff + 5] = 2; oversubscribed[huff + 9] = 15; cases.push(oversubscribed);
+  const symbol = Buffer.from(strip); symbol[huff + 21] = 17; cases.push(symbol);
+  const unknown = Buffer.from(strip); unknown[scan + 5] = 99; cases.push(unknown);
+  const restart = Buffer.concat([strip.subarray(0, scan), Buffer.from([255, 221, 0, 4, 0, 1]), strip.subarray(scan)]); cases.push(restart);
+  for (const [index, bytes] of cases.entries()) {
+    const source = encapsulatedDicom(fixture({ uid: '1.2.840.10008.1.2.4.70' }), evenJpeg(bytes)), output = path.join(directory, `missing-${index}.png`); await writeFile(input, source);
+    await assert.rejects(inspectDicom({ input_path: input }), { code: 'DICOM_JPEG_UNSUPPORTED' });
+    await assert.rejects(renderDicom({ input_path: input, output_path: output }), { code: 'DICOM_JPEG_UNSUPPORTED' });
+    await assert.rejects(stat(output), { code: 'ENOENT' });
+  }
+  const mode = encapsulatedDicom(fixture({ uid: '1.2.840.10008.1.2.4.70' }), losslessJpeg([0, 1, 2, 3], { predictor: 2 }));
+  await writeFile(input, mode); await assert.rejects(inspectDicom({ input_path: input }), { code: 'DICOM_JPEG_UNSUPPORTED' });
+});
+
+test('independent JPEG predictor verification refuses a source-decoder low-precision wrap discrepancy before any PNG is written', async t => {
+  const directory = await workspace(t), input = path.join(directory, 'wrapped.dcm'), output = path.join(directory, 'refused.png'), values = [0, 4095, 0, 0],
+    source = encapsulatedDicom(fixture({ uid: '1.2.840.10008.1.2.4.57', bits: 16, stored: 12, pixels: values }), losslessJpeg(values, { precision: 12, predictor: 7 }));
+  await writeFile(input, source); await assert.rejects(renderDicom({ input_path: input, output_path: output }), { code: 'VERIFICATION_FAILED' });
+  await assert.rejects(stat(output), { code: 'ENOENT' }); assert.equal(digest(await readFile(input)), digest(source));
 });

@@ -24,7 +24,7 @@ export function universalManifest(version) {
   return {
     manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version,
     description: 'Local images, PDFs, audio, video, OCR, DICOM and file tools.',
-    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. Supports image and EXIF editing, PDF security, WAV editing, MP4 packet copying, GIF and slideshow creation, document scans, custom ID photos, receipt OCR and uncompressed and RLE DICOM previews. Images, audio, OCR and generated video need installed Edge, Chrome or Chromium; video encoding also requires native H.264 support. Receipt fields require review. DICOM previews are not diagnosis or anonymization. Copied video boundaries are not redaction. File contents and passwords stay local.',
+    long_description: 'Published by Abox Technologies. Includes local Node runtimes for Windows x64, Linux x64, and macOS Intel and Apple silicon. Supports HEIC/AVIF and raster images, EXIF, PDF security and permanent image-only redaction, WAV/MP3/AAC editing and extraction, H.264 video editing, GIFs, scans, ID photos, receipt OCR and native/RLE/JPEG-lossless DICOM previews. Image and PDF rendering, media decoding and OCR use installed Edge, Chrome or Chromium; encoding depends on native H.264/AAC availability. Receipt fields need review. DICOM previews are not diagnosis or anonymization. Files stay local, with no runtime engine or model downloads.',
     author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
     homepage: 'https://abox.tools/',
     documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

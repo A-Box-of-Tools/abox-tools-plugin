@@ -7,6 +7,11 @@ import { verifyVendor } from '../scripts/verify-vendor.mjs';
 import { localPath } from '../src/files.mjs';
 
 const commands = {
+  'reverse-video': 'abox_video_reverse', 'timelapse-video': 'abox_video_timelapse', 'video-to-gif': 'abox_video_to_gif', 'bake-video-rotation': 'abox_video_rotate_bake',
+  'extract-audio': 'abox_audio_extract',
+  'compress-video': 'abox_video_compress', 'crop-video': 'abox_video_crop', 'grab-video-frame': 'abox_video_frame',
+  'redact-pdf': 'abox_pdf_redact',
+  'convert-heic': 'abox_heic_convert', 'convert-avif': 'abox_avif_convert',
   'compress-image': 'abox_image_compress', 'resize-image': 'abox_image_resize', 'convert-image': 'abox_image_convert',
   'split-pdf': 'abox_pdf_split', 'merge-pdf': 'abox_pdf_merge', 'select-pdf-pages': 'abox_pdf_select', 'rotate-pdf': 'abox_pdf_rotate',
   'images-to-pdf': 'abox_images_to_pdf', 'remove-exif': 'abox_exif_remove', 'inspect-exif': 'abox_exif_inspect', 'hash-file': 'abox_file_hash',

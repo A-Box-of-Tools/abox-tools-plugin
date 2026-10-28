@@ -1,0 +1,26 @@
+[
+  {
+    "path": "tests/fixtures/avif/white_1x1.avif",
+    "url": "https://raw.githubusercontent.com/AOMediaCodec/libavif/v1.3.0/tests/data/white_1x1.avif",
+    "bytes": 305,
+    "sha256": "ea4e43d1f07e4c00de16c13afa32376111bb306e51f08212cf4c1b6064df3667"
+  },
+  {
+    "path": "tests/fixtures/avif/colors_sdr_srgb.avif",
+    "url": "https://raw.githubusercontent.com/AOMediaCodec/libavif/v1.3.0/tests/data/colors_sdr_srgb.avif",
+    "bytes": 18845,
+    "sha256": "24463b9b79e4624d06e247079efddf624f9062c516d43ddf6fe5e150343629d6"
+  },
+  {
+    "path": "tests/fixtures/avif/LICENSE",
+    "url": "https://raw.githubusercontent.com/AOMediaCodec/libavif/v1.3.0/LICENSE",
+    "bytes": 20415,
+    "sha256": "165abf92cc04b39e80d29cadea7a6a7e8fddf59407d4ad2616507a7ebe8216f9"
+  },
+  {
+    "path": "tests/fixtures/avif/UPSTREAM-README.md",
+    "url": "https://raw.githubusercontent.com/AOMediaCodec/libavif/v1.3.0/tests/data/README.md",
+    "bytes": 37184,
+    "sha256": "031c621976ec18b022ffb56786fa45e8bcc3b1feb8cca85ac0c60f14cd45a52f"
+  }
+]

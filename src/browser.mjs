@@ -27,7 +27,7 @@ export async function findBrowser() {
   return null;
 }
 
-export async function withBrowser(work, { signal, wasm = false, workers = false } = {}) {
+export async function withBrowser(work, { signal, wasm = false, workers = false, pdfjs = false } = {}) {
   const executablePath = await findBrowser();
   if (!executablePath) throw new AdapterError('BROWSER_NOT_FOUND', 'Install Edge, Chrome, or Chromium, or set ABOX_BROWSER_PATH to its absolute executable path.');
   const { chromium } = await import('playwright-core');
@@ -56,12 +56,23 @@ export async function withBrowser(work, { signal, wasm = false, workers = false 
       if (url.pathname === '/') {
         return route.fulfill({
           contentType: 'text/html',
-          headers: { 'content-security-policy': `default-src 'none'; script-src 'self'${wasm ? " 'wasm-unsafe-eval'" : ''}; worker-src ${workers ? "'self' blob:" : "'none'"}; img-src blob: data:; connect-src 'none'; base-uri 'none'; form-action 'none'` },
+          headers: { 'content-security-policy': `default-src 'none'; script-src 'self'${wasm ? " 'wasm-unsafe-eval'" : ''}; worker-src ${workers || pdfjs ? "'self' blob:" : "'none'"}; img-src blob: data:; connect-src ${pdfjs ? "'self'" : "'none'"}; font-src ${pdfjs ? 'blob: data:' : "'none'"}; base-uri 'none'; form-action 'none'` },
           body: '<!doctype html><meta charset="utf-8"><title>abox.tools local adapter</title><input id="input" type="file">',
         });
       }
       let decoded;
       try { decoded = decodeURIComponent(url.pathname); } catch { return route.abort(); }
+      if (pdfjs && decoded.startsWith('/pdfjs/')) {
+        const relative = decoded.slice('/pdfjs/'.length);
+        // Only the pinned renderer's executable modules and passive font/CMap
+        // assets are exposed. A PDF never chooses a local filesystem path.
+        if (!/^(?:legacy\/build\/pdf(?:\.worker)?\.mjs|standard_fonts\/[a-zA-Z0-9_.-]+\.(?:otf|pfb|ttf)|cmaps\/[a-zA-Z0-9_.-]+\.bcmap)$/.test(relative)) return route.abort();
+        const base = path.join(ROOT, 'node_modules', 'pdfjs-dist');
+        const file = path.resolve(base, relative);
+        if (path.relative(base, file).startsWith('..')) return route.abort();
+        try { return await route.fulfill({ contentType: relative.endsWith('.mjs') ? 'text/javascript' : 'application/octet-stream', body: await readFile(file) }); }
+        catch { return route.abort(); }
+      }
       if (!decoded.startsWith('/vendor/abox/') || !decoded.endsWith('.js')) return route.abort();
       const file = path.resolve(ROOT, `.${decoded}`);
       const relative = path.relative(VENDOR, file);

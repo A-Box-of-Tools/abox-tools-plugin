@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { renderDicom } from '../src/dicom.mjs';
 import { findBrowser, withBrowser } from '../src/browser.mjs';
+import { losslessJpeg, encapsulatedDicom } from './fixtures/dicom-lossless.mjs';
 
 const browserOptions = { skip: !await findBrowser(), timeout: 120000 };
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -131,5 +132,26 @@ test('strict RLE decoding preserves signed/bit-depth values, literal/repeated by
     assert.equal(result.verification.native_samples_checked, 0); assert.equal(result.verification.stored_samples_checked, settings.values.length);
     assert.equal(result.verification.png_pixels_checked, 4); assert.equal(result.decoded_sample_layout, 'interleaved');
     assert.ok(!JSON.stringify(result).includes('PRIVATE')); assert.equal(digest(await readFile(input)), digest(source));
+  }
+});
+
+test('strict JPEG-lossless decoding retains every independently reconstructed sample across predictors, point transforms and component order', browserOptions, async t => {
+  const directory = await workspace(t), input = path.join(directory, 'jpeg-lossless.dcm');
+  const cases = [];
+  for (let predictor = 1; predictor <= 7; predictor++) cases.push({ uid: '1.2.840.10008.1.2.4.57', settings: { bits: 16, signed: false, values: [0, 100, 200, 300] },
+    encoding: { predictor }, window: { window_center: 150, window_width: 301 }, expected: grey([0, 85, 170, 255]) });
+  cases.push({ uid: '1.2.840.10008.1.2.4.70', settings: { bits: 16, signed: true, values: [-100, 0, 100, 200], slope: 2, intercept: -100 },
+    encoding: {}, window: { window_center: 0, window_width: 401 }, expected: grey([0, 64, 192, 255]) });
+  cases.push({ uid: '1.2.840.10008.1.2.4.70', settings: { bits: 16, stored: 12, signed: true, values: [-2048, -4, 0, 2044] },
+    encoding: { precision: 12, point: 2 }, window: { window_center: 0, window_width: 4096 }, expected: grey([0, 127, 128, 255]) });
+  for (const planar of [0, 1]) cases.push({ uid: '1.2.840.10008.1.2.4.70', settings: { bits: 8, signed: false, photo: 'RGB', samples: 3, planar,
+    values: [255, 0, 0, 0, 255, 0, 0, 0, 255, 20, 40, 60] }, encoding: { precision: 8, components: 3, order: [2, 0, 1] }, window: {},
+    expected: [255, 0, 0, 255, 0, 255, 0, 255, 0, 0, 255, 255, 20, 40, 60, 255] });
+  for (const [index, item] of cases.entries()) {
+    const encoded = losslessJpeg(item.settings.values, item.encoding), source = encapsulatedDicom(fixture({ ...item.settings, uid: item.uid }), encoded), output = path.join(directory, `jpeg-${index}.png`);
+    await writeFile(input, source); const result = await renderDicom({ input_path: input, output_path: output, ...item.window });
+    assert.equal(result.compression, 'jpeg-lossless'); assert.equal(result.verified, true); assert.equal(result.verification.compressed_stream, true);
+    assert.equal(result.verification.native_samples_checked, 0); assert.equal(result.verification.stored_samples_checked, item.settings.values.length);
+    assert.deepEqual((await pixels(output)).pixels, item.expected); assert.equal(digest(await readFile(input)), digest(source));
   }
 });

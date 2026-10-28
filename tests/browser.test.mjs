@@ -14,6 +14,25 @@ async function workspace(t) {
   return root;
 }
 
+test('the PDF renderer can load only its bundled assets while remote, write and traversal requests stay blocked', async () => {
+  const probe = async page => page.evaluate(async () => {
+    const get = url => fetch(url).then(response => response.ok, () => false);
+    return {
+      module: await get('/pdfjs/legacy/build/pdf.mjs'),
+      cmap: await get('/pdfjs/cmaps/Adobe-Japan1-UCS2.bcmap'),
+      filesystem: await get('/pdfjs/../../package.json'),
+      unlisted: await get('/pdfjs/package.json'),
+      remote: await get('https://example.invalid/private-file'),
+      write: await fetch('/pdfjs/legacy/build/pdf.mjs', { method: 'POST', body: 'private probe' }).then(() => true, () => false),
+      offline: !navigator.onLine,
+    };
+  });
+  const enabled = await withBrowser(probe, { pdfjs: true });
+  assert.deepEqual(enabled, { module: true, cmap: true, filesystem: false, unlisted: false, remote: false, write: false, offline: true });
+  const ordinary = await withBrowser(probe);
+  assert.equal(ordinary.module, false); assert.equal(ordinary.cmap, false); assert.equal(ordinary.remote, false); assert.equal(ordinary.write, false);
+});
+
 async function fixtures() {
   return withBrowser(async page => page.evaluate(async () => {
     const canvas = document.createElement('canvas');

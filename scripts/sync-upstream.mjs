@@ -12,6 +12,16 @@ const VENDOR = path.join(ROOT, 'vendor/abox');
 const run = promisify(execFile);
 const sha = data => createHash('sha256').update(data).digest('hex');
 const seeds = [
+  'tools/heic-to-jpg/src/heif.js', 'tools/heic-to-jpg/src/codecs.js',
+  'tools/heic-to-jpg/src/example-data.js', 'tools/heic-to-jpg/README.md',
+  'tools/heic-to-jpg/vendor/libheif.js', 'tools/heic-to-jpg/vendor/LICENSE',
+  'tools/compress-video/src/encode.js', 'tools/compress-video/src/plan.js',
+  'tools/crop-video/src/transcode.js', 'tools/crop-video/src/draw.js', 'tools/crop-video/src/mp4.js',
+  'tools/grab-frame/src/frames.js', 'tools/grab-frame/src/plan.js', 'tools/grab-frame/src/still.js', 'tools/grab-frame/src/draw.js',
+  'tools/extract-audio-from-video/src/mono.js',
+  'tools/reverse-video/src/reverse.js', 'tools/reverse-video/src/timeline.js', 'tools/reverse-video/src/draw.js', 'tools/reverse-video/src/audio.js',
+  'tools/timelapse-video/src/decode.js', 'tools/timelapse-video/src/encode.js', 'tools/timelapse-video/src/plan.js',
+  'tools/video-to-gif/src/frames.js', 'tools/video-to-gif/src/encode.js', 'tools/video-to-gif/src/plan.js',
   'tools/compress-image/src/process.js',
   'tools/resize-image/src/run.js',
   'shared/js/image-convert.js',

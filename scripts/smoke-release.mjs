@@ -16,6 +16,10 @@ import { PdfDocument } from '../vendor/abox/shared/js/pdf-reader.js';
 import { readSource } from '../vendor/abox/tools/merge-pdf/src/assemble.js';
 import { PdfWriter } from '../vendor/abox/shared/js/pdf-page-writer.js';
 import { smokeNewTools } from './smoke-new-tools.mjs';
+import { smokeImageGaps } from './smoke-image-gaps.mjs';
+import { smokeAudioGaps } from './smoke-audio-gaps.mjs';
+import { smokeDocumentGaps } from './smoke-document-gaps.mjs';
+import { smokeVideoGaps } from './smoke-video-gaps.mjs';
 
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
@@ -27,6 +31,8 @@ const expectedTools = [
     'abox_exif_edit',
     'abox_video_rotate', 'abox_video_remux',
     'abox_code_format', 'abox_xml_json', 'abox_markdown_html',
+    'abox_heic_convert', 'abox_avif_convert', 'abox_pdf_redact', 'abox_audio_extract',
+    'abox_video_compress', 'abox_video_crop', 'abox_video_frame', 'abox_video_reverse', 'abox_video_timelapse', 'abox_video_to_gif', 'abox_video_rotate_bake',
     'abox_video_inspect', 'abox_video_trim', 'abox_video_join', 'abox_document_scan', 'abox_id_photo', 'abox_business_profile',
     'abox_height_compare', 'abox_receipt_extract', 'abox_dicom_inspect', 'abox_dicom_render', 'abox_images_to_video', 'abox_gif_to_mp4',
 ].sort();
@@ -800,12 +806,18 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.ok(!JSON.stringify(generated).includes(generatedBytes.toString('utf8').trim()));
     generatedBytes.fill(0);
     const expanded = await smokeNewTools({ call, client, workspace, imageInput, imageResized, pdfInput, qrPath, qrPayload });
+    const engineering_gaps = {
+      images: await smokeImageGaps({ call, client, workspace }),
+      audio: await smokeAudioGaps({ call, client, workspace }),
+      documents: await smokeDocumentGaps({ run: (name, args) => call(client, name, args), workspace }),
+      video: await smokeVideoGaps({ call, client, workspace }),
+    };
     assert.equal(hash(await readFile(imageInput)), hash(png));
     assert.equal(hash(await readFile(imageResized)), hash(resizedBytes));
     assert.equal(hash(await readFile(imageCompressed)), hash(compressedBytes));
     assert.equal(hash(await readFile(pdfInput)), hash(pdfBytes));
     assert.equal(hash(await readFile(secondPdfInput)), hash(secondPdfBytes));
-    console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, expanded, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, image_resize: { width: resized.width, height: resized.height }, image_convert: converted.format, pdf_outputs: split.outputs.length, pdf_merge_pages: merged.page_count, pdf_select_pages: selected.page_count, relocated: true, system_node_required: false }));
+    console.log(JSON.stringify({ ok: true, universal, version: expectedVersion, runtime: runtimeVersion, platform: process.platform, arch: process.arch, tools: expectedTools, expanded, engineering_gaps, image_bytes: compressedBytes.length, image_target_bytes: targetBytes, image_resize: { width: resized.width, height: resized.height }, image_convert: converted.format, pdf_outputs: split.outputs.length, pdf_merge_pages: merged.page_count, pdf_select_pages: selected.page_count, relocated: true, system_node_required: false }));
   } finally {
     // On Windows the server may still hold browser or output handles until its
     // transport closes. Close it before removing the directory we created.

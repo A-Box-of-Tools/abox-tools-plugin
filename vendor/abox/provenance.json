@@ -2,6 +2,30 @@
   "repository": "https://github.com/A-Box-of-Tools/website",
   "commit": "0b35dbc391f9c7f457885058afdbf0d0955bc5cd",
   "entrypoints": [
+    "tools/heic-to-jpg/src/heif.js",
+    "tools/heic-to-jpg/src/codecs.js",
+    "tools/heic-to-jpg/src/example-data.js",
+    "tools/heic-to-jpg/vendor/libheif.js",
+    "tools/compress-video/src/encode.js",
+    "tools/compress-video/src/plan.js",
+    "tools/crop-video/src/transcode.js",
+    "tools/crop-video/src/draw.js",
+    "tools/crop-video/src/mp4.js",
+    "tools/grab-frame/src/frames.js",
+    "tools/grab-frame/src/plan.js",
+    "tools/grab-frame/src/still.js",
+    "tools/grab-frame/src/draw.js",
+    "tools/extract-audio-from-video/src/mono.js",
+    "tools/reverse-video/src/reverse.js",
+    "tools/reverse-video/src/timeline.js",
+    "tools/reverse-video/src/draw.js",
+    "tools/reverse-video/src/audio.js",
+    "tools/timelapse-video/src/decode.js",
+    "tools/timelapse-video/src/encode.js",
+    "tools/timelapse-video/src/plan.js",
+    "tools/video-to-gif/src/frames.js",
+    "tools/video-to-gif/src/encode.js",
+    "tools/video-to-gif/src/plan.js",
     "tools/compress-image/src/process.js",
     "tools/resize-image/src/run.js",
     "shared/js/image-convert.js",
@@ -607,6 +631,26 @@
       "generated": true
     },
     {
+      "path": "tools/compress-video/src/encode.js",
+      "sha256": "34cae1b68b00eae61fff9519fc748839d90d94fdcf46f64aacc17acae0d1ab9f",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-video/src/plan.js",
+      "sha256": "f1cf8c94682f57b00a4639b1b360ccd5b3fbbbc5dfd7bcafb5e55deedfa78638",
+      "generated": false
+    },
+    {
+      "path": "tools/compress-video/src/shared/mp4-writer.js",
+      "sha256": "f4c760d6dede4b2b4d5f760039c1eefa5a0026c8b745c25d29a7d662f6e47bc1",
+      "generated": true
+    },
+    {
+      "path": "tools/compress-video/src/shared/reencode-video.js",
+      "sha256": "18cec2eb4796251ced5a69c2fb908e4ecd740669c9d89bc00fa9de4acc8b0315",
+      "generated": true
+    },
+    {
       "path": "tools/convert-to-mp4/README.md",
       "sha256": "f0ef55a561fcc8adf111fece8d39bb98b0e0a074189cccb190d622e35f284225",
       "generated": false
@@ -635,6 +679,46 @@
       "path": "tools/convert-to-mp4/src/shared/reencode-video.js",
       "sha256": "18cec2eb4796251ced5a69c2fb908e4ecd740669c9d89bc00fa9de4acc8b0315",
       "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/draw.js",
+      "sha256": "cd021599de14192977d7488a9cdc946395208cca8190838cd2753c0ce8e8e81b",
+      "generated": false
+    },
+    {
+      "path": "tools/crop-video/src/mp4.js",
+      "sha256": "136ce9169a061f70d21afaaefaa1ed9875dfc2fa7d0f39079f989ff62233134f",
+      "generated": false
+    },
+    {
+      "path": "tools/crop-video/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/shared/mp4-boxes.js",
+      "sha256": "a736d168e3a05f682ec68486f113d906ea7471572345807fdfc6bead726f267c",
+      "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/shared/mp4-reader.js",
+      "sha256": "c12ca455ca3f8c5711ba11b2dd496d0ae51beb7c4adf07cdc2893e015bb899b3",
+      "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/shared/video-support.js",
+      "sha256": "5e21537117e8d0084e88eb26924da030e058e813781b8356ef951388ab0e4a5a",
+      "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/crop-video/src/transcode.js",
+      "sha256": "c263ed9b4d72e7dafaa2000e9ee6a13bb3685ff4446b1abe20934f9ced85b507",
+      "generated": false
     },
     {
       "path": "tools/dicom-viewer/README.md",
@@ -842,6 +926,16 @@
       "generated": false
     },
     {
+      "path": "tools/extract-audio-from-video/src/mono.js",
+      "sha256": "4be4cd3201bb6cad62da644b1231fb4d29307d464d6230076a720a105619d094",
+      "generated": false
+    },
+    {
+      "path": "tools/extract-audio-from-video/src/shared/cooperative-work.js",
+      "sha256": "3e126e65ad9019bb2e5ea679da034683bbeb3726a68fd629d66324202374762a",
+      "generated": true
+    },
+    {
       "path": "tools/gif-analyzer/README.md",
       "sha256": "c5b8ae1281bc259884edbd238479c7f685de1caa56c3ea1d9759a39620b9ce1f",
       "generated": false
@@ -977,6 +1071,41 @@
       "generated": false
     },
     {
+      "path": "tools/grab-frame/src/draw.js",
+      "sha256": "68bcf58ba63398cf8331242fd617754cd35728cd09579325a324912949db0d62",
+      "generated": false
+    },
+    {
+      "path": "tools/grab-frame/src/frames.js",
+      "sha256": "42e42d1a1b0d8686bb24295446922cb77cb3e0b6b8bad138c2e6cb6539dac33d",
+      "generated": false
+    },
+    {
+      "path": "tools/grab-frame/src/plan.js",
+      "sha256": "0dc239ddb2d242fe53507d4789e62b72d194e50c06a2072cabd01ba09cd7ded1",
+      "generated": false
+    },
+    {
+      "path": "tools/grab-frame/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/grab-frame/src/shared/mp4-reader.js",
+      "sha256": "c12ca455ca3f8c5711ba11b2dd496d0ae51beb7c4adf07cdc2893e015bb899b3",
+      "generated": true
+    },
+    {
+      "path": "tools/grab-frame/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/grab-frame/src/still.js",
+      "sha256": "0f9dd23e3f2c4ffac084ecd0aa003b6f89182cf3528ba1f989ee6c08331f42bb",
+      "generated": false
+    },
+    {
       "path": "tools/hash-checksum/README.md",
       "sha256": "f8ab3081c8daf733f2f452f723daa3e421af6431126b371330ad2a8f0342a0e6",
       "generated": false
@@ -1010,6 +1139,41 @@
       "path": "tools/hash-checksum/src/shared/md5.js",
       "sha256": "693144b901bd910d29bcedce17ed9c422bd8f8dced15ab7cac137104aa199e70",
       "generated": true
+    },
+    {
+      "path": "tools/heic-to-jpg/README.md",
+      "sha256": "3e1c0744cf6e2dbcee2ac318845408e7d25d9a2f115c60f972828e70812738dc",
+      "generated": false
+    },
+    {
+      "path": "tools/heic-to-jpg/src/codecs.js",
+      "sha256": "803d20944ac80781fc873b73ea98274113904b428752bd6db4fbdf2fc80bf057",
+      "generated": false
+    },
+    {
+      "path": "tools/heic-to-jpg/src/example-data.js",
+      "sha256": "82ba64db5ca46dbc1ce5027e540361709da3e3ec4041e90bd112bd5596ed3bc4",
+      "generated": false
+    },
+    {
+      "path": "tools/heic-to-jpg/src/heif.js",
+      "sha256": "7e808c4f4b131226e1f708f3fd0a6ab286e7d23bb3d4bd8177be1b4a0d5d77a1",
+      "generated": false
+    },
+    {
+      "path": "tools/heic-to-jpg/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/heic-to-jpg/vendor/libheif.js",
+      "sha256": "793b36c913689784b2bfba60456fd87c14ed49e2d13f3b4d2611baaf05148f81",
+      "generated": false
+    },
+    {
+      "path": "tools/heic-to-jpg/vendor/LICENSE",
+      "sha256": "fa81ce652315b013359d6e8e4744335f31a50c7c192907176d3632f78a3b4596",
+      "generated": false
     },
     {
       "path": "tools/id-photo/README.md",
@@ -1597,6 +1761,56 @@
       "generated": true
     },
     {
+      "path": "tools/reverse-video/src/audio.js",
+      "sha256": "ff3678342c55b1c11a846c41761faebf91e0be4317496d7c106436689dbb2313",
+      "generated": false
+    },
+    {
+      "path": "tools/reverse-video/src/draw.js",
+      "sha256": "63f66a621a69c6787af3a1584233e9449ac0a83e33c25f2375294c74dfd0b333",
+      "generated": false
+    },
+    {
+      "path": "tools/reverse-video/src/reverse.js",
+      "sha256": "f84f5f77e632c8b8c1053f468043d5324b72ae21c822e7e0fccd7b76ea49bb39",
+      "generated": false
+    },
+    {
+      "path": "tools/reverse-video/src/shared/aac.js",
+      "sha256": "f54c88d131197be537612242349e05c008bcb728e9e108ec4956ae0191c8533f",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/shared/mp4-reader.js",
+      "sha256": "c12ca455ca3f8c5711ba11b2dd496d0ae51beb7c4adf07cdc2893e015bb899b3",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/shared/mp4-writer.js",
+      "sha256": "f4c760d6dede4b2b4d5f760039c1eefa5a0026c8b745c25d29a7d662f6e47bc1",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/shared/video-support.js",
+      "sha256": "5e21537117e8d0084e88eb26924da030e058e813781b8356ef951388ab0e4a5a",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/reverse-video/src/timeline.js",
+      "sha256": "6eaa3db5f3f55bbb5892921175355bb296b7aa5117d65a385110f15a71679419",
+      "generated": false
+    },
+    {
       "path": "tools/rotate-video/README.md",
       "sha256": "7bf24146c753e6abf666e8e249fa49a2ac138b9ba1da9613452dea9facf890cf",
       "generated": false
@@ -1717,6 +1931,46 @@
       "generated": false
     },
     {
+      "path": "tools/timelapse-video/src/decode.js",
+      "sha256": "8a9776b1f927c88074ee38d4462281bc1f4715d38467bfa50cca9bafde48c024",
+      "generated": false
+    },
+    {
+      "path": "tools/timelapse-video/src/encode.js",
+      "sha256": "3da89247b2553ecf6647eb7b90a64e739712612b9d9d34f4b030af612c0c34fb",
+      "generated": false
+    },
+    {
+      "path": "tools/timelapse-video/src/plan.js",
+      "sha256": "bd69f864cadc0703bc03eb0cc8b2883555442fd5e4b896aa2c906877106a8f7d",
+      "generated": false
+    },
+    {
+      "path": "tools/timelapse-video/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/timelapse-video/src/shared/frame-canvas.js",
+      "sha256": "81bdf8a226c6b9553c2e97b72f765ae6eccf17ba0d28afc5741716765349e8c7",
+      "generated": true
+    },
+    {
+      "path": "tools/timelapse-video/src/shared/mp4-muxer.js",
+      "sha256": "53c883bb7e1f019e8c60f1e17f90711970764d5d9d2a32a1b795941da57bbc31",
+      "generated": true
+    },
+    {
+      "path": "tools/timelapse-video/src/shared/mp4-reader.js",
+      "sha256": "c12ca455ca3f8c5711ba11b2dd496d0ae51beb7c4adf07cdc2893e015bb899b3",
+      "generated": true
+    },
+    {
+      "path": "tools/timelapse-video/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
       "path": "tools/trim-audio/README.md",
       "sha256": "a858d62d23c9628d26200330fdf5f9da04022336b7193f7a36ee102f3da85b69",
       "generated": false
@@ -1769,6 +2023,51 @@
     {
       "path": "tools/unlock-pdf/src/shared/pdf-reader.js",
       "sha256": "040dddba3dd262d103b957816f6104d558b711d66524721c672c05a2d9a7e84b",
+      "generated": true
+    },
+    {
+      "path": "tools/video-to-gif/src/encode.js",
+      "sha256": "936b471644a26074c4396b07e992ba742276f02b5f3a2fe4fecdc1b462d37d65",
+      "generated": false
+    },
+    {
+      "path": "tools/video-to-gif/src/frames.js",
+      "sha256": "3a7dbccaa4a5ebad141eacf0a1ac2528f00ea66090427852cf30e3b83f2a0c7f",
+      "generated": false
+    },
+    {
+      "path": "tools/video-to-gif/src/gif.js",
+      "sha256": "6a873fb25ebb813bcc027b68402a79893043668e4d04b40378fda8ac920bb2b7",
+      "generated": false
+    },
+    {
+      "path": "tools/video-to-gif/src/plan.js",
+      "sha256": "8c44b2ee269c716be137d964068e6dc812f0deacc15d75c324464c2082077775",
+      "generated": false
+    },
+    {
+      "path": "tools/video-to-gif/src/quantize.js",
+      "sha256": "27b68db1c5da26f6724c60276c5f18c92818a771553c14af4dd014e938a2b92c",
+      "generated": false
+    },
+    {
+      "path": "tools/video-to-gif/src/shared/errors.js",
+      "sha256": "49cfaa4b41b85d07f37a2063e779ba4962ce660558ed70a64112337138ada910",
+      "generated": true
+    },
+    {
+      "path": "tools/video-to-gif/src/shared/frame-canvas.js",
+      "sha256": "81bdf8a226c6b9553c2e97b72f765ae6eccf17ba0d28afc5741716765349e8c7",
+      "generated": true
+    },
+    {
+      "path": "tools/video-to-gif/src/shared/mp4-reader.js",
+      "sha256": "c12ca455ca3f8c5711ba11b2dd496d0ae51beb7c4adf07cdc2893e015bb899b3",
+      "generated": true
+    },
+    {
+      "path": "tools/video-to-gif/src/shared/webcodecs.js",
+      "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
       "generated": true
     },
     {
