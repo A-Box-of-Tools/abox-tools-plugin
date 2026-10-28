@@ -6,12 +6,72 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
-Version 0.9.0 is [active in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0),
+## v0.10.0 publication evidence
+
+The release tag identifies
+[9a5a9c4](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/9a5a9c4a9c16170538364263102ffc85b03e0f23).
+The runtime implementation is
+[58dfd83](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/58dfd83ff08208a3ab638b43f9a1959d11b5200b);
+the later commit changes only the nonbundled publication helper. This source
+provides 66 file operations and one capabilities tool.
+
+Local validation passed 222 core and 101 browser checks, all 407 vendor-file
+hashes, the five- and seven-case Python groups and both skill validators. A local
+extracted Windows archive passed all 66 operations and 67 MCP tools, including
+the new image, audio, PDF, DICOM and video checks without capability absences.
+That preview used bundled Node.js 24.19.0 and identified `58dfd83` in `BUNDLE`.
+It is separate from the public-download receipt below.
+
+[Source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40706169571)
+passed on Windows and Ubuntu for `58dfd83`. The tagged
+[release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40708603838)
+and [tag verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40708603628)
+passed for `9a5a9c4`, with final source verification on Windows and Ubuntu.
+The release completed all four native builds, universal assembly, all four
+universal launch checks, publication and registration. The public nondraft
+release contains 26 assets and became available on 28 October 2026 at 14:57:18 UTC.
+Structured summaries from all four native and all four universal jobs reported
+67 MCP tools with no capability absences. Windows and Linux used Node.js 24.22.1,
+macOS Apple silicon 24.21.0, and macOS Intel 24.19.0.
+
+The universal MCPB is 187971902 bytes with SHA-256
+`4a8838282318f9c0ef7eae1ee5f1f9740bbc61bdfd44fb64a418e7d00b0d3446`.
+The exact [v0.10.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
+returned HTTP 200, active/latest status, Abox Technologies as publisher and that
+same asset hash. Its publication timestamp is `2026-10-28T14:57:35.827538Z`.
+
+The public Windows ZIP is 63806586 bytes with SHA-256
+`96798c85085b4a020a4a6708abcc4d33f41af97e362238dbe287b5fb9ab6342e`.
+The default Python installer downloaded this actual public package without a
+local-archive argument, verified its checksum and installed it in an isolated
+Windows x64 cache. Its clean bundle identifies tagged source `9a5a9c4` and
+Node.js 24.22.1. Full MCP smoke against that actual public cache passed all
+66 file operations and 67 MCP tools, including every new image, audio, PDF,
+DICOM and video check without capability absences. Relocation and launch without
+system Node passed as well. The default public downloader and SHA-verified
+cache supplied this proof, with no local archive or rebuild.
+
+On 28 October 2026, Gemini CLI 0.65.0 installed the actual public repository with
+`--ref v0.10.0` and reported version 0.10.0, 67 MCP tools, the shared skill,
+bundled runtime selection and a successful local file operation.
+
+Public skills CLI 1.7.4 installed `abox-local-files` from
+`A-Box-of-Tools/abox-tools-plugin`: adapter version 0.10.0, 14 copied files,
+project scope and an isolated home, using CLI-default telemetry. The standalone
+installer's offline contract check passed, without installing an adapter offline.
+This skill-copy proof is separate from the default Python public download and
+full 66-operation MCP check above. Publication, public installation and local
+preview receipts therefore remain distinct.
+
+## Historical v0.9.0 publication evidence
+
+Version 0.9.0 was [registered in the Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0),
 with **Abox Technologies** as publisher. It provides 55 local file operations and
 one capabilities tool. The public GitHub Release contains 26 assets. Native and
 universal package checks, packaged Gemini CLI installation, skill discovery and
 offline standalone adapter setup passed on all four platforms. The public
-Registry record is active/latest and agrees with the universal MCPB's SHA-256.
+Registry readback was active/latest when checked on 27 October 2026 and agreed
+with the universal MCPB's SHA-256.
 The public v0.9.0 Windows download passed all 55 operations/56 MCP tools; public
 Gemini installation and the ten-file skill installation also passed. Earlier
 v0.8.0 receipts are retained below as history.
@@ -36,7 +96,7 @@ publication and registration. The 26-asset release became public on
 
 The public universal MCPB is 173934646 bytes with SHA-256
 `5cf3ae701b5aa0e84d21ab7c40cca4de7d280272e9038338c9d6f1943ddef595`;
-the active/latest Registry readback matches that asset. The public Windows ZIP
+the Registry readback on 27 October 2026 matched that asset. The public Windows ZIP
 is 49920618 bytes and its published SHA-256 is
 `4706f217fe1f67994d0c732b9d3d28555ce2817a5a48b388919578d92cab7b1d`.
 The default Python installer downloaded that public Windows ZIP into an isolated

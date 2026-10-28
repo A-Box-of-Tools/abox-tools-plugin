@@ -4,6 +4,13 @@ These materials describe the local file-processing plugin. The website's
 development catalogue MCP is a separate service and is not part of this listing.
 Registration automation is documented in [Publishing](publishing.md).
 
+The public v0.10.0 release provides 66 file operations plus capabilities. Release
+and Registry publication are verified; the actual public Windows cache passed
+all 66 operations and 67 MCP tools. Public Gemini installation and 14-file
+shared-skill installation also passed. No new desktop-directory
+approval or submission is implied by a published release. See
+[publication evidence](publishing.md#v0100-publication-evidence).
+
 ## Listing copy
 
 Display name: **abox.tools**
@@ -18,14 +25,14 @@ Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: 55 local image, GIF, PDF, audio, video,
+> Abox Technologies publishes abox.tools: 66 local image, GIF, PDF, audio, video,
 > text, OCR, metadata and checksum operations with a shared agent skill.
 > Runtimes and English OCR data are included. Rendering needs an installed browser.
 > Files stay local. Extraction requires review. No account required.
 
 Long description:
 
-> Give your agent 55 reusable file operations: compress JPEG, PNG, and static WebP
+> Give your agent 66 reusable file operations: compress JPEG, PNG, and static WebP
 > images to a byte target; resize or convert images; merge or split unencrypted
 > PDFs; extract, reorder, duplicate or rotate their pages; create PDFs from images;
 > inspect or remove supported image metadata; and calculate file checksums.
@@ -47,23 +54,31 @@ Long description:
 > content. Password values, hashes and samples are excluded from tool results.
 > PDF tables are inferred without OCR and require review against the source.
 > Read QR/barcode payloads only into a local report, create GIFs, protect or unlock
-> PDFs using separate local password files, edit/trim admitted WAV audio, inspect
-> or copy supported MP4/MOV timelines, and encode bounded silent H.264 videos from
+> PDFs using separate local password files, edit/trim admitted WAV/MP3/AAC audio,
+> extract decoded WAV or exact MP4 AAC packets to M4A, inspect or copy supported
+> MP4/MOV timelines, and encode bounded silent H.264 videos from
 > still images or one GIF cycle. Explicit local corner/landmark settings support
 > document scans and custom ID photos without face detection or official approval.
 > Generate local business-profile or height previews without publishing accounts.
 > Bundled English receipt OCR writes suggested fields into a local report for
 > review. Technical DICOM inspection/rendering supports admitted native or strict
-> single-frame RLE images; it is not diagnosis or anonymization. Edit explicit
+> single-frame RLE/JPEG Lossless images; it is not diagnosis or anonymization. Edit explicit
 > EXIF tags, format supported HTML/CSS/YAML, map XML and JSON with documented
 > losses, or render the small Markdown dialect into passive HTML. HTML formatting
 > retains active markup and is not sanitization; video cuts can retain boundary
 > packets and are not redaction.
+> Convert admitted HEIC/AVIF still photos with predecode codec admission.
+> Flatten admitted PDF pages into a fresh lossless image-only PDF with explicit
+> black rectangles, removing source text and objects from the new document.
+> Compress, crop, grab frames, reverse, time-lapse, make a GIF or bake rotation
+> from admitted progressive H.264 video. Re-encoding and color/timing changes
+> are lossy; native codec support is required and unsupported inputs fail locally.
 > The adapter processes files locally and returns output paths and
 > concise verification results. It never overwrites existing outputs.
 >
 > The release includes Node and the server dependencies. Image processing, GIF
-> creation/extraction, WAV processing, scans, previews, OCR and new MP4 encoding need
+> creation/extraction, decoded audio, scans, previews, OCR, PDF raster redaction
+> and video decoding/encoding need
 > an installed Edge, Chrome, or Chromium. New MP4 encoding also needs its native
 > H.264 encoder; no encoder or OCR model is downloaded during processing.
 > QR codes and barcodes default to SVG
@@ -142,7 +157,29 @@ installation or replace that recording.
 
 ## Submission status and access
 
-The active/latest [v0.9.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0)
+The active/latest [v0.10.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
+identifies Abox Technologies as publisher and matches the public universal MCPB
+hash. The 26-asset release became public on 28 October 2026 at 14:57:18 UTC.
+Its [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40708603838)
+and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40708603628)
+passed for tagged source
+[9a5a9c4](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/9a5a9c4a9c16170538364263102ffc85b03e0f23).
+The default Python installer downloaded and verified the actual public Windows
+ZIP into an isolated cache. That cache passed all 66 file operations and 67 MCP
+tools, including every new codec/rendering route without capability absences,
+relocation and launch without system Node. It used bundled Node.js 24.22.1 and
+tagged source `9a5a9c4`, without a local archive or rebuild. Public Gemini CLI
+0.65.0 installed `--ref v0.10.0` with 67 tools, the shared skill, bundled runtime
+and a local file operation. Public skills CLI 1.7.4 installed adapter version
+0.10.0's 14 skill files at project scope in an isolated home, using CLI-default
+telemetry. Its offline installer-contract check passed without installing an
+adapter offline; the separate public Python download/full MCP check establishes
+actual adapter installation. These checks passed on 28 October 2026. Hashes and local/CI evidence are recorded
+in [Publishing](publishing.md#v0100-publication-evidence).
+
+### Historical v0.9.0 installation evidence
+
+The previously verified [v0.9.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0)
 identifies Abox Technologies as publisher. This version provides 55 local file operations and one
 capabilities tool. Its
 [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40578848781)

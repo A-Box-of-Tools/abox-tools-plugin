@@ -1,20 +1,33 @@
 # Use abox.tools in Cursor
 
-The v0.9.0 release includes a native ZIP for Windows x64, Linux x64,
+The public v0.10.0 release implements 66 file operations plus capabilities.
+All native/universal platform checks and public Registry registration passed.
+The default Python installer downloaded and verified its public Windows ZIP.
+That actual cache passed all 66 operations and 67 MCP tools with bundled
+Node.js 24.22.1, no capability absences, relocation and launch without system
+Node; no local archive or rebuild supplied the proof. Public Gemini installation
+and skills CLI 1.7.4 copying of the 14-file shared skill also passed in isolated
+profiles. The skill-only offline check validates its installer contract and does
+not replace the separate actual adapter download above. Link/MCP verification does
+not establish installation through Cursor's desktop interface. See
+[publication evidence](publishing.md#v0100-publication-evidence).
+
+The v0.10.0 release includes a native ZIP for Windows x64, Linux x64,
 macOS Apple silicon and macOS Intel. Download
 the ZIP matching your computer, extract it to a permanent folder, and open
 `START-HERE.html`. Select **Install tools in Cursor** and review Cursor's
 installation prompt. The link
 configures the Node runtime and MCP server inside that extracted folder. Keep
 the folder in place. Node.js, npm, Python and a source build are not required
-for this route. The adapter exposes 55 local file operations and one capabilities
-tool. Image rendering, GIF creation/extraction, WAV processing, receipt OCR,
-document scans, previews and new MP4 encoding need an installed Edge, Chrome or
+for this route. The adapter exposes 66 local file operations and one capabilities
+tool. Image rendering/conversion, GIF creation/extraction, decoded audio, receipt
+OCR, document scans, previews, PDF raster redaction and video decoding/encoding
+need an installed Edge, Chrome or
 Chromium. MP4 encoding also needs its native H.264 encoder. PDF security, video
 packet copying, text, metadata, inspection and password generation need no
 browser. QR/barcodes default to SVG without one; PNG output uses the browser.
 
-Version 0.9.0 native and universal package checks passed on all four targets.
+Historically, version 0.9.0 native and universal package checks passed on all four targets.
 The default Python installer then downloaded and verified the public Windows
 ZIP in an isolated cache; that actual bundle passed all 55 operations/56 MCP
 tools, relocation, installation links and launch without system Node using its

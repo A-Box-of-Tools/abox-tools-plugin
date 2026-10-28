@@ -15,23 +15,30 @@ fields with bundled OCR; inspects and renders a restricted DICOM subset; protect
 and unlocks PDFs; redacts explicit image/PDF regions; and generates passwords into
 local files. Codec and rendering operations expose documented subsets.
 
-The public v0.9.0 release provides 55 file operations and one capabilities tool.
+The public v0.10.0 release provides 66 file operations and one capabilities tool.
 Native and universal packages passed checks on all four target platforms.
 See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
 the source engines reused by this adapter and the limits of each route.
 
-The upcoming v0.10.0 source targets 66 file operations and 67 MCP tools, adding
+Version 0.10.0 adds
 HEIC/AVIF, flattened PDF redaction, sound extraction and admitted H.264 video
-processing. It also expands audio and DICOM codec support. These source changes
-are separate from the public v0.9.0 installation receipts below.
+processing. It also expands audio and DICOM codec support. Publication and the
+exact active/latest Registry record are verified. The default Python installer
+downloaded and checksum-verified the public Windows package. That actual cache
+passed all 66 file operations and 67 MCP tools with its bundled runtime, without
+capability absences or a local rebuild. Public Gemini CLI installation and the
+shared skill's 14-file project installation also passed. The skill check
+validated the installer contract offline; actual adapter installation was
+proved separately by the public Python download and full MCP smoke. See the
+[v0.10.0 publication evidence](docs/publishing.md#v0100-publication-evidence).
 
-The public v0.9.0 Windows download passed all 55 file operations and 56 MCP tools
+Historically, the public v0.9.0 Windows download passed all 55 file operations and 56 MCP tools
 using its bundled runtime. Public Gemini CLI installation and the shared skill's
 ten-file installation were also checked. See [publication evidence](docs/publishing.md),
 including the historical v0.8.0 receipts.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.9.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 
@@ -56,8 +63,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.9.0 Windows
-   bundle extracts as `abox-tools-0.9.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.10.0 Windows
+   bundle extracts as `abox-tools-0.10.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -136,7 +143,7 @@ a Python 3.9+ setup script that downloads the matching packaged release, verifie
 its checksum and installs the bundled runtime. It does not require cloning or
 building this project. See [standalone setup](skills/abox-local-files/references/installation.md).
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Public v0.9.0 Gemini installation and skill copying were verified;
+is public. Public v0.10.0 Gemini installation and skill copying were verified;
 a Gemini gallery listing is unconfirmed.
 
 ## Ask the agent
@@ -250,8 +257,8 @@ Use `capabilities` to check what your installed release exposes.
 | `abox_xml_json` | `convert-xml-json` | Explicit lossy XML↔JSON mapping; verifies source mapping rather than semantic round-trip |
 | `abox_markdown_html` | `markdown-to-html` | Small Markdown dialect to standalone passive HTML with CSP; links never opened |
 
-In v0.9.0, audio inputs are simple mono/stereo PCM16/Float32 WAV. The upcoming
-source expands the admitted codecs as described below. MP4 creation is limited
+In v0.9.0, audio inputs are simple mono/stereo PCM16/Float32 WAV. Version 0.10.0
+expands the admitted codecs as described below. MP4 creation is limited
 to 60 seconds, 1800 frames and a 2,073,600-pixel output, and needs a supported
 installed browser encoder. Receipt OCR includes
 its worker, WebAssembly and English data; no processing asset is downloaded.
@@ -264,10 +271,9 @@ for exact HTML/CSS/YAML options, XML/JSON mapping losses and the passive Markdow
 dialect. Formatting existing HTML keeps its active content; it is distinct from
 the Markdown renderer's escaped, restricted output.
 
-## Source additions for v0.10.0
+## Operations added in v0.10.0
 
-These additions are implemented in the source tree; public package and Registry
-receipts above still describe v0.9.0 until a new release is verified. Always check
+These additions are included in the public v0.10.0 release. Always check
 the installed adapter's `capabilities` before choosing a new operation.
 
 | MCP operation | CLI command | Result and important boundary |

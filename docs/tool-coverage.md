@@ -1,9 +1,15 @@
 # Local tool coverage
 
-The upcoming v0.10.0 source targets 66 file operations plus `abox_capabilities`.
-The published v0.9.0 release provides 55 operations; its verified public-download
-and installation evidence remains in [publication evidence](publishing.md).
-New source support is separate from a completed public release.
+The public v0.10.0 release implements 66 file operations plus `abox_capabilities`.
+All four native/universal platform checks and publication/Registry registration
+passed. The default Python installer downloaded and verified the public Windows
+ZIP; that actual cache passed all 66 operations and 67 MCP tools with bundled
+Node.js 24.22.1 and no capability absences. Public Gemini installation and the
+14-file skill installation also passed. The skill's offline installer-contract
+check did not install an adapter offline; actual adapter setup is established
+by the separate public download/MCP proof. See
+[publication evidence](publishing.md#v0100-publication-evidence), which also
+preserves the separate verified v0.9.0 public-installation history.
 
 The adapter reuses the website's processing modules unchanged. Production
 wrappers add container/codec-header admission, bounded decode plans, independent

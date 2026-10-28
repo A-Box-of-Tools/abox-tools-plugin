@@ -2,8 +2,21 @@
 
 Publisher: **Abox Technologies**. Product: **abox.tools**.
 
-The [v0.9.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.9.0)
-is public with 26 assets and provides 55 local file operations and one
+The [v0.10.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.10.0)
+is public with 26 assets and 66 local file operations plus capabilities. All four
+native builds, universal assembly, four universal launch checks, publication and
+Registry registration passed. The exact active/latest Registry record matches
+the public universal MCPB hash. The default Python installer downloaded and
+verified the public Windows ZIP in an isolated cache; that actual cache passed
+all 66 file operations and 67 MCP tools using bundled Node.js 24.22.1, with no
+capability absences, relocation and launch without system Node. No local archive
+or rebuild supplied the proof. Public Gemini CLI installation and the skill's
+14-file project installation also passed; the latter checked the installer
+contract offline without installing an adapter offline. See the
+[v0.10.0 publication evidence](publishing.md#v0100-publication-evidence).
+
+Historically, the [v0.9.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.9.0)
+was published with 26 assets and 55 local file operations and one
 capabilities tool. Native packages and the universal MCPB passed checks on all
 four platforms, including packaged Gemini installation and standalone skill
 setup. Source verification passed on Ubuntu and Windows. Directory status is
@@ -13,21 +26,22 @@ and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/ac
 
 | Client | Installation route | Runtime requirements |
 | --- | --- | --- |
-| Codex desktop | Extract the matching native `abox-tools-0.9.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
-| Claude Desktop / MCPB hosts | Open `abox-tools-0.9.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
+| Codex desktop | Extract the matching native `abox-tools-0.10.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
+| Claude Desktop / MCPB hosts | Open `abox-tools-0.10.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
 | Cursor | Use the native ZIP's **Install tools in Cursor** button for the local MCP tools. The repository also carries a Cursor plugin and shared skill. | The native link uses the included runtime. A source plugin needs Node.js 22.15+ on PATH and one-time adapter setup. See [Cursor setup](cursor.md). |
 | VS Code | Use the native ZIP's **Install tools in VS Code** button, included from version 0.6.0. | VS Code with its URL handler must be installed. The link selects the bundled runtime and absolute server path; keep the extracted folder. |
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
 | Agents supported by skills.sh | Install `abox-local-files` from this repository, then run its one-time adapter setup. | The current skills CLI needs Node.js 22.20+. Adapter setup uses Python 3 and downloads a verified native ZIP; later file processing uses the cached bundled runtime. |
 
-Image rendering, GIF creation/extraction, WAV processing, document scans, local
-previews, receipt OCR, DICOM rendering and new video encoding need an installed
+Image rendering/conversion, GIF creation/extraction, decoded audio, document
+scans, local previews, receipt OCR, DICOM rendering, PDF raster redaction and
+video decoding/encoding need an installed
 Edge, Chrome or Chromium browser. New MP4 encoding also needs a supported native
 H.264 encoder; it downloads no encoder or model during processing.
 QR codes and barcodes default to
 SVG without a browser; their PNG output uses the installed local browser.
 PDF page/security operations, hashes, metadata operations, text processing,
-video packet copying, DICOM/GIF inspection and password generation use the local
+audio/video packet copying, DICOM/GIF inspection and password generation use the local
 adapter directly. All routes use the same processing engines and refuse
 existing output paths.
 
@@ -36,7 +50,7 @@ existing output paths.
 Install the released extension with:
 
 ```sh
-gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.9.0
+gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.10.0
 ```
 
 The release includes these Gemini-specific assets:
@@ -54,8 +68,12 @@ manifest is for development; a plain clone does not contain the bundled
 runtime or installed server dependencies.
 
 The public repository has the root manifest and `gemini-cli-extension` topic
-required for Google's daily gallery crawler. A gallery listing is unconfirmed. The
-v0.9.0 extracted release archives passed packaged Gemini installation checks in
+required for Google's daily gallery crawler. A gallery listing is unconfirmed.
+On 28 October 2026, Gemini CLI 0.65.0 installed the actual public repository at
+`--ref v0.10.0` and reported version 0.10.0. All 67 tools, shared skill discovery,
+bundled runtime selection and a local file operation passed.
+
+Historically, the v0.9.0 extracted release archives passed packaged Gemini installation checks in
 CI on all four platforms. The public GitHub-release installation check for
 v0.9.0 passed on Windows on 27 October 2026 using Gemini CLI 0.65.0 and
 `--ref v0.9.0`: 56 MCP tools, shared skill discovery, bundled runtime and a local
@@ -84,7 +102,18 @@ its Node.js 22.20+ requirement. Installation telemetry drives the
 [abox-local-files listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 was verified public on 25 October 2026, displaying Abox Technologies and the
 standalone setup guide. Installation counts and rankings update separately.
-Version 0.9.0's copied skill contains ten files. Packaged offline setup passed in
+Public skills CLI 1.7.4 installed version 0.10.0's 14 skill files from
+`A-Box-of-Tools/abox-tools-plugin` into an isolated project/home on
+28 October 2026, using the CLI defaults. The installer contract was checked
+offline without installing an adapter offline. Actual adapter installation is
+proved separately: the default Python installer downloaded and verified the
+public Windows ZIP, then all 66 operations and 67 MCP tools passed against its
+isolated cache using bundled Node.js 24.22.1, without capability absences or a
+local rebuild. All four native and all four universal CI summaries also reported
+67 tools without capability absences; exact runtime versions are recorded in
+[Publishing](publishing.md#v0100-publication-evidence).
+
+Historically, version 0.9.0's copied skill contains ten files. Packaged offline setup passed in
 CI on all four platforms; the Linux log confirms skills CLI 1.7.4 and ten copied
 files. Public skills CLI 1.7.4 also installed the v0.9.0 skill's ten files from
 `A-Box-of-Tools/abox-tools-plugin` into an isolated project/home on
@@ -106,8 +135,8 @@ Relocation and installation-link checks used that same downloaded bundle,
 without a local rebuild or changes to the user's agent settings.
 
 Historical v0.7.0 checks also covered public Gemini installation and the skill's
-actual adapter download on Windows; the v0.8.0 public receipts above are retained
-separately from the current v0.9.0 public and packaged CI checks.
+actual adapter download on Windows. The v0.8.0 and v0.9.0 receipts remain separate
+from current v0.10.0 publication and installation verification.
 
 ## Publication status and other clients
 
