@@ -1,7 +1,6 @@
 import path from 'node:path';
-import { tools } from '../src/tools.mjs';
 import { createHash } from 'node:crypto';
-import { createReadStream } from 'node:fs';
+import { createReadStream, readFileSync } from 'node:fs';
 import { lstat, mkdtemp, readFile, readdir, rm, rmdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { execFile } from 'node:child_process';
@@ -97,13 +96,20 @@ function checkDraft(info, tag, files, complete = false) {
   if (complete && names.size !== expected.size) throw new Error('The draft is missing release assets and will not be published.');
 }
 
-function releaseNotes(version, tag, repository) {
+export function releaseNotes(version, tag, repository) {
+  // Publication intentionally needs only Node builtins. Read the trusted
+  // registration block for its count without importing adapter dependencies.
+  const source = readFileSync(path.join(ROOT, 'src', 'tools.mjs'), 'utf8');
+  const registrations = /export const tools = \[([\s\S]*?)\n\];/.exec(source)?.[1];
+  const names = [...(registrations ?? '').matchAll(/^\s*\{ name: '(abox_[a-z0-9_]+)'/gm)].map(match => match[1]);
+  if (names.length < 2 || new Set(names).size !== names.length || !names.includes('abox_capabilities')) throw new Error('Could not count the trusted tool registrations for publication.');
+  const operationCount = names.length - 1;
   const base = `https://github.com/${repository}/releases/download/${tag}`;
   const downloads = platforms.map(({ label, suffix }) => {
     const name = `abox-tools-${version}-${suffix}`;
     return `- ${label}: [ZIP](${base}/${name}.zip), [MCPB](${base}/${name}.mcpb).`;
   }).join('\n');
-  return `abox.tools ${version}, published by Abox Technologies, provides ${tools.filter(tool => tool.name !== 'abox_capabilities').length} local file operations and one capabilities tool. It includes HEIC/AVIF conversion, permanent image-only PDF redaction, MP3/AAC editing and WAV/M4A extraction, H.264 compression/cropping/frame extraction/reversal/time-lapse/GIF/baked rotation, and native/RLE/JPEG-lossless DICOM inspection and rendering, alongside the existing image, PDF, OCR, code and text tools. Each bundle includes its runtime, shared skill, offline engines and corresponding codec source archives. File processing stays local with no runtime engine or model downloads.\n\n`
+  return `abox.tools ${version}, published by Abox Technologies, provides ${operationCount} local file operations and one capabilities tool. It includes HEIC/AVIF conversion, permanent image-only PDF redaction, MP3/AAC editing and WAV/M4A extraction, H.264 compression/cropping/frame extraction/reversal/time-lapse/GIF/baked rotation, and native/RLE/JPEG-lossless DICOM inspection and rendering, alongside the existing image, PDF, OCR, code and text tools. Each bundle includes its runtime, shared skill, offline engines and corresponding codec source archives. File processing stays local with no runtime engine or model downloads.\n\n`
     + `Receipt fields require review. DICOM previews provide no diagnosis or anonymization. PDF redaction uses explicit rectangles and flattens every page into fresh lossless images; searchable text and original document structure are omitted. MP4 packet-copy cuts can retain encoded footage around edit boundaries. Image, PDF rendering, audio and decoded-video workflows need installed Edge, Chrome or Chromium; encoding depends on native H.264/AAC support. Format, pixel, sample and duration limits are documented in [coverage and supported limits](https://github.com/${repository}/blob/${tag}/docs/tool-coverage.md). Live device and peer-pairing workflows remain separate from this file adapter.\n\n`
     + `For Codex, download the ZIP for your computer, extract it, open START-HERE.html, and click Install in Codex. Keep the extracted folder in place.\n\n`
     + `For Cursor or VS Code, use the matching button in the same START-HERE.html. These links register local MCP tools using the bundled runtime; no separate Node or npm installation is needed.\n\n`
