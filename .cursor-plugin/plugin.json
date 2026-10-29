@@ -1,16 +1,31 @@
 {
   "name": "abox-tools",
   "displayName": "abox.tools",
-  "version": "0.10.0",
-  "description": "Local image, PDF, audio, video, OCR and file tools. Source installs need Node.js and one-time adapter setup.",
-  "author": { "name": "Abox Technologies" },
+  "version": "0.11.0",
+  "description": "Offline file tools and opt-in direct sharing, camera and voice sessions by Abox Technologies.",
+  "author": {
+    "name": "Abox Technologies"
+  },
   "publisher": "Abox Technologies",
   "homepage": "https://abox.tools/",
   "repository": "https://github.com/A-Box-of-Tools/abox-tools-plugin",
   "license": "MIT",
   "logo": "assets/icon.png",
   "category": "Productivity",
-  "keywords": ["local-files", "images", "gif", "pdf", "audio", "video", "ocr", "dicom", "qr", "barcode", "passwords", "mcp"],
+  "keywords": [
+    "local-files",
+    "images",
+    "gif",
+    "pdf",
+    "audio",
+    "video",
+    "ocr",
+    "dicom",
+    "qr",
+    "barcode",
+    "passwords",
+    "mcp"
+  ],
   "skills": "./skills/",
   "mcpServers": "./cursor-mcp.json"
 }

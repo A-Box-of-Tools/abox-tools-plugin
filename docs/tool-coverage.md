@@ -11,6 +11,13 @@ by the separate public download/MCP proof. See
 [publication evidence](publishing.md#v0100-publication-evidence), which also
 preserves the separate verified v0.9.0 public-installation history.
 
+The v0.11.0 source adds a separate visible companion for the four live website
+workflows, with six controls including status/stop: 66 offline file operations
+plus six live controls, or 72 operations and 73 MCP tools including capabilities.
+It uses the existing pairing service only after explicit Start/Connect. Source
+and passive/synthetic checks are separate from public-release or physical-device
+pairing evidence; neither new claim is made here.
+
 The adapter reuses the website's processing modules unchanged. Production
 wrappers add container/codec-header admission, bounded decode plans, independent
 verification, noninteractive settings, isolated browser/worker jobs and exclusive
@@ -50,6 +57,7 @@ The installed adapter's `capabilities` response is the authority for its limits.
 | Local previews | Business profile, compare heights | `business-profile-preview`; `compare-heights` chart/artwork | Local illustrative SVG/PNG, no listing publication or measurement inference |
 | Receipt OCR | Extract receipt | `receipt-invoice-extractor` OCR/receipt/CSV; pinned bundled Tesseract and English data | Printed English still-image input; suggested fields and recognized text saved locally; human review required |
 | DICOM | Inspect, render | `dicom-viewer` parser/dictionary/pixel/window/RLE/JPEG modules | Flat PS3.10 native or strict single-frame RLE/JPEG Lossless subset; complete compressed admission and stored-sample checks; no diagnosis or anonymization |
+| Live sharing/media | Share Text, Remote Camera, Walkie Talkie, Voice Oncall; status/stop | `share-text` names/network/file transfer; shared peer-pairing/network, voice sessions; `remote-camera` capture/session | Separate visible companion, explicit human Start/permissions/approval, existing rendezvous and direct host-candidate WebRTC; no relay/discovery/recording |
 
 Runtime processing does not fetch modules, models or encoders. The receipt OCR
 assets are shipped and licensed with the plugin; their presence is not a network
@@ -62,7 +70,8 @@ universal operating-system process-memory cap.
 The audited catalog contains 58 website tools: 54 file-oriented pages and four
 live/device pages. Every file-oriented main workflow has a local route; this
 does not imply every browser control, codec or source recovery behavior is
-supported. The complete page mapping is:
+supported. The v0.11.0 companion adds explicit wrappers for the four live pages.
+The complete page mapping is:
 
 | Website pages | Adapter workflow |
 |---|---|
@@ -80,7 +89,7 @@ supported. The complete page mapping is:
 | `document-scanner`, `id-photo` | Explicit-coordinate document cleanup and custom ID-photo sheets |
 | `business-profile-preview`, `compare-heights` | Local illustrative previews |
 | `receipt-invoice-extractor`, `dicom-viewer`, `password-generator` | Bundled OCR, technical DICOM preview and local secret generation |
-| `share-text`, `remote-camera`, `walkie-talkie`, `voice-oncall` | Interactive workflows remain separate; only the pure Markdown helper from `share-text` is reused locally |
+| `share-text`, `remote-camera`, `walkie-talkie`, `voice-oncall` | Explicit visible live sessions with the existing pairing service and direct peer transport; the pure Markdown helper also remains available offline |
 
 ## Concrete boundaries
 
@@ -160,13 +169,28 @@ landmark or document-edge detection are not exposed by these routes.
 
 ### Live sharing and devices
 
-`share-text`, `remote-camera`, `walkie-talkie` and `voice-oncall` depend on live
-connections, peer pairing or camera/microphone access. They require explicit
-interactive device/network workflows rather than a local file adapter.
-No route opens a camera, microphone, rendezvous connection, decoded URL or
-business account. An unsupported file is not uploaded as a fallback.
-The pure `share-text/src/markdown.js` helper is independently reusable and is
-exposed as local Markdown-to-HTML; it does not import the live sharing workflow.
+The 66 file operations open no camera, microphone, rendezvous connection,
+decoded URL or business account. An unsupported file is not uploaded as a
+fallback. Markdown-to-HTML still uses only the pure sharing helper offline.
+
+The six new live controls instead open a separate visible browser with bundled
+assets, a narrow page-owned native binding and no actual HTTP listener/file
+server. The person starts/connects, supplies invitations/passwords and handles
+device permission and peer approval there. Pairing uses the existing
+`wss://rendezvous.abox.tools` service; it receives IP/timing/room/negotiation
+metadata and Cloudflare keeps seven-day metadata logs. Direct WebRTC content
+does not pass through that rendezvous. Host-candidate/no-STUN filtering can
+require directly reachable devices; it is not a private-subnet guarantee.
+
+The companion has no TURN fallback, discovery, recording or automatic permission
+grants. Camera is video-only; camera switching/alerts and voice hands-free modes
+are not exposed. Share receive-save operations require an explicit click and a
+new output directory; generated names, exact byte/offset admission and exclusive
+publication prevent peers from choosing paths or overwriting files. Stop closes
+devices/transports and removes unfinished files; completed saves remain.
+See [live-session settings](../skills/abox-local-files/references/live-sessions.md)
+and [Privacy](../PRIVACY.md). Fake device/browser tests do not establish physical
+device compatibility or the user's actual network pairing.
 
 ## How to extend this safely
 

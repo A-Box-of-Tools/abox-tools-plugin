@@ -2,10 +2,12 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.A-Box-of-Tools/abox-tools",
   "title": "abox.tools",
-  "description": "Local image, PDF, audio, video, OCR, DICOM, code and text tools, passwords and checksums.",
+  "description": "Offline file tools and opt-in direct sharing, camera and voice sessions by Abox Technologies.",
   "_meta": {
     "io.modelcontextprotocol.registry/publisher-provided": {
-      "publisher": { "name": "Abox Technologies" }
+      "publisher": {
+        "name": "Abox Technologies"
+      }
     }
   },
   "repository": {

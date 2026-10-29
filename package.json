@@ -1,18 +1,26 @@
 {
   "name": "abox-tools-plugin",
-  "version": "0.10.0",
-  "description": "Local image, PDF, audio, video, OCR and file tools published by Abox Technologies, reusing abox.tools engines.",
-  "author": { "name": "Abox Technologies", "url": "https://abox.tools/" },
+  "version": "0.11.0",
+  "description": "Offline file tools and opt-in direct sharing, camera and voice sessions by Abox Technologies.",
+  "author": {
+    "name": "Abox Technologies",
+    "url": "https://abox.tools/"
+  },
   "type": "module",
   "private": true,
   "license": "MIT",
-  "engines": { "node": ">=22.15.0" },
-  "bin": { "abox": "bin/abox.mjs", "abox-mcp": "bin/abox-mcp.mjs" },
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "bin": {
+    "abox": "bin/abox.mjs",
+    "abox-mcp": "bin/abox-mcp.mjs"
+  },
   "scripts": {
     "start": "node bin/abox-mcp.mjs",
     "doctor": "node bin/abox.mjs doctor",
-    "test": "node --test tests/heif.test.mjs tests/pdf-raster-redact.test.mjs tests/audio-headers.test.mjs tests/video-headers.test.mjs tests/video-decode.test.mjs tests/adapter.test.mjs tests/code-format.test.mjs tests/xml-json.test.mjs tests/markdown-html.test.mjs tests/exif-edit.test.mjs tests/pdf-extra.test.mjs tests/pdf-rotate.test.mjs tests/pdf-compress.test.mjs tests/pdf-csv.test.mjs tests/text.test.mjs tests/structured-text.test.mjs tests/text-diff.test.mjs tests/data-uri.test.mjs tests/codes.test.mjs tests/gif.test.mjs tests/image-vector-stack.test.mjs tests/password-redact.test.mjs tests/read-codes-gif-create.test.mjs tests/pdf-security-redact.test.mjs tests/audio.test.mjs tests/video-copy.test.mjs tests/video-rotate.test.mjs tests/document-scan.test.mjs tests/id-photo.test.mjs tests/profile-heights.test.mjs tests/receipt-ocr.test.mjs tests/dicom.test.mjs tests/video-create.test.mjs tests/hash.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs tests/cursor.test.mjs tests/static-imports.test.mjs",
-    "test:browser": "node --test --test-concurrency=2 tests/heif-browser.test.mjs tests/pdf-raster-redact-browser.test.mjs tests/audio-compressed-browser.test.mjs tests/video-decode-browser.test.mjs tests/browser.test.mjs tests/image.test.mjs tests/images-pdf.test.mjs tests/pdf-compress-browser.test.mjs tests/pdf-watermark.test.mjs tests/icon-svg.test.mjs tests/image-layout.test.mjs tests/codes-browser.test.mjs tests/gif-browser.test.mjs tests/image-vector-stack-browser.test.mjs tests/password-redact-browser.test.mjs tests/read-codes-gif-create-browser.test.mjs tests/audio-browser.test.mjs tests/document-scan-browser.test.mjs tests/id-photo-browser.test.mjs tests/profile-heights-browser.test.mjs tests/receipt-ocr-browser.test.mjs tests/dicom-browser.test.mjs tests/video-create-browser.test.mjs",
+    "test": "node --test tests/heif.test.mjs tests/pdf-raster-redact.test.mjs tests/audio-headers.test.mjs tests/video-headers.test.mjs tests/video-decode.test.mjs tests/adapter.test.mjs tests/code-format.test.mjs tests/xml-json.test.mjs tests/markdown-html.test.mjs tests/exif-edit.test.mjs tests/pdf-extra.test.mjs tests/pdf-rotate.test.mjs tests/pdf-compress.test.mjs tests/pdf-csv.test.mjs tests/text.test.mjs tests/structured-text.test.mjs tests/text-diff.test.mjs tests/data-uri.test.mjs tests/codes.test.mjs tests/gif.test.mjs tests/image-vector-stack.test.mjs tests/password-redact.test.mjs tests/read-codes-gif-create.test.mjs tests/pdf-security-redact.test.mjs tests/audio.test.mjs tests/video-copy.test.mjs tests/video-rotate.test.mjs tests/document-scan.test.mjs tests/id-photo.test.mjs tests/profile-heights.test.mjs tests/receipt-ocr.test.mjs tests/dicom.test.mjs tests/video-create.test.mjs tests/hash.test.mjs tests/mcp.test.mjs tests/installer.test.mjs tests/release-assets.test.mjs tests/registry.test.mjs tests/publisher.test.mjs tests/cursor.test.mjs tests/static-imports.test.mjs tests/live.test.mjs tests/live-media.test.mjs tests/live-share.test.mjs",
+    "test:browser": "node --test --test-concurrency=2 tests/heif-browser.test.mjs tests/pdf-raster-redact-browser.test.mjs tests/audio-compressed-browser.test.mjs tests/video-decode-browser.test.mjs tests/browser.test.mjs tests/image.test.mjs tests/images-pdf.test.mjs tests/pdf-compress-browser.test.mjs tests/pdf-watermark.test.mjs tests/icon-svg.test.mjs tests/image-layout.test.mjs tests/codes-browser.test.mjs tests/gif-browser.test.mjs tests/image-vector-stack-browser.test.mjs tests/password-redact-browser.test.mjs tests/read-codes-gif-create-browser.test.mjs tests/audio-browser.test.mjs tests/document-scan-browser.test.mjs tests/id-photo-browser.test.mjs tests/profile-heights-browser.test.mjs tests/receipt-ocr-browser.test.mjs tests/dicom-browser.test.mjs tests/video-create-browser.test.mjs tests/live-browser.test.mjs",
     "sync-upstream": "node scripts/sync-upstream.mjs",
     "verify-vendor": "node scripts/verify-vendor.mjs",
     "package:release": "node scripts/package-release.mjs",
@@ -20,7 +28,8 @@
     "package:universal": "node scripts/package-universal.mjs",
     "smoke:universal": "node scripts/smoke-universal.mjs",
     "smoke:gemini": "node scripts/smoke-gemini.mjs",
-    "smoke:skills": "node scripts/smoke-skills.mjs"
+    "smoke:skills": "node scripts/smoke-skills.mjs",
+    "test:live": "node --input-type=module --eval \"process.env.ABOX_TEST_LIVE_NETWORK='1'; await import('./tests/live-network.test.mjs')\""
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",

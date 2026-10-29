@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { tools, execute, VERSION } from '../src/tools.mjs';
 import { errorResult } from '../src/errors.mjs';
+import { closeLiveSessions } from '../src/live.mjs';
 
 const server = new McpServer({ name: 'abox-tools', version: VERSION });
 for (const tool of tools) {
@@ -10,7 +11,7 @@ for (const tool of tools) {
     title: tool.title, description: tool.description, inputSchema: tool.schema.shape,
     annotations: {
       readOnlyHint: Boolean(tool.readOnly), destructiveHint: false,
-      idempotentHint: Boolean(tool.readOnly), openWorldHint: false,
+      idempotentHint: Boolean(tool.readOnly), openWorldHint: Boolean(tool.openWorld),
     },
   }, async (args, extra) => {
     try {
@@ -24,3 +25,5 @@ for (const tool of tools) {
 }
 
 await server.connect(new StdioServerTransport());
+process.stdin.once('end', () => { void closeLiveSessions(); });
+for (const event of ['SIGINT', 'SIGTERM']) process.once(event, () => { void closeLiveSessions().finally(() => process.exit(event === 'SIGINT' ? 130 : 143)); });

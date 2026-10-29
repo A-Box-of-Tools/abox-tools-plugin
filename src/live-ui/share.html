@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>abox.tools — Local sharing</title>
+  <link rel="stylesheet" href="/live/share.css">
+  <script type="module" src="/live/share.mjs"></script>
+</head>
+<body>
+  <main>
+    <p class="brand">abox.tools · Local companion</p>
+    <h1 id="title">Share text and files</h1>
+    <p class="intro">You control this session here. Nothing connects until you choose Start sharing or Connect.</p>
+    <section class="notice" aria-label="Connection and privacy">
+      <strong>Local network mode · Private approval · No discovery</strong>
+      <p>The existing abox.tools pairing service introduces the browsers. It sees their IP addresses, share code and connection messages. Text and file contents travel directly between the browsers.</p>
+      <p>No public STUN server or TURN relay is used. Host-only connections work best on the same Wi-Fi or Ethernet; VPNs, firewalls and browser policy can change which routes are available. Keep both pages open.</p>
+    </section>
+    <label for="room-name">Share code or local-network share link</label>
+    <input id="room-name" type="text" maxlength="2048" autocomplete="off" spellcheck="false">
+    <section id="host-options" hidden>
+      <label for="text-input">Load a local UTF-8 text file (optional)</label>
+      <input id="text-input" type="file" accept="text/plain,.txt,.md,.json,.csv">
+      <label for="share-text">Text to share</label>
+      <textarea id="share-text" rows="8" maxlength="50000" spellcheck="false"></textarea>
+      <p class="hint">Up to 50,000 characters and 200,000 UTF-8 bytes. Text is shown as plain text.</p>
+      <label for="attachments">Local files to share (optional)</label>
+      <input id="attachments" type="file" multiple>
+      <p class="hint">Up to 16 files, 128 MiB each and 256 MiB combined. Readers see the names and sizes after you approve them.</p>
+      <ul id="selected-files"></ul>
+      <button id="update-text" type="button" disabled>Send updated text</button>
+      <h2>Readers awaiting approval</h2>
+      <p class="hint">Only approve people you expect. A share code does not establish identity.</p>
+      <div id="requests"></div>
+    </section>
+    <section id="reader-options" hidden>
+      <div id="knock-row" hidden>
+        <label for="introduction">Optional introduction for the sharer</label>
+        <input id="introduction" type="text" maxlength="200" autocomplete="off">
+        <button id="knock" type="button">Request access</button>
+      </div>
+      <h2>Received text</h2>
+      <pre id="received-text" tabindex="0"></pre>
+      <button id="save-text" type="button" disabled>Save received text</button>
+      <h2>Available files</h2>
+      <p id="save-policy" class="hint">Each Receive and save action writes a new file in the chosen output folder. Remote filenames are display labels; saved files receive generated local names.</p>
+      <div id="offered-files"></div>
+      <p id="progress" role="status"></p>
+      <button id="cancel-file" type="button" hidden>Cancel file transfer</button>
+    </section>
+    <section id="invitation-row" hidden>
+      <label for="invitation">Open this local-network link on the other device</label>
+      <input id="invitation" type="text" readonly spellcheck="false">
+      <button id="copy-link" type="button">Copy share link</button>
+    </section>
+    <p id="state" role="status" aria-live="polite">Preparing the local page…</p>
+    <p id="message" role="status" aria-live="polite"></p>
+    <div class="actions">
+      <button id="start" type="button" disabled>Start sharing</button>
+      <button id="stop" type="button" disabled>Stop</button>
+      <button id="close-session" type="button">Close session</button>
+    </div>
+    <p class="hint">Stop closes this page's sharing connections and cancels incomplete saves. It cannot revoke copies another person has already received. Close session also closes this companion window.</p>
+  </main>
+</body>
+</html>

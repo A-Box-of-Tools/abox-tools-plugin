@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>abox.tools live session</title>
+  <link rel="stylesheet" href="/live/media.css">
+</head>
+<body>
+<main id="live-media">
+  <header><p class="eyebrow">abox.tools · local companion</p><h1 id="title">Live session</h1></header>
+  <p id="purpose"></p>
+  <p class="notice">Start opens the existing abox.tools pairing service. Media travels directly between devices with host-only connection candidates; there is no STUN or TURN relay. Both devices may need the same reachable network. Nearby discovery is off. No media is recorded or sent to the agent.</p>
+  <p id="status" role="status" aria-live="polite">Nothing is connected.</p>
+  <form id="setup">
+    <div id="room-field"><label for="room">Pager name</label><input id="room" maxlength="80" autocomplete="off" value="Local pager"></div>
+    <div id="invitation-field"><label for="invitation">Invitation from the other device</label><input id="invitation" maxlength="2048" autocomplete="off" spellcheck="false" type="text"></div>
+    <div id="password-field"><label for="password">Pager password <span>(if required)</span></label><input id="password" maxlength="256" autocomplete="off" type="password"><p class="hint">An optional host password protects the pager. Share it separately; it is never placed in the invitation.</p></div>
+    <button id="start" type="submit">Start</button>
+  </form>
+  <section id="invitation-output" hidden aria-labelledby="invite-title"><h2 id="invite-title">Invite the other device</h2><label for="share-link">Open this link on the other device</label><input id="share-link" type="text" readonly autocomplete="off" spellcheck="false"><button id="copy" type="button">Copy invitation</button><p id="copy-status" role="status"></p></section>
+  <section id="camera-section" hidden><h2 id="camera-title">Camera</h2><video id="camera" playsinline controls></video><p id="camera-empty">No camera stream is available.</p></section>
+  <section id="approval-section" hidden aria-labelledby="approval-title"><h2 id="approval-title">Viewer requests</h2><p>Approve only a device you intended to invite. A request label is unverified.</p><ul id="requests"></ul><p id="requests-empty">No viewer requests.</p><h2>Approved viewers</h2><ul id="viewers"></ul><p id="viewers-empty">No approved viewers.</p></section>
+  <section id="voice-section" hidden><h2>Voice</h2><div id="talk-controls" hidden><button id="talk" type="button" disabled aria-pressed="false">Hold Talk</button><p>Hold with a pointer, Space or Enter. Releasing, leaving the button, changing tabs or losing focus mutes the microphone.</p></div><button id="sound" type="button">Enable sound</button><p id="sound-status" role="status">Sound has not been enabled.</p><div id="audio-streams"></div><h2 id="participants-title" hidden>Callers</h2><ul id="participants"></ul><p id="participants-empty" hidden>No callers are connected.</p></section>
+  <div class="actions"><button id="stop" type="button" disabled>Stop media</button><button id="close" type="button" class="secondary">Close session</button></div>
+  <p class="hint">Stop closes this session’s camera, microphone and peer connections. Close session also closes this companion window. Device permissions are controlled by your browser.</p>
+</main>
+<script type="module" src="/live/media.mjs"></script>
+</body>
+</html>

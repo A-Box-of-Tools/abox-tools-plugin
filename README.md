@@ -7,7 +7,8 @@ PDFs; format JSON and XML; convert YAML and JSON; compare text files; encode or
 decode Base64; embed images as data URIs; generate QR codes and barcodes; inspect
 or remove image metadata; and calculate file checksums with the existing
 [abox.tools](https://abox.tools/) code. An agent supplies local paths and receives
-output paths and short JSON results. File bytes stay on your computer.
+output paths and short JSON results. Offline file processing keeps bytes on your
+computer and out of tool responses.
 
 It also processes GIFs, admitted audio and supported video timelines; straightens
 document photos; prepares custom ID photos and local previews; extracts receipt
@@ -19,6 +20,16 @@ The public v0.10.0 release provides 66 file operations and one capabilities tool
 Native and universal packages passed checks on all four target platforms.
 See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
 the source engines reused by this adapter and the limits of each route.
+
+The v0.11.0 source adds six live-session controls, for 72 operations plus
+capabilities: the existing 66 offline file tools and a separate opt-in visible
+companion for text/files, camera video and voice. Opening a window starts no
+network or capture. The person clicks Start/Connect and handles permissions and
+pairing there. Live mode uses the existing abox.tools pairing service and direct
+encrypted WebRTC; the service sees negotiation metadata and keeps seven-day
+Cloudflare metadata logs. There is no relay, discovery or recording. Public
+v0.11.0 release and real-device pairing evidence are not claimed here. Read the
+[live-session boundary](skills/abox-local-files/references/live-sessions.md).
 
 Version 0.10.0 adds
 HEIC/AVIF, flattened PDF redaction, sound extraction and admitted H.264 video
@@ -315,6 +326,32 @@ arbitrary codec support. Generated MP4 frames are decoded and checked for shape,
 timing and count, while copied AAC packets are compared exactly. Lossy encoding,
 color conversion and final-frame timing can change. Matrix-only video rotation
 remains available separately without decoding or re-encoding.
+
+## Source additions for v0.11.0
+
+These controls open a separate visible browser and keep private content and
+pairing secrets outside agent context. The person starts/connects and approves
+capture/peers there. They require a graphical desktop and directly reachable
+devices; host-candidate connections can require the same network. File operations
+remain offline. This source update is separate from the verified public v0.10.0
+release receipts above.
+
+| MCP operation | CLI command | Explicit role and important boundary |
+|---|---|---|
+| `abox_share_session` | `share-session` | `host` preloads selected local text/files; `reader` requests approval and explicitly saves into a new output directory |
+| `abox_camera_session` | `camera-session` | `host` grants video-only camera permission and approves viewers; `viewer` receives live video, without recording |
+| `abox_walkie_session` | `walkie-session` | Microphone-granted `host` holds Talk; `listener` receives without microphone capture |
+| `abox_voice_oncall_session` | `voice-oncall-session` | `host` receives/moderates callers with an optional UI password; microphone-granted `sender` holds Talk |
+| `abox_live_status` | `live-status` | Safe counts/state/expiry for this adapter process; no invitations, received text or media |
+| `abox_live_stop` | `live-stop` | Close one companion and release devices/transports; unfinished saves removed and completed saves retained |
+
+At most four windows run together. `ttl_minutes` defaults to 30 and ranges from
+1 to 120. Share attachments are at most 16 files, 128 MiB each and 256 MiB
+combined; text is at most 50,000 characters and 200,000 UTF-8 bytes. Peers' names
+never select filesystem paths: explicit receive saves use generated `.bin` or
+`.txt` names with exclusive writes. The synthetic loopback-looking address has
+no actual HTTP listener or file server. See [live settings and CLI lifetime](skills/abox-local-files/references/live-sessions.md),
+[Privacy](PRIVACY.md) and [Security](SECURITY.md).
 
 For PDF protection, pass `open_password_file`/`owner_password_file`; for unlocking,
 pass `password_file`. Their exact UTF-8 text, including BOM and final newline,

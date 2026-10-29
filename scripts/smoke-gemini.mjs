@@ -101,7 +101,7 @@ try {
   assert.ok(!capabilities.isError);
   const data = capabilities.structuredContent;
   assert.equal(data.version, config.version);
-  assert.equal(data.processing, 'local');
+  assert.equal(data.processing, 'local-files-and-opt-in-live-sessions');
   assert.deepEqual(tools.tools.map(tool => tool.name).sort(), ['abox_capabilities', ...data.operations.map(operation => operation.name)].sort());
   // A real file operation catches entry-point and local-path errors that a
   // successful protocol handshake alone would miss. Full native smoke tests

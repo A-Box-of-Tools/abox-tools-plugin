@@ -1,4 +1,4 @@
 interface:
-  display_name: "abox.tools local files"
-  short_description: "Local image, PDF, audio, video, text and OCR tools."
-  default_prompt: "Use $abox-local-files to process these local files with abox.tools."
+  display_name: "abox.tools files and live sessions"
+  short_description: "Offline files plus opt-in live text, camera and voice."
+  default_prompt: "Use $abox-local-files for this file task or explicitly requested live session."

@@ -1,11 +1,13 @@
 {
   "name": "abox-tools",
-  "version": "0.10.0",
-  "description": "Local images, PDFs, audio, video, OCR, codes, text and file tools by Abox Technologies.",
+  "version": "0.11.0",
+  "description": "Offline file tools and opt-in direct sharing, camera and voice sessions by Abox Technologies.",
   "mcpServers": {
     "abox": {
       "command": "node",
-      "args": ["${extensionPath}/bin/abox-mcp.mjs"],
+      "args": [
+        "${extensionPath}/bin/abox-mcp.mjs"
+      ],
       "cwd": "${extensionPath}"
     }
   }

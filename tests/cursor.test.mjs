@@ -126,6 +126,6 @@ test('the offline Cursor launcher serves the real MCP server from a verified cac
   const result = JSON.parse(response.content.find(item => item.type === 'text').text);
   assert.equal(result.version, project.version);
   assert.equal(result.publisher, 'Abox Technologies');
-  assert.equal(result.processing, 'local');
+  assert.equal(result.processing, 'local-files-and-opt-in-live-sessions');
   assert.equal(result.operations.length, listed.tools.length - 1);
 });

@@ -20,10 +20,12 @@ import { smokeImageGaps } from './smoke-image-gaps.mjs';
 import { smokeAudioGaps } from './smoke-audio-gaps.mjs';
 import { smokeDocumentGaps } from './smoke-document-gaps.mjs';
 import { smokeVideoGaps } from './smoke-video-gaps.mjs';
+import { smokeLive } from './smoke-live.mjs';
 
 const runFile = promisify(execFile);
 const expectedVersion = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8')).version;
 const expectedTools = [
+  'abox_share_session', 'abox_camera_session', 'abox_walkie_session', 'abox_voice_oncall_session', 'abox_live_status', 'abox_live_stop',
   'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_gif_inspect', 'abox_gif_split',
   'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout', 'abox_image_redact', 'abox_image_resize', 'abox_image_stack', 'abox_image_to_ico', 'abox_image_trace', 'abox_images_to_pdf', 'abox_json_format', 'abox_password_generate',
   'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
@@ -335,7 +337,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
     assert.deepEqual(listed.tools.map(tool => tool.name).sort(), expectedTools);
     const capabilities = await call(client, 'abox_capabilities', {});
     assert.equal(capabilities.version, expectedVersion);
-    assert.equal(capabilities.processing, 'local');
+    assert.equal(capabilities.processing, 'local-files-and-opt-in-live-sessions');
     assert.equal(capabilities.max_input_bytes, 128 * 1024 * 1024);
     assert.deepEqual(capabilities.operations.map(operation => operation.name).sort(), expectedTools.filter(name => name !== 'abox_capabilities'));
     assert.equal(capabilities.browser.available, true, 'Real compression requires an installed supported local browser.');
@@ -807,6 +809,7 @@ export async function smokeRelease(config, { universal = false } = {}) {
     generatedBytes.fill(0);
     const expanded = await smokeNewTools({ call, client, workspace, imageInput, imageResized, pdfInput, qrPath, qrPayload });
     const engineering_gaps = {
+      live_companion: await smokeLive({ runFile, runtime, bundle, cwd: workspace, env }),
       images: await smokeImageGaps({ call, client, workspace }),
       audio: await smokeAudioGaps({ call, client, workspace }),
       documents: await smokeDocumentGaps({ run: (name, args) => call(client, name, args), workspace }),

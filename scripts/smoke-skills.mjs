@@ -207,7 +207,7 @@ export async function smokeSkills(args = process.argv.slice(2)) {
       })).stdout.trim());
       assert.equal(capabilities.ok, true);
       assert.equal(capabilities.version, project.version);
-      assert.equal(capabilities.processing, 'local');
+      assert.equal(capabilities.processing, 'local-files-and-opt-in-live-sessions');
       offlineAdapterInstalled = true;
     }
     const result = {

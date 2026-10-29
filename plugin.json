@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "abox-tools",
-  "version": "0.10.0",
-  "description": "Local image, PDF, audio, video and OCR tools, codes, text, passwords and checksums.",
+  "version": "0.11.0",
+  "description": "Offline file tools and opt-in direct sharing, camera and voice sessions by Abox Technologies.",
   "author": {
     "name": "Abox Technologies",
     "url": "https://abox.tools/"
@@ -16,10 +16,13 @@
       "onboardingSkill": "./skills/setup/SKILL.md",
       "interface": {
         "displayName": "abox.tools",
-        "shortDescription": "Process local images, PDFs and files",
+        "shortDescription": "Local files and direct live sessions",
         "developerName": "Abox Technologies",
         "category": "Productivity",
-        "capabilities": ["Read", "Write"],
+        "capabilities": [
+          "Read",
+          "Write"
+        ],
         "logo": "./assets/icon.png",
         "composerIcon": "./assets/icon.png"
       }

@@ -80,6 +80,7 @@ test('MCP initializes, advertises all operations, and returns structured local c
   await client.connect(transport);
   const listed = await client.listTools();
   assert.deepEqual(listed.tools.map(tool => tool.name).sort(), [
+    'abox_share_session', 'abox_camera_session', 'abox_walkie_session', 'abox_voice_oncall_session', 'abox_live_status', 'abox_live_stop',
     'abox_barcode_generate', 'abox_base64', 'abox_capabilities', 'abox_exif_inspect', 'abox_exif_remove', 'abox_file_hash', 'abox_gif_inspect', 'abox_gif_split', 'abox_image_compress', 'abox_image_convert', 'abox_image_data_uri', 'abox_image_layout',
     'abox_image_redact', 'abox_image_resize', 'abox_image_stack', 'abox_image_to_ico', 'abox_image_trace', 'abox_images_to_pdf', 'abox_json_format', 'abox_password_generate', 'abox_pdf_compress', 'abox_pdf_merge', 'abox_pdf_rotate', 'abox_pdf_select', 'abox_pdf_split', 'abox_pdf_to_csv', 'abox_pdf_watermark', 'abox_qr_generate', 'abox_svg_to_image', 'abox_text_diff', 'abox_xml_format', 'abox_yaml_json',
     'abox_code_read', 'abox_gif_create', 'abox_pdf_protect', 'abox_pdf_unlock', 'abox_audio_edit', 'abox_audio_trim',
@@ -92,6 +93,7 @@ test('MCP initializes, advertises all operations, and returns structured local c
     'abox_height_compare', 'abox_receipt_extract', 'abox_dicom_inspect', 'abox_dicom_render', 'abox_images_to_video', 'abox_gif_to_mp4',
   ].sort());
   for (const tool of listed.tools) assert.equal(tool.inputSchema.type, 'object');
+  for (const tool of listed.tools) assert.equal(tool.annotations.openWorldHint, ['abox_share_session', 'abox_camera_session', 'abox_walkie_session', 'abox_voice_oncall_session'].includes(tool.name));
   const result = await client.callTool({ name: 'abox_capabilities', arguments: {} });
   assert.ok(!result.isError);
   assert.ok(result.structuredContent);
@@ -100,7 +102,7 @@ test('MCP initializes, advertises all operations, and returns structured local c
   const json = JSON.parse(text.text);
   assert.deepEqual(json, result.structuredContent);
   assert.equal(json.ok, true);
-  assert.equal(json.processing, 'local');
+  assert.equal(json.processing, 'local-files-and-opt-in-live-sessions');
   assert.equal(json.max_input_bytes, 128 * 1024 * 1024);
   assert.deepEqual(json.operations.map(operation => operation.name).sort(), listed.tools.map(tool => tool.name).filter(name => name !== 'abox_capabilities').sort());
   const rejected = await client.callTool({
@@ -119,8 +121,8 @@ test('CLI capabilities works independently of the caller working directory', { t
   assert.equal(result.code, 0, result.stderr);
   const json = JSON.parse(result.stdout);
   assert.equal(json.ok, true);
-  assert.equal(json.processing, 'local');
-  assert.equal(json.operations.length, 66);
+  assert.equal(json.processing, 'local-files-and-opt-in-live-sessions');
+  assert.equal(json.operations.length, 72);
 });
 
 test('CLI processes a JSON request file and exposes machine-readable failure without overwriting files', { timeout: 30_000 }, async t => {

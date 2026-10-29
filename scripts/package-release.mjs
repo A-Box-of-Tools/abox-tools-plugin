@@ -101,8 +101,8 @@ const bundledPackage = { ...project, scripts: { start: project.scripts.start, do
 await writeFile(path.join(destination, 'package.json'), `${JSON.stringify(bundledPackage, null, 2)}\n`);
 const mcpb = {
   manifest_version: '0.3', name: 'abox-tools', display_name: 'abox.tools', version: project.version,
-  description: 'Local images, PDFs, audio, video, OCR, DICOM and file tools.',
-  long_description: 'Published by Abox Technologies. Reuses abox.tools engines on local paths, with Node and dependencies included. Supports HEIC/AVIF and raster images, EXIF, PDF security and permanent image-only redaction, WAV/MP3/AAC editing and extraction, H.264 video editing, GIFs, document scans, ID photos, receipt OCR and native/RLE/JPEG-lossless DICOM previews. Image and PDF rendering, media decoding and OCR use installed Edge, Chrome or Chromium; encoding depends on native H.264/AAC availability. Receipt fields need review. DICOM previews are not diagnosis or anonymization. All file processing stays local, with no runtime engine or model downloads.',
+  description: 'Offline file tools and opt-in direct text, camera and voice sessions.',
+  long_description: 'Published by Abox Technologies. Includes Node and dependencies for 66 offline image, PDF, audio, video, OCR, DICOM and text operations. Separate live controls open a visible browser for Share Text, Remote Camera, Walkie Talkie and Voice Oncall. The person starts pairing and grants device access there. The existing abox.tools pairing service sees negotiation metadata; content uses encrypted direct WebRTC, without relay, discovery or recording. Invitations and live content are excluded from agent results. Browser rendering, media codecs and live sessions need installed Edge, Chrome or Chromium; live mode needs a graphical desktop and reachable peers. Receipt fields need review and DICOM previews are not diagnosis. No runtime engine or model downloads.',
   author: { name: 'Abox Technologies', url: 'https://github.com/A-Box-of-Tools' },
   homepage: 'https://abox.tools/',
   documentation: 'https://github.com/A-Box-of-Tools/abox-tools-plugin#readme',

@@ -43,9 +43,16 @@ import { MAX_HEIF_BYTES, MAX_HEIF_PIXELS, MAX_HEIF_SIDE, MAX_HEIF_ITEMS, MAX_HEI
 import { splitPdf, mergePdf, selectPdfPages, rotatePdf, MAX_PAGES, MAX_OUTPUTS, MAX_PAGE_SELECTION_LENGTH } from './pdf.mjs';
 import { MAX_INPUT_BYTES } from './files.mjs';
 import { AdapterError } from './errors.mjs';
+import { openShareSession, openCameraSession, openWalkieSession, openVoiceOncallSession, liveStatus, stopLiveSession, LIVE_LIMITS } from './live.mjs';
 
 export const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 const filename = z.string().min(1).describe('Absolute local filesystem path. URLs and network shares are refused.');
+const liveOptions = { room_name: z.string().max(80).regex(/^[^\u0000-\u001f\u007f]*$/).optional(), ttl_minutes: z.number().int().min(1).max(120).default(30) };
+const shareSession = z.object({ role: z.enum(['host', 'reader']), ...liveOptions, room_name: z.string().regex(/^[a-z0-9][a-z0-9-]{0,63}$/).optional().describe('Optional share code; omit to generate it privately in the companion window.'), text_path: filename.optional(), input_paths: z.array(filename).max(LIVE_LIMITS.file_count).optional(), output_dir: filename.optional().describe('New directory for explicitly saved received content. Peer filenames are replaced with random safe names.') }).strict();
+const cameraSession = z.object({ role: z.enum(['host', 'viewer']), ...liveOptions }).strict();
+const walkieSession = z.object({ role: z.enum(['host', 'listener']), ...liveOptions }).strict();
+const oncallSession = z.object({ role: z.enum(['host', 'sender']), ...liveOptions }).strict();
+const liveSessionId = z.string().uuid();
 const image = z.object({
   input_path: filename, output_path: filename,
   target_bytes: z.number().int().positive().max(MAX_INPUT_BYTES),
@@ -334,6 +341,12 @@ const xmlJson = z.object({ input_path: filename, output_path: filename, directio
 const markdown = z.object({ input_path: filename, output_path: filename }).strict();
 
 export const tools = [
+  { name: 'abox_share_session', title: 'Open a direct text and file sharing window', description: 'Open a visible local browser companion for abox.tools Share Text. Host may preload local files or a UTF-8 text file. The person clicks Start or Connect and approves each reader in the window. Existing abox.tools pairing sees IP addresses, timing and negotiation metadata; content goes directly over encrypted host-candidate WebRTC with no relay or discovery. Receive saves need a new output_dir and an explicit Save click; contents and pairing secrets are never returned to the agent. Requires directly reachable peers and an active graphical desktop. The window expires after 30 minutes by default.', schema: shareSession, run: openShareSession, openWorld: true },
+  { name: 'abox_camera_session', title: 'Open a direct remote camera window', description: 'Open the local companion for abox.tools Remote Camera as host or viewer. The person clicks Start or Connect, grants camera permission, and approves viewers in the window. Pairing uses the existing abox.tools service; live media goes directly between peers with no relay or recording. No capture begins on opening the window. Pairing metadata reaches the service; no frames, notes or pairing secrets are returned to the agent.', schema: cameraSession, run: openCameraSession, openWorld: true },
+  { name: 'abox_walkie_session', title: 'Open a direct voice broadcast window', description: 'Open the local companion for abox.tools Walkie Talkie as host or listener. The person starts pairing in the window. A host grants microphone permission and holds Talk to transmit; listeners need no microphone. The existing pairing service sees negotiation metadata; voice travels directly over encrypted host-candidate WebRTC with no relay, discovery or recording. Invitations and voice remain outside agent context.', schema: walkieSession, run: openWalkieSession, openWorld: true },
+  { name: 'abox_voice_oncall_session', title: 'Open a direct voice inbox window', description: 'Open the local companion for abox.tools Voice Oncall as host or sender. The host listens and moderates incoming senders; a sender grants microphone permission and holds Talk. Start, invitations, optional passwords and approvals stay in the visible window. Existing abox.tools pairing receives negotiation metadata; voice goes directly between reachable peers, with no relay, discovery or recording. No sound or pairing secrets are returned to the agent.', schema: oncallSession, run: openVoiceOncallSession, openWorld: true },
+  { name: 'abox_live_status', title: 'Check local live-session status', description: 'Return only session types, safe state, peer counts, capture kind, expiry and saved-file counts. Does not return pairing codes, invitations, received contents, device labels or media. Sessions belong to this adapter process.', schema: z.object({ session_id: liveSessionId.optional() }).strict(), run: liveStatus, readOnly: true },
+  { name: 'abox_live_stop', title: 'Close a local live-session window', description: 'Close the selected companion browser, release capture and peer connections, and remove incomplete receive files. Completed local saves remain. Closing an already closed session is harmless.', schema: z.object({ session_id: liveSessionId }).strict(), run: stopLiveSession },
   { name: 'abox_video_reverse', title: 'Reverse a local H.264 video', description: 'Reverse admitted video frames into a new re-encoded H.264 MP4 and verify output timing and decoding. Silent by default. Explicit keep_audio:true also decodes and reverses matching-duration AAC using bounded packet audio processing and requires a native AAC encoder; requested sound is never silently dropped. Coded input geometry is checked before decoding. Requires a local browser and native codecs.', schema: videoReverseDecode, run: reverseVideo },
   { name: 'abox_video_timelapse', title: 'Make a local time-lapse video', description: 'Speed up admitted H.264 video into a silent new H.264 MP4 with explicit speed, frame rate, maximum side and quality. Reuses the website frame-selection and encoding engines, verifies decoded output frames and timing, and refuses fewer than two planned frames. Source audio and metadata are omitted. Requires a local browser and native H.264 encoding.', schema: videoTimelapseDecode, run: timelapseVideo },
   { name: 'abox_video_to_gif', title: 'Convert local video to GIF', description: 'Decode an admitted H.264 time range and write a bounded animated GIF using the website palette and encoding engines. Supports sampling rate, size, color count, dithering and looping. Verifies complete GIF streams, frame timing and quantized pixels. At most 200 frames and 16 million total frame pixels; color and timing are lossy, and sound is omitted. Requires a local browser.', schema: videoGifDecode, run: videoToGif },
@@ -407,9 +420,13 @@ export async function capabilities() {
   const browser = await findBrowser();
   const upstream = JSON.parse(await readFile(new URL('../vendor/abox/provenance.json', import.meta.url), 'utf8'));
   return {
-    ok: true, version: VERSION, publisher: 'Abox Technologies', processing: 'local', max_input_bytes: MAX_INPUT_BYTES,
+    ok: true, version: VERSION, publisher: 'Abox Technologies', processing: 'local-files-and-opt-in-live-sessions', file_processing: 'offline', max_input_bytes: MAX_INPUT_BYTES,
+    live_sessions: { opt_in: true, visible_browser: true, starts_on_open: false, pairing_service: 'wss://rendezvous.abox.tools', metadata_logging_days: 7, content_transport: 'direct-host-candidate-webrtc', relay: false, discovery: false, recording: false, microphone_camera_permission: 'browser-user-prompt', limits: LIVE_LIMITS, default_ttl_minutes: 30, max_ttl_minutes: 120 },
     browser: { available: Boolean(browser), path: browser }, upstream_commit: upstream.commit,
     operations: [
+      ...['abox_share_session', 'abox_camera_session', 'abox_walkie_session', 'abox_voice_oncall_session'].map(name => ({ name, processing: 'local-visible-companion', network_access: 'explicit-start-pairing-and-direct-peer', requires_browser: true, requires_graphical_desktop: true, returns_content: false, device_activation_on_open: false })),
+      { name: 'abox_live_status', requires_browser: false, returns_content: false },
+      { name: 'abox_live_stop', requires_browser: false, removes_incomplete_saves: true },
       { name: 'abox_image_compress', formats: ['jpeg', 'png', 'webp'], animated: false, max_megapixels: 80, requires_browser: true },
       { name: 'abox_image_resize', formats: ['jpeg', 'png', 'webp'], animated: false, fits: ['contain', 'cover'], max_megapixels: 80, requires_browser: true, defaults: { allow_upscale: false } },
       { name: 'abox_image_convert', input_formats: ['jpeg', 'png', 'webp'], output_formats: ['jpeg', 'png', 'webp'], animated: false, max_megapixels: 80, requires_browser: true },

@@ -2,6 +2,21 @@
   "repository": "https://github.com/A-Box-of-Tools/website",
   "commit": "0b35dbc391f9c7f457885058afdbf0d0955bc5cd",
   "entrypoints": [
+    "tools/share-text/src/names.js",
+    "tools/share-text/src/network.js",
+    "tools/share-text/src/send-file.js",
+    "tools/share-text/src/receive-file.js",
+    "tools/remote-camera/src/session.js",
+    "tools/remote-camera/src/capture.js",
+    "tools/remote-camera/src/protocol.js",
+    "tools/remote-camera/src/bandwidth.js",
+    "tools/walkie-talkie/src/session.js",
+    "tools/voice-oncall/src/session.js",
+    "tools/voice-oncall/src/inbox-credentials.js",
+    "shared/js/peer-pairing.js",
+    "shared/js/peer-network.js",
+    "shared/js/room-names.js",
+    "shared/js/voice-session.js",
     "tools/heic-to-jpg/src/heif.js",
     "tools/heic-to-jpg/src/codecs.js",
     "tools/heic-to-jpg/src/example-data.js",
@@ -361,6 +376,16 @@
       "generated": false
     },
     {
+      "path": "shared/js/peer-network.js",
+      "sha256": "2b15fdb378aa0119fe117e32a98119a00d0b7de07dad86e9862115b8509bf296",
+      "generated": false
+    },
+    {
+      "path": "shared/js/peer-pairing.js",
+      "sha256": "5eb6f006b512a0c0d8f0f480007c2b135441f4d44b6c81e0352727b654158b7a",
+      "generated": false
+    },
+    {
       "path": "shared/js/phrases.js",
       "sha256": "7b6938c6491f48c206d1baf78d3f8697af68e77dfc899d015365a43cc12deee3",
       "generated": false
@@ -396,6 +421,11 @@
       "generated": false
     },
     {
+      "path": "shared/js/room-names.js",
+      "sha256": "bb345627b0820236359646c46f64ff45e625dc2126bcff1533cb0c8abe11069b",
+      "generated": false
+    },
+    {
       "path": "shared/js/samplerate.js",
       "sha256": "b1ebaee2b57112b503a33f399509e890e35d2ec688a78a423cd53914a35834ec",
       "generated": false
@@ -408,6 +438,11 @@
     {
       "path": "shared/js/video-support.js",
       "sha256": "c6518cc3331b67ed1872bc7c1a9955955bdcc0ec22be51af6465a9036d43fc20",
+      "generated": false
+    },
+    {
+      "path": "shared/js/voice-session.js",
+      "sha256": "f151339ce23dc9f70e9bd3e739419cfdfe47fa7b6a5410f0a280ae3c3257a4c5",
       "generated": false
     },
     {
@@ -1726,6 +1761,46 @@
       "generated": false
     },
     {
+      "path": "tools/remote-camera/README.md",
+      "sha256": "fea92c5ec4f767de53752820c9bf801fddb77a4220d2d8f3f39d8de3e7b02d88",
+      "generated": false
+    },
+    {
+      "path": "tools/remote-camera/src/bandwidth.js",
+      "sha256": "fe5f880cb57b9013190dfa156b2423f9c2d5ec841e26e6f1c2b8f56e633e8c6b",
+      "generated": false
+    },
+    {
+      "path": "tools/remote-camera/src/capture.js",
+      "sha256": "914ec3c82ea568e254e911ac933ce70eda73f444a31ea6c1cebfef4af89f991a",
+      "generated": false
+    },
+    {
+      "path": "tools/remote-camera/src/protocol.js",
+      "sha256": "ec75701bb6af3be22daf7bd320065f031b1b262ba7e6d6acfbb01e6a9be4b81a",
+      "generated": false
+    },
+    {
+      "path": "tools/remote-camera/src/session.js",
+      "sha256": "806039e581d54117788df2055f45414cb14ce63586de58629e9f7806a912accd",
+      "generated": false
+    },
+    {
+      "path": "tools/remote-camera/src/shared/peer-network.js",
+      "sha256": "50264272ab39734acf4eda09afdf330550cb1199fdaec43cf20d11147e33d948",
+      "generated": true
+    },
+    {
+      "path": "tools/remote-camera/src/shared/peer-pairing.js",
+      "sha256": "8bb7aacbed132ddac6b3a03dad97e420ad0409e2fd71fc069172ad3e657caecd",
+      "generated": true
+    },
+    {
+      "path": "tools/remote-camera/src/shared/room-names.js",
+      "sha256": "fbc6022beed1df6dd8e7383e977099e33ca030c73c131799016f3a401ec9c360",
+      "generated": true
+    },
+    {
       "path": "tools/resize-image/README.md",
       "sha256": "cfcb4a03023e110bc77a1c217eed3d0ac181e5700c70f81f431fb2327fffdd26",
       "generated": false
@@ -1846,9 +1921,44 @@
       "generated": true
     },
     {
+      "path": "tools/share-text/README.md",
+      "sha256": "e82d2f52d9ddf57db76904394c607be1c325aba5fc94ffe20c17f3092b74a1a7",
+      "generated": false
+    },
+    {
       "path": "tools/share-text/src/markdown.js",
       "sha256": "e69f14a18974375da25dcc5de7be8c2bc5a4bfcf3cbad723b1db96cc46b626f9",
       "generated": false
+    },
+    {
+      "path": "tools/share-text/src/names.js",
+      "sha256": "2892df67def7d149315b6c604a0901a7aa1f2566566280c2972bfa3bcfcd6170",
+      "generated": false
+    },
+    {
+      "path": "tools/share-text/src/network.js",
+      "sha256": "5134c095b9d42ff112d5fb033d48acb03bffc72a1846a8cef5ab9debb80d47e0",
+      "generated": false
+    },
+    {
+      "path": "tools/share-text/src/receive-file.js",
+      "sha256": "08601ce585bbd0b7929f2b21d16922eec7f7ba22f6af44f9e2601f4e76728e95",
+      "generated": false
+    },
+    {
+      "path": "tools/share-text/src/send-file.js",
+      "sha256": "f1f0a1ee55075574fc2acc700fb84aaec5e3ef230ca266d1f5d4169791eee003",
+      "generated": false
+    },
+    {
+      "path": "tools/share-text/src/shared/peer-network.js",
+      "sha256": "50264272ab39734acf4eda09afdf330550cb1199fdaec43cf20d11147e33d948",
+      "generated": true
+    },
+    {
+      "path": "tools/share-text/src/shared/room-names.js",
+      "sha256": "fbc6022beed1df6dd8e7383e977099e33ca030c73c131799016f3a401ec9c360",
+      "generated": true
     },
     {
       "path": "tools/split-gif/README.md",
@@ -2068,6 +2178,41 @@
     {
       "path": "tools/video-to-gif/src/shared/webcodecs.js",
       "sha256": "24428d6bb820e51ca3fe1d300bc31c35243187c71bac90f516569ee63b94612e",
+      "generated": true
+    },
+    {
+      "path": "tools/voice-oncall/README.md",
+      "sha256": "0423f14550d3b65d6fa6f1c97fa6f23379bd1a50565bbd207b56d252ce3d67f6",
+      "generated": false
+    },
+    {
+      "path": "tools/voice-oncall/src/inbox-credentials.js",
+      "sha256": "8ecb3304286d84de46253cd923d186b459d9a0031e5261bea0b889c38819dc35",
+      "generated": false
+    },
+    {
+      "path": "tools/voice-oncall/src/session.js",
+      "sha256": "6871e48bda7d81f1e382525e8a1fa68cf7a6acd08f7b68aeeccd1959c59e91e8",
+      "generated": false
+    },
+    {
+      "path": "tools/voice-oncall/src/shared/voice-session.js",
+      "sha256": "a448a633909ae80e2d1a02973ee12f91837ff82f66eb7750a53b67fb358d28d9",
+      "generated": true
+    },
+    {
+      "path": "tools/walkie-talkie/README.md",
+      "sha256": "18de5ae4f33202bef801f27951e6f8631acb2075e83555ad75501b07ed2ccf2a",
+      "generated": false
+    },
+    {
+      "path": "tools/walkie-talkie/src/session.js",
+      "sha256": "38bf82ae00ea9b79c10d6cfe2955a14276417b58267fe2ff4956a1dbd29e028a",
+      "generated": false
+    },
+    {
+      "path": "tools/walkie-talkie/src/shared/voice-session.js",
+      "sha256": "a448a633909ae80e2d1a02973ee12f91837ff82f66eb7750a53b67fb358d28d9",
       "generated": true
     },
     {

@@ -12,6 +12,11 @@ const VENDOR = path.join(ROOT, 'vendor/abox');
 const run = promisify(execFile);
 const sha = data => createHash('sha256').update(data).digest('hex');
 const seeds = [
+  'tools/share-text/src/names.js', 'tools/share-text/src/network.js', 'tools/share-text/src/send-file.js', 'tools/share-text/src/receive-file.js',
+  'tools/remote-camera/src/session.js', 'tools/remote-camera/src/capture.js', 'tools/remote-camera/src/protocol.js', 'tools/remote-camera/src/bandwidth.js',
+  'tools/walkie-talkie/src/session.js', 'tools/voice-oncall/src/session.js', 'tools/voice-oncall/src/inbox-credentials.js',
+  'tools/share-text/README.md', 'tools/remote-camera/README.md', 'tools/walkie-talkie/README.md', 'tools/voice-oncall/README.md',
+  'shared/js/peer-pairing.js', 'shared/js/peer-network.js', 'shared/js/room-names.js', 'shared/js/voice-session.js',
   'tools/heic-to-jpg/src/heif.js', 'tools/heic-to-jpg/src/codecs.js',
   'tools/heic-to-jpg/src/example-data.js', 'tools/heic-to-jpg/README.md',
   'tools/heic-to-jpg/vendor/libheif.js', 'tools/heic-to-jpg/vendor/LICENSE',

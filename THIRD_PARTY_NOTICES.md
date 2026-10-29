@@ -1,6 +1,6 @@
 # Reused code
 
-The processing engines under `vendor/abox/` come from
+The processing and live-session engines under `vendor/abox/` come from
 [A Box of Tools](https://github.com/A-Box-of-Tools/website), Copyright (c) 2026
 A Box of Tools, under the MIT license included at `vendor/abox/LICENSE`, except
 for the separately licensed wordlists, artwork, OCR and HEIC components described below.
@@ -8,6 +8,14 @@ for the separately licensed wordlists, artwork, OCR and HEIC components describe
 every copied file. The source modules are unchanged. Small generated re-export
 modules resolve the website build's `./shared/` imports to one shared copy.
 The plugin icon is the existing Image Compressor icon from that checkout.
+
+The live companion reuses the website's MIT-licensed pairing, host-candidate
+network filtering, text/file transfer, camera capture/session and voice-session
+modules unchanged. Its WebSocket and WebRTC implementations are supplied by the
+installed browser, rather than a downloaded runtime service library. The existing
+abox.tools rendezvous is used only after explicit Start/Connect and receives
+negotiation metadata; direct peer content is not relayed through it. Service use
+is separate from redistributing the bundled code. See [Privacy](PRIVACY.md).
 
 The long and short Dice-Generated Passphrase wordlists are by the
 Electronic Frontier Foundation, from [EFF Dice-Generated Passphrases](https://www.eff.org/dice).

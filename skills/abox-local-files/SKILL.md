@@ -1,12 +1,14 @@
 ---
 name: abox-local-files
-description: Use abox.tools to process local images, PDFs, GIFs, audio, video and text, extract receipt or code reports, generate passwords and edit metadata while keeping file contents outside the conversation.
+description: Use abox.tools for offline local image, PDF, audio, video and text work, or explicitly requested live text/file sharing, camera and voice sessions with visible human controls and content outside the conversation.
 ---
 
 # abox.tools local files
 
 Use the installed Abox Technologies adapter with absolute local paths. File
-processing is offline. Keep source bytes, recognized text, decoded codes,
+processing is offline. Explicitly requested live sessions use a separate visible
+companion and the existing pairing service after the person starts it. Keep
+source bytes, recognized text, decoded codes,
 passwords and metadata values out of the conversation. Return output links and
 the adapter's short verification summary.
 
@@ -56,6 +58,8 @@ Do not install during a file operation unless setup is already authorized.
 | Preview a business profile or compare heights | `abox_business_profile`, `abox_height_compare` | [Local previews](references/media-and-documents.md#local-previews) |
 | Extract printed receipt fields | `abox_receipt_extract` | [Receipt OCR](references/media-and-documents.md#receipt-ocr) |
 | Inspect/render DICOM | `abox_dicom_inspect`, `abox_dicom_render` | [DICOM](references/media-and-documents.md#dicom) |
+| Open explicit live text/file, camera or voice sessions | `abox_share_session`, `abox_camera_session`, `abox_walkie_session`, `abox_voice_oncall_session` | [Live sessions and human controls](references/live-sessions.md) |
+| Check or close this process's live windows | `abox_live_status`, `abox_live_stop` | [Live session lifetime](references/live-sessions.md#status-and-lifetime) |
 
 ## Decisions that matter
 
@@ -78,8 +82,9 @@ Do not install during a file operation unless setup is already authorized.
   watermark or video cut does not securely remove hidden content.
 - Codec routes admit documented subsets before decoding. Follow a local
   unsupported/capability result; do not upload files or download codecs as a
-  fallback. Live sharing, remote cameras and other device/network workflows
-  require separate interactive authorization and are outside this adapter.
+  fallback. Live tools are used only for an explicit sharing/camera/voice request.
+  Leave Start/Connect, device permissions, pairing invitations and peer approvals
+  to the person in the visible window. Do not read or echo those secrets/media.
 
 ## CLI fallback
 

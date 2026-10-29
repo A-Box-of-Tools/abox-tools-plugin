@@ -5,8 +5,11 @@ import { execute, capabilities } from '../src/tools.mjs';
 import { errorResult, AdapterError } from '../src/errors.mjs';
 import { verifyVendor } from '../scripts/verify-vendor.mjs';
 import { localPath } from '../src/files.mjs';
+import { closeLiveSessions } from '../src/live.mjs';
 
 const commands = {
+  'share-session': 'abox_share_session', 'camera-session': 'abox_camera_session', 'walkie-session': 'abox_walkie_session', 'voice-oncall-session': 'abox_voice_oncall_session',
+  'live-status': 'abox_live_status', 'live-stop': 'abox_live_stop',
   'reverse-video': 'abox_video_reverse', 'timelapse-video': 'abox_video_timelapse', 'video-to-gif': 'abox_video_to_gif', 'bake-video-rotation': 'abox_video_rotate_bake',
   'extract-audio': 'abox_audio_extract',
   'compress-video': 'abox_video_compress', 'crop-video': 'abox_video_crop', 'grab-video-frame': 'abox_video_frame',
@@ -32,6 +35,7 @@ const commands = {
   'rotate-video': 'abox_video_rotate', 'remux-video': 'abox_video_remux',
   'format-code': 'abox_code_format', 'convert-xml-json': 'abox_xml_json', 'markdown-to-html': 'abox_markdown_html',
 };
+for (const event of ['SIGINT', 'SIGTERM']) process.once(event, () => { void closeLiveSessions().finally(() => process.exit(event === 'SIGINT' ? 130 : 143)); });
 
 try {
   const { values, positionals } = parseArgs({
