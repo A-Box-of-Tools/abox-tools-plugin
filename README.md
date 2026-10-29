@@ -16,25 +16,31 @@ fields with bundled OCR; inspects and renders a restricted DICOM subset; protect
 and unlocks PDFs; redacts explicit image/PDF regions; and generates passwords into
 local files. Codec and rendering operations expose documented subsets.
 
-The public v0.10.0 release provides 66 file operations and one capabilities tool.
+The public v0.11.0 release provides 66 offline file operations, six opt-in live
+controls and one capabilities tool: 72 operations and 73 MCP tools.
 Native and universal packages passed checks on all four target platforms.
 See [tool coverage and concrete unsupported paths](docs/tool-coverage.md) for
 the source engines reused by this adapter and the limits of each route.
 
-The v0.11.0 source adds six live-session controls, for 72 operations plus
-capabilities: the existing 66 offline file tools and a separate opt-in visible
+Version 0.11.0 adds six live-session controls: a separate opt-in visible
 companion for text/files, camera video and voice. Opening a window starts no
 network or capture. The person clicks Start/Connect and handles permissions and
 pairing there. Live mode uses the existing abox.tools pairing service and direct
 encrypted WebRTC; the service sees negotiation metadata and keeps seven-day
-Cloudflare metadata logs. There is no relay, discovery or recording. Public
-v0.11.0 release and real-device pairing evidence are not claimed here. Read the
+Cloudflare metadata logs. There is no relay, discovery or recording. Read the
 [live-session boundary](skills/abox-local-files/references/live-sessions.md).
+The actual SHA-verified public Windows cache passed all 72 operations/73 tools
+and all eight passive companion roles, with no capability absences or unrequested
+pairing/capture. Public Gemini installation and the 15-file shared-skill copy also
+passed. Real pairing-service and public-website interoperability checks used
+temporary files and generated media in two isolated browsers on one computer.
+Physical devices, native camera permission and desktop-client installation
+remain unverified. See [v0.11.0 publication evidence](docs/publishing.md#v0110-publication-evidence).
 
-Version 0.10.0 adds
+Historically, version 0.10.0 added
 HEIC/AVIF, flattened PDF redaction, sound extraction and admitted H.264 video
 processing. It also expands audio and DICOM codec support. Publication and the
-exact active/latest Registry record are verified. The default Python installer
+Registry readback were verified on 28 October 2026. The default Python installer
 downloaded and checksum-verified the public Windows package. That actual cache
 passed all 66 file operations and 67 MCP tools with its bundled runtime, without
 capability absences or a local rebuild. Public Gemini CLI installation and the
@@ -49,7 +55,7 @@ ten-file installation were also checked. See [publication evidence](docs/publish
 including the historical v0.8.0 receipts.
 
 **[Download the latest release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/latest).**
-Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
+Listed in the [Official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.11.0)
 as `io.github.A-Box-of-Tools/abox-tools`. New tagged releases update the Registry
 automatically after their downloads pass verification.
 
@@ -74,8 +80,8 @@ Download the matching `.zip` from the release's **Assets**:
 | `macos-x64` | Mac with an Intel processor |
 | `linux-x64` | Linux with an Intel or AMD 64-bit processor |
 
-1. Extract the entire ZIP to a permanent folder. For example, a 0.10.0 Windows
-   bundle extracts as `abox-tools-0.10.0-windows-x64`. Keep this folder in place
+1. Extract the entire ZIP to a permanent folder. For example, a 0.11.0 Windows
+   bundle extracts as `abox-tools-0.11.0-windows-x64`. Keep this folder in place
    because the local marketplace uses it for plugin refresh.
 2. Open `START-HERE.html` inside the extracted folder. This page works offline.
    Select **Install in Codex**, allow your browser to open the desktop app, then
@@ -154,7 +160,7 @@ a Python 3.9+ setup script that downloads the matching packaged release, verifie
 its checksum and installs the bundled runtime. It does not require cloning or
 building this project. See [standalone setup](skills/abox-local-files/references/installation.md).
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
-is public. Public v0.10.0 Gemini installation and skill copying were verified;
+is public. Public v0.11.0 Gemini installation and skill copying were verified;
 a Gemini gallery listing is unconfirmed.
 
 ## Ask the agent
@@ -327,14 +333,14 @@ timing and count, while copied AAC packets are compared exactly. Lossy encoding,
 color conversion and final-frame timing can change. Matrix-only video rotation
 remains available separately without decoding or re-encoding.
 
-## Source additions for v0.11.0
+## Operations added in v0.11.0
 
 These controls open a separate visible browser and keep private content and
 pairing secrets outside agent context. The person starts/connects and approves
 capture/peers there. They require a graphical desktop and directly reachable
 devices; host-candidate connections can require the same network. File operations
-remain offline. This source update is separate from the verified public v0.10.0
-release receipts above.
+remain offline. These controls are included in the verified public v0.11.0
+release; historical v0.10.0 receipts remain above.
 
 | MCP operation | CLI command | Explicit role and important boundary |
 |---|---|---|

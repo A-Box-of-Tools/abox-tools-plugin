@@ -1,17 +1,25 @@
 # Directory submission materials
 
-These materials describe the local file-processing plugin. The website's
+These materials describe the offline file tools and opt-in live controls. The website's
 development catalogue MCP is a separate service and is not part of this listing.
 Registration automation is documented in [Publishing](publishing.md).
 
-The public v0.10.0 release provides 66 file operations plus capabilities. Release
+The public v0.11.0 release provides 66 offline file operations and six opt-in live
+controls, plus capabilities. All source/release targets, exact Registry readback,
+actual public Windows-cache smoke, Gemini installation and the 15-file skill copy
+passed. Actual service/public-website interoperability used synthetic peers/media
+on one computer. Physical-device permission and desktop GUI installation remain
+unverified; a release does not establish a directory approval. See
+[v0.11.0 evidence](publishing.md#v0110-publication-evidence).
+
+Historically, the public v0.10.0 release provides 66 file operations plus capabilities. Release
 and Registry publication are verified; the actual public Windows cache passed
 all 66 operations and 67 MCP tools. Public Gemini installation and 14-file
 shared-skill installation also passed. No new desktop-directory
 approval or submission is implied by a published release. See
 [publication evidence](publishing.md#v0100-publication-evidence).
 
-## Listing copy
+## Listing copy for v0.11.0
 
 Display name: **abox.tools**
 
@@ -19,16 +27,17 @@ Publisher: **Abox Technologies**
 
 Use this registered trade name consistently; abox.tools is the product name.
 
-Short description: **Local image, PDF, audio, video and text tools**
+Short description: **Offline file tools and opt-in live sharing, camera and voice**
 
 Category: **Productivity**
 
 Description (within Claude's 50-word limit):
 
-> Abox Technologies publishes abox.tools: 66 local image, GIF, PDF, audio, video,
-> text, OCR, metadata and checksum operations with a shared agent skill.
-> Runtimes and English OCR data are included. Rendering needs an installed browser.
-> Files stay local. Extraction requires review. No account required.
+> Abox Technologies publishes abox.tools: 66 offline file operations plus six
+> opt-in live controls. Process images, PDFs, audio, video, OCR and text locally.
+> Live sharing, camera and voice use visible controls, an existing pairing service
+> and direct encrypted peers. Runtime included; browser required for rendering/live
+> sessions. No account required.
 
 Long description:
 
@@ -90,6 +99,16 @@ Long description:
 > streaming checksums support 8 GiB. Native ZIPs and Gemini extensions also
 > include a shared workflow skill. The
 > MCPB installs the MCP tools in compatible desktop hosts.
+>
+> Six opt-in controls open a separate visible companion for Share Text, Remote
+> Camera, Walkie Talkie and Voice Oncall, plus session status/stop. Opening it
+> starts no network or capture. The person selects Start/Connect, supplies access
+> links and handles device permissions/peer approval there. The existing
+> abox.tools pairing service sees connection/access/negotiation metadata, with
+> seven-day Cloudflare metadata logs; content goes directly between reachable
+> peers over encrypted WebRTC. There is no relay, discovery or recording. Ordinary
+> file tools remain offline. Pairing secrets, received content and media are
+> excluded from agent results. Completed explicit receive saves remain local.
 
 ## Public links and assets
 
@@ -157,7 +176,32 @@ installation or replace that recording.
 
 ## Submission status and access
 
-The active/latest [v0.10.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
+The exact [v0.11.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.11.0)
+is active/latest with Abox Technologies as publisher and a universal hash matching
+the public 26-asset release. The
+[release/registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056617)
+and both platforms in [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056519)
+passed for clean tagged source
+[ff422ea](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/ff422ea7509d4195097691a94e7f992b811661ba).
+All four native and four universal summaries reported 73 tools, all eight passive
+UI roles, zero unrequested pairing/capture and no capability absences.
+
+The default Python installer downloaded and verified the actual public Windows
+ZIP, and its clean relocated cache passed 72 operations/73 tools and all eight
+passive roles using bundled Node.js 24.22.1. Public Gemini CLI 0.65.0 installed
+`--ref v0.11.0` with 73 tools, shared skill discovery, bundled runtime and a local
+file operation. Public skills CLI 1.7.4 copied adapter version 0.11.0's 15 skill
+files into an isolated project and checked the installer contract offline without
+installing an adapter offline. This is separate from the actual public adapter
+download/full MCP proof. Real service and four actual-public-website cases passed
+with synthetic files, canvas video and generated/fake voice, including a
+password-protected inbox. Physical/native-device permission and desktop-client
+GUI installation remain unverified. Hashes and evidence are recorded in
+[Publishing](publishing.md#v0110-publication-evidence).
+
+### Historical v0.10.0 publication evidence
+
+The previously verified [v0.10.0 Official MCP Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
 identifies Abox Technologies as publisher and matches the public universal MCPB
 hash. The 26-asset release became public on 28 October 2026 at 14:57:18 UTC.
 Its [release and registration workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40708603838)
@@ -193,7 +237,8 @@ Claude's form confirmed the
 publisher correction and the 0.3.0 review download link; directory review remains
 pending. Its original 0.2.1 attachment cannot be replaced through response
 editing, so the updated feedback directs reviewers to the current public MCPB.
-Version 0.2.1 is installed and Running in Claude Desktop on Windows. OpenAI
+Historically, version 0.2.1 was installed and reported Running in Claude Desktop
+on Windows. This is not a v0.11.0 GUI-installation receipt. OpenAI
 remains pending local-MCP partner approval.
 
 The [skills.sh listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)

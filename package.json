@@ -29,7 +29,8 @@
     "smoke:universal": "node scripts/smoke-universal.mjs",
     "smoke:gemini": "node scripts/smoke-gemini.mjs",
     "smoke:skills": "node scripts/smoke-skills.mjs",
-    "test:live": "node --input-type=module --eval \"process.env.ABOX_TEST_LIVE_NETWORK='1'; await import('./tests/live-network.test.mjs')\""
+    "test:live": "node --input-type=module --eval \"process.env.ABOX_TEST_LIVE_NETWORK='1'; await import('./tests/live-network.test.mjs')\"",
+    "test:website": "node --test --import \"data:text/javascript,process.env.ABOX_TEST_LIVE_WEBSITE='1'\" tests/live-website-sharing.test.mjs tests/live-website-voice.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",

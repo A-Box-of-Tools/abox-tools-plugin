@@ -1,7 +1,30 @@
 The Official MCP Registry publishes metadata pointing to public release assets. It does not process user files or host this adapter.
 
-The [v0.10.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
-is active/latest with Abox Technologies as publisher and 66 file operations plus
+The [v0.11.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.11.0)
+is active/latest with Abox Technologies as publisher: 66 offline file tools,
+six opt-in live controls and capabilities. The exact HTTP 200 readback identifies
+the 188067956-byte universal MCPB with SHA-256
+`a8a2ab86d1c88e63ae46c2ddc131004fdbba722ed6187a8b5f5d7aa30bc545a8`,
+matching the public GitHub asset. Its publication/status-change timestamp is
+`2026-10-29T12:54:21.617466Z`. The 26-asset nondraft release became public at
+12:54:07 UTC. All 11 [release jobs](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056617)
+and both [source-CI platforms](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056519)
+passed.
+
+The default Python installer downloaded and SHA-verified the actual public
+Windows ZIP. That clean, relocated cache passed 72 operations/73 MCP tools and
+all eight passive companion roles with zero unrequested pairing/capture and no
+capability absences, using bundled Node.js 24.22.1. Public Gemini CLI 0.65.0
+installed v0.11.0 with 73 tools, its shared skill, bundled runtime and a local
+file operation. Public skills CLI 1.7.4 copied 15 skill files into an isolated
+project and checked the installer contract offline without installing an adapter
+offline. That skill-only proof is separate from the actual public downloader/MCP
+proof. Real-service and public-website interoperability used synthetic peers;
+physical devices/native permissions/desktop GUI installs remain unverified. See
+[v0.11.0 evidence](../docs/publishing.md#v0110-publication-evidence).
+
+Historically, the [v0.10.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
+was verified active/latest on 28 October 2026 with Abox Technologies as publisher and 66 file operations plus
 capabilities. The exact HTTP 200 readback identifies the 187971902-byte universal
 MCPB with SHA-256 `4a8838282318f9c0ef7eae1ee5f1f9740bbc61bdfd44fb64a418e7d00b0d3446`,
 matching the public GitHub asset. The 26-asset release became public on

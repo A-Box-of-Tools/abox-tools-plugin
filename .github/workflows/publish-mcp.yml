@@ -12,7 +12,7 @@ on:
       tag:
         description: The already published release containing the universal MCPB.
         required: true
-        default: v0.10.0
+        default: v0.11.0
         type: string
 
 permissions:

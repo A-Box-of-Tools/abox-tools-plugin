@@ -1,6 +1,16 @@
 # Use abox.tools in Cursor
 
-The public v0.10.0 release implements 66 file operations plus capabilities.
+The public v0.11.0 release provides 66 offline file operations, six explicit live
+controls and capabilities. All native/universal targets, source CI and Registry
+registration passed. The actual public Windows cache passed 72 operations and
+73 MCP tools with all eight passive companion roles and zero unrequested
+pairing/capture. Public Gemini and 15-file skill installation also passed.
+Actual service/public-website interoperability used synthetic peers/media on one
+computer. These checks do not establish installation through Cursor's own
+interface or physical-device permission. See
+[v0.11.0 evidence](publishing.md#v0110-publication-evidence).
+
+Historically, the public v0.10.0 release implements 66 file operations plus capabilities.
 All native/universal platform checks and public Registry registration passed.
 The default Python installer downloaded and verified its public Windows ZIP.
 That actual cache passed all 66 operations and 67 MCP tools with bundled
@@ -12,20 +22,24 @@ not replace the separate actual adapter download above. Link/MCP verification do
 not establish installation through Cursor's desktop interface. See
 [publication evidence](publishing.md#v0100-publication-evidence).
 
-The v0.10.0 release includes a native ZIP for Windows x64, Linux x64,
+The v0.11.0 release includes a native ZIP for Windows x64, Linux x64,
 macOS Apple silicon and macOS Intel. Download
 the ZIP matching your computer, extract it to a permanent folder, and open
 `START-HERE.html`. Select **Install tools in Cursor** and review Cursor's
 installation prompt. The link
 configures the Node runtime and MCP server inside that extracted folder. Keep
 the folder in place. Node.js, npm, Python and a source build are not required
-for this route. The adapter exposes 66 local file operations and one capabilities
-tool. Image rendering/conversion, GIF creation/extraction, decoded audio, receipt
+for this route. The adapter exposes 66 offline file tools, six explicit live
+controls and one capabilities tool. Image rendering/conversion, GIF creation/extraction, decoded audio, receipt
 OCR, document scans, previews, PDF raster redaction and video decoding/encoding
 need an installed Edge, Chrome or
 Chromium. MP4 encoding also needs its native H.264 encoder. PDF security, video
 packet copying, text, metadata, inspection and password generation need no
 browser. QR/barcodes default to SVG without one; PNG output uses the browser.
+Live controls additionally need a graphical desktop. Opening a companion starts
+no network or capture; the person selects Start/Connect and handles permissions
+there. Live mode uses the existing pairing service and direct reachable peers;
+the 66 file operations keep their offline boundary.
 
 Historically, version 0.9.0 native and universal package checks passed on all four targets.
 The default Python installer then downloaded and verified the public Windows

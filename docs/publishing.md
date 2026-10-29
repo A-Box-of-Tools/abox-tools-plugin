@@ -6,7 +6,85 @@ are the distribution source. A GitHub Release does not register an MCP server or
 create an OpenAI or Claude directory listing. The routes below were checked
 against primary documentation on 25 October 2026.
 
+## v0.11.0 publication evidence
+
+The public v0.11.0 tag identifies clean source
+[ff422ea](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/ff422ea7509d4195097691a94e7f992b811661ba).
+It provides 66 offline file operations and six opt-in live controls, plus
+capabilities: 72 operations and 73 MCP tools. The
+[release workflow](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056617)
+and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/actions/runs/40875056519)
+passed. Source verification completed on both Ubuntu and Windows, including
+257 core checks, 104 browser checks and skill validation. All 11 release jobs
+passed: four native targets, universal assembly, four universal launch targets,
+publication and registration. The 26-asset nondraft release became public on
+29 October 2026 at 12:54:07 UTC.
+
+All four native and all four universal structured summaries reported 73 tools,
+all eight passive companion roles, zero unrequested pairing/capture and no
+capability absences. Windows and Linux used Node.js 24.22.1, macOS Apple silicon
+24.21.0, and macOS Intel 24.19.0 for both native and universal checks.
+
+The public universal MCPB is 188067956 bytes with SHA-256
+`a8a2ab86d1c88e63ae46c2ddc131004fdbba722ed6187a8b5f5d7aa30bc545a8`.
+The exact [v0.11.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.11.0)
+returned HTTP 200, active/latest status, Abox Technologies as publisher and that
+matching universal hash. Its publication/status-change timestamp is
+`2026-10-29T12:54:21.617466Z`.
+
+The public Windows ZIP is 63909230 bytes with SHA-256
+`fc1a160ae42ec1b2d98a3258eb53f41c6120ec1e700b627902508259726ce671`.
+The default Python installer downloaded that actual public ZIP without a local
+archive argument, verified its digest and installed an isolated Windows x64
+cache. Its clean `BUNDLE` identifies tagged source `ff422ea` and Node.js 24.22.1;
+the runtime hash is
+`d702daa815eabbff763c7d3808e235cf031cf2ca70211b56847bc72f51e240e5`.
+The relocated actual public cache passed all 66 file operations over MCP,
+73-tool registration, all eight passive UI roles, zero unrequested pairing/capture
+and no capability absences. No local rebuild supplied that public-download evidence.
+A separate Windows desktop MCP check used that same public cache to invoke all
+four real visible-window open commands, status and stop. Each window remained
+idle with zero peers and capture set to none, and all windows closed successfully.
+Together these checks exercise all 72 operations; no device access was granted.
+
+Public Gemini CLI 0.65.0 installed the GitHub repository at `--ref v0.11.0` and
+reported version 0.11.0, 73 tools, the shared skill, bundled runtime selection
+and a successful local file operation. Public skills CLI 1.7.4 copied the
+`abox-local-files` skill from `A-Box-of-Tools/abox-tools-plugin`: adapter version
+0.11.0 and 15 files in an isolated project. Its offline installer-contract check
+passed without installing an adapter offline. This skill-copy proof is separate
+from the default Python public download and full MCP-cache proof above.
+
+Local validation passed 257 required core checks, 104 browser checks, the final
+11-case media-controller group, five distribution and seven universal-package
+checks, all 433 vendor-file hashes and both skill validators. A clean local
+extracted preview using bundled Node.js 24.19.0 passed all 66 file operations,
+73-tool registration and all eight passive companion roles without capability
+absences. Its local preview Node runtime SHA-256 is
+`3602f2bb1a10f2cbab4c36886218a33c1ab3db87290e73b033c46c77147d0237`.
+This is local preview evidence, separate from a public download.
+
+All four integrations against the existing abox.tools pairing service passed
+using two isolated browsers on the same computer. Share Text verified an exact
+70,000-byte synthetic file and private-reader approval. Remote Camera verified
+real RTP with a generated canvas stream, zero tracks before approval and
+advancing video frames afterward. Walkie Talkie and Voice Oncall used synthetic
+browser audio to verify push-to-talk transport and Stop cleanup. These checks
+used no private user files or physical camera/microphone. They establish actual
+pairing-service/direct-peer transport for those fixtures, rather than native
+camera permission, physical-device compatibility or desktop-client installation.
+
+Four additional interoperability cases passed against the current public
+Share Text, Remote Camera, Walkie Talkie and Voice Oncall pages, which returned
+HTTP 200. They verified private-reader approval, synthetic text and an exact
+70,000-byte file, canvas-video RTP, generated/fake voice, push-to-talk and a
+password-protected voice inbox. These used synthetic peers/media rather than
+physical phones, native camera permission or a desktop MCP client's own
+installation interface. Those manual validations remain unverified.
+
 ## v0.10.0 publication evidence
+
+The following v0.10.0 receipts are retained as historical evidence.
 
 The release tag identifies
 [9a5a9c4](https://github.com/A-Box-of-Tools/abox-tools-plugin/commit/9a5a9c4a9c16170538364263102ffc85b03e0f23).
@@ -37,7 +115,8 @@ macOS Apple silicon 24.21.0, and macOS Intel 24.19.0.
 The universal MCPB is 187971902 bytes with SHA-256
 `4a8838282318f9c0ef7eae1ee5f1f9740bbc61bdfd44fb64a418e7d00b0d3446`.
 The exact [v0.10.0 Registry record](https://registry.modelcontextprotocol.io/v0.1/servers/io.github.A-Box-of-Tools%2Fabox-tools/versions/0.10.0)
-returned HTTP 200, active/latest status, Abox Technologies as publisher and that
+returned HTTP 200 with active/latest status when checked on 28 October 2026,
+Abox Technologies as publisher and that
 same asset hash. Its publication timestamp is `2026-10-28T14:57:35.827538Z`.
 
 The public Windows ZIP is 63806586 bytes with SHA-256

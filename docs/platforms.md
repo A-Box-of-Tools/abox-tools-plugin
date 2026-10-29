@@ -2,10 +2,21 @@
 
 Publisher: **Abox Technologies**. Product: **abox.tools**.
 
-The [v0.10.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.10.0)
+The [v0.11.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.11.0)
+is public with 26 assets, 66 offline file tools and six opt-in live controls:
+72 operations plus capabilities. All native/universal targets and both source-CI
+platforms passed. The active/latest Registry record matches the universal hash.
+The actual public Windows cache passed 73 MCP tools and all eight passive
+companion roles, without unrequested pairing/capture or capability absences.
+Public Gemini installation and the 15-file skill copy also passed. Real-service
+and current-public-website integrations used synthetic media in two isolated
+browsers on one computer; physical-device permissions and desktop-client GUI
+installation remain unverified. See [v0.11.0 evidence](publishing.md#v0110-publication-evidence).
+
+Historically, the [v0.10.0 release](https://github.com/A-Box-of-Tools/abox-tools-plugin/releases/tag/v0.10.0)
 is public with 26 assets and 66 local file operations plus capabilities. All four
 native builds, universal assembly, four universal launch checks, publication and
-Registry registration passed. The exact active/latest Registry record matches
+Registry registration passed. Its Registry readback on 28 October 2026 matched
 the public universal MCPB hash. The default Python installer downloaded and
 verified the public Windows ZIP in an isolated cache; that actual cache passed
 all 66 file operations and 67 MCP tools using bundled Node.js 24.22.1, with no
@@ -26,8 +37,8 @@ and [source verification](https://github.com/A-Box-of-Tools/abox-tools-plugin/ac
 
 | Client | Installation route | Runtime requirements |
 | --- | --- | --- |
-| Codex desktop | Extract the matching native `abox-tools-0.10.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
-| Claude Desktop / MCPB hosts | Open `abox-tools-0.10.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
+| Codex desktop | Extract the matching native `abox-tools-0.11.0-<platform>-<arch>.zip`, open `START-HERE.html`, and select **Install in Codex**. | The adapter's Node runtime and dependencies are included. Keep the extracted folder. |
+| Claude Desktop / MCPB hosts | Open `abox-tools-0.11.0-universal.mcpb` in the host's extension installer. | The MCPB includes Windows x64, Linux x64, and both macOS runtimes. Host application support and installation approval still apply. |
 | Cursor | Use the native ZIP's **Install tools in Cursor** button for the local MCP tools. The repository also carries a Cursor plugin and shared skill. | The native link uses the included runtime. A source plugin needs Node.js 22.15+ on PATH and one-time adapter setup. See [Cursor setup](cursor.md). |
 | VS Code | Use the native ZIP's **Install tools in VS Code** button, included from version 0.6.0. | VS Code with its URL handler must be installed. The link selects the bundled runtime and absolute server path; keep the extracted folder. |
 | Gemini CLI | Install the release extension through Gemini CLI; platform-specific archives have a root `gemini-extension.json`. | Gemini CLI must already be installed. The extension includes the adapter's Node runtime and dependencies. |
@@ -50,7 +61,7 @@ existing output paths.
 Install the released extension with:
 
 ```sh
-gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.10.0
+gemini extensions install https://github.com/A-Box-of-Tools/abox-tools-plugin --ref v0.11.0
 ```
 
 The release includes these Gemini-specific assets:
@@ -69,7 +80,11 @@ runtime or installed server dependencies.
 
 The public repository has the root manifest and `gemini-cli-extension` topic
 required for Google's daily gallery crawler. A gallery listing is unconfirmed.
-On 28 October 2026, Gemini CLI 0.65.0 installed the actual public repository at
+On 29 October 2026, Gemini CLI 0.65.0 installed the actual public repository at
+`--ref v0.11.0` and reported version 0.11.0, 73 tools, the shared skill,
+bundled runtime selection and a local file operation.
+
+Historically, on 28 October 2026, Gemini CLI 0.65.0 installed the actual public repository at
 `--ref v0.10.0` and reported version 0.10.0. All 67 tools, shared skill discovery,
 bundled runtime selection and a local file operation passed.
 
@@ -102,7 +117,15 @@ its Node.js 22.20+ requirement. Installation telemetry drives the
 [abox-local-files listing](https://www.skills.sh/a-box-of-tools/abox-tools-plugin/abox-local-files)
 was verified public on 25 October 2026, displaying Abox Technologies and the
 standalone setup guide. Installation counts and rankings update separately.
-Public skills CLI 1.7.4 installed version 0.10.0's 14 skill files from
+Public skills CLI 1.7.4 installed version 0.11.0's 15 skill files from
+`A-Box-of-Tools/abox-tools-plugin` in an isolated project. The installer contract
+was checked offline without installing an adapter offline. Actual adapter
+installation was proved separately by the default Python public downloader and
+the full relocated Windows-cache smoke: 72 operations/73 MCP tools, all eight
+passive companion roles and no unrequested pairing/capture or capability absences,
+using bundled Node.js 24.22.1. These checks passed on 29 October 2026.
+
+Historically, public skills CLI 1.7.4 installed version 0.10.0's 14 skill files from
 `A-Box-of-Tools/abox-tools-plugin` into an isolated project/home on
 28 October 2026, using the CLI defaults. The installer contract was checked
 offline without installing an adapter offline. Actual adapter installation is
@@ -136,7 +159,7 @@ without a local rebuild or changes to the user's agent settings.
 
 Historical v0.7.0 checks also covered public Gemini installation and the skill's
 actual adapter download on Windows. The v0.8.0 and v0.9.0 receipts remain separate
-from current v0.10.0 publication and installation verification.
+from current v0.11.0 publication and installation verification.
 
 ## Publication status and other clients
 

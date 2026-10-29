@@ -1,6 +1,16 @@
 # Local tool coverage
 
-The public v0.10.0 release implements 66 file operations plus `abox_capabilities`.
+The public v0.11.0 release provides 66 offline file operations and six opt-in live
+controls, plus `abox_capabilities`: 72 operations and 73 MCP tools. All release
+targets and both source-CI platforms passed. The actual SHA-verified public
+Windows cache passed the full smoke and all eight passive companion roles with
+zero unrequested pairing/capture and no capability absences. Public Gemini and
+the 15-file skill copy also passed. Real-service and actual-public-website
+integrations used synthetic media/peers; physical-device permissions and desktop
+GUI installation remain unverified. See
+[v0.11.0 evidence](publishing.md#v0110-publication-evidence).
+
+Historically, the public v0.10.0 release implements 66 file operations plus `abox_capabilities`.
 All four native/universal platform checks and publication/Registry registration
 passed. The default Python installer downloaded and verified the public Windows
 ZIP; that actual cache passed all 66 operations and 67 MCP tools with bundled
@@ -11,12 +21,18 @@ by the separate public download/MCP proof. See
 [publication evidence](publishing.md#v0100-publication-evidence), which also
 preserves the separate verified v0.9.0 public-installation history.
 
-The v0.11.0 source adds a separate visible companion for the four live website
+Version 0.11.0 adds a separate visible companion for the four live website
 workflows, with six controls including status/stop: 66 offline file operations
 plus six live controls, or 72 operations and 73 MCP tools including capabilities.
 It uses the existing pairing service only after explicit Start/Connect. Source
-and passive/synthetic checks are separate from public-release or physical-device
-pairing evidence; neither new claim is made here.
+validation and clean local package smoke passed all eight passive companion
+roles. All four actual pairing-service integrations also passed using temporary
+files, generated canvas video and synthetic audio in two isolated browsers on
+the same computer. Those are separate from physical-device permissions and
+desktop-client installation. Four additional current-public-website cases
+verified text/file sharing, camera RTP and both voice modes, including a protected
+inbox, using synthetic data/media. Public release/Registry/install receipts are
+recorded separately in [Publishing](publishing.md#v0110-publication-evidence).
 
 The adapter reuses the website's processing modules unchanged. Production
 wrappers add container/codec-header admission, bounded decode plans, independent
